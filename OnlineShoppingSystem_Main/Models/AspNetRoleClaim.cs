@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OnlineShoppingSystem_Main.Models;
 
-[Index("RoleId", Name = "IX_AspNetRoleClaims_RoleId")]
 public partial class AspNetRoleClaim
 {
     [Key]
     public int Id { get; set; }
 
+    [StringLength(450)]
     public string RoleId { get; set; } = null!;
 
     public string? ClaimType { get; set; }

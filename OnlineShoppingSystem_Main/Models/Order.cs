@@ -10,15 +10,12 @@ namespace OnlineShoppingSystem_Main.Models;
 public partial class Order
 {
     [Key]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string OrderId { get; set; } = null!;
+    public int OrderId { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime OrderedAt { get; set; }
 
     [StringLength(255)]
-    [Unicode(false)]
     public string? PaymentMethod { get; set; }
 
     [StringLength(255)]

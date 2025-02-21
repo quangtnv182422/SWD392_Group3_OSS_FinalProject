@@ -10,9 +10,7 @@ namespace OnlineShoppingSystem_Main.Models;
 public partial class ProductStatus
 {
     [Key]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string ProductStatusId { get; set; } = null!;
+    public int ProductStatusId { get; set; }
 
     [StringLength(255)]
     [Unicode(false)]

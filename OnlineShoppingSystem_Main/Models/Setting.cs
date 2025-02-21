@@ -9,25 +9,17 @@ namespace OnlineShoppingSystem_Main.Models;
 public partial class Setting
 {
     [Key]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string Id { get; set; } = null!;
+    public int Id { get; set; }
 
     [StringLength(255)]
-    [Unicode(false)]
     public string SettingName { get; set; } = null!;
 
     [StringLength(255)]
-    [Unicode(false)]
     public string SettingValue { get; set; } = null!;
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string? SettingCategoryId { get; set; }
+    public int? SettingCategoryId { get; set; }
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string? SettingStatusId { get; set; }
+    public int? SettingStatusId { get; set; }
 
     [ForeignKey("SettingCategoryId")]
     [InverseProperty("Settings")]

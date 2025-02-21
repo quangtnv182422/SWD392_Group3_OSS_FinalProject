@@ -10,9 +10,7 @@ namespace OnlineShoppingSystem_Main.Models;
 public partial class Cart
 {
     [Key]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string CartId { get; set; } = null!;
+    public int CartId { get; set; }
 
     public double TotalPrice { get; set; }
 

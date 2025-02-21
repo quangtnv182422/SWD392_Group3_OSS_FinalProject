@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 namespace OnlineShoppingSystem_Main.Models;
 
 [PrimaryKey("LoginProvider", "ProviderKey")]
-[Index("UserId", Name = "IX_AspNetUserLogins_UserId")]
 public partial class AspNetUserLogin
 {
     [Key]
@@ -20,6 +19,7 @@ public partial class AspNetUserLogin
 
     public string? ProviderDisplayName { get; set; }
 
+    [StringLength(450)]
     public string UserId { get; set; } = null!;
 
     [ForeignKey("UserId")]

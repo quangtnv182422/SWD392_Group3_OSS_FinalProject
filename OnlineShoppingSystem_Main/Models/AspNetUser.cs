@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OnlineShoppingSystem_Main.Models;
 
-[Index("NormalizedEmail", Name = "EmailIndex")]
 public partial class AspNetUser
 {
     [Key]

@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OnlineShoppingSystem_Main.Models;
 
-[Index("UserId", Name = "IX_AspNetUserClaims_UserId")]
 public partial class AspNetUserClaim
 {
     [Key]
     public int Id { get; set; }
 
+    [StringLength(450)]
     public string UserId { get; set; } = null!;
 
     public string? ClaimType { get; set; }

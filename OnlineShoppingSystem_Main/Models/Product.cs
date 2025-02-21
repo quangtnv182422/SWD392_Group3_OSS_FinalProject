@@ -10,18 +10,14 @@ namespace OnlineShoppingSystem_Main.Models;
 public partial class Product
 {
     [Key]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string ProductId { get; set; } = null!;
+    public int ProductId { get; set; }
 
     [StringLength(255)]
-    [Unicode(false)]
     public string ProductName { get; set; } = null!;
 
     public int Quantity { get; set; }
 
     [StringLength(255)]
-    [Unicode(false)]
     public string? Description { get; set; }
 
     public double Price { get; set; }
@@ -29,13 +25,9 @@ public partial class Product
     [Column(TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string? CategoryId { get; set; }
+    public int? CategoryId { get; set; }
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string? ProductStatusId { get; set; }
+    public int? ProductStatusId { get; set; }
 
     [InverseProperty("Product")]
     public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();

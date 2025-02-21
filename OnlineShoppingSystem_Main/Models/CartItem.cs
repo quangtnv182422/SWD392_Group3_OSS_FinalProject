@@ -10,17 +10,11 @@ namespace OnlineShoppingSystem_Main.Models;
 public partial class CartItem
 {
     [Key]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string CartItemId { get; set; } = null!;
+    public int CartItemId { get; set; }
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string? CartId { get; set; }
+    public int? CartId { get; set; }
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string? ProductId { get; set; }
+    public int? ProductId { get; set; }
 
     public int Quantity { get; set; }
 

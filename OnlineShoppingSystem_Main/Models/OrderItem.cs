@@ -10,17 +10,11 @@ namespace OnlineShoppingSystem_Main.Models;
 public partial class OrderItem
 {
     [Key]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string OrderItemId { get; set; } = null!;
+    public int OrderItemId { get; set; }
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string? OrderId { get; set; }
+    public int? OrderId { get; set; }
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string? ProductId { get; set; }
+    public int? ProductId { get; set; }
 
     public int Quantity { get; set; }
 

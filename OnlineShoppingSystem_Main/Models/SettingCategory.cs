@@ -10,12 +10,9 @@ namespace OnlineShoppingSystem_Main.Models;
 public partial class SettingCategory
 {
     [Key]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string Id { get; set; } = null!;
+    public int Id { get; set; }
 
     [StringLength(255)]
-    [Unicode(false)]
     public string CategoryName { get; set; } = null!;
 
     [InverseProperty("SettingCategory")]

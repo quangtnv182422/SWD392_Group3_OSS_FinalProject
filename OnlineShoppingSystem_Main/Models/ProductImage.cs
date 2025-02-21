@@ -10,13 +10,9 @@ namespace OnlineShoppingSystem_Main.Models;
 public partial class ProductImage
 {
     [Key]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string ProductImageId { get; set; } = null!;
+    public int ProductImageId { get; set; }
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string? ProductId { get; set; }
+    public int? ProductId { get; set; }
 
     [Column("ProductImageURL")]
     [StringLength(255)]

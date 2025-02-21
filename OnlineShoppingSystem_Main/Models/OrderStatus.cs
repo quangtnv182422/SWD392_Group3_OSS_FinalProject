@@ -13,7 +13,6 @@ public partial class OrderStatus
     public int StatusId { get; set; }
 
     [StringLength(255)]
-    [Unicode(false)]
     public string StatusName { get; set; } = null!;
 
     [InverseProperty("OrderStatus")]

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlineShoppingSystem_Main.Models;
 
@@ -11,9 +12,11 @@ using OnlineShoppingSystem_Main.Models;
 namespace OnlineShoppingSystem_Main.Migrations
 {
     [DbContext(typeof(Swd392OssContext))]
-    partial class Swd392OssContextModelSnapshot : ModelSnapshot
+    [Migration("20250222090130_AddIsFeaturedToProduct")]
+    partial class AddIsFeaturedToProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

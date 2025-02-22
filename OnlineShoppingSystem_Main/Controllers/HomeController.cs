@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
 using System.Diagnostics;
 
@@ -8,18 +9,42 @@ namespace OnlineShoppingSystem_Main.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly Swd392OssContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, Swd392OssContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var featuredProducts = await _context.Products
+         .Include(p => p.ProductImages)
+         .Where(p => p.IsFeatured && p.ProductStatusId == 1) 
+         .Take(6)
+         .ToListAsync();
+
+            var latestProducts = await _context.Products
+                .Include(p => p.ProductImages)
+                .Where(p => p.ProductStatusId == 1) 
+                .OrderBy(p => p.CreatedAt)
+                .Take(5)
+                .ToListAsync();
+
+            var allProducts = await _context.Products
+                .Include(p => p.ProductImages)
+                .Where(p => p.ProductStatusId == 1) 
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.FeaturedProducts = featuredProducts ?? new List<Product>();
+            ViewBag.LatestProducts = latestProducts ?? new List<Product>();
+
+            return View(allProducts);
         }
 
-        [Authorize]
+            [Authorize]
         public IActionResult Privacy()
         {
             return View();

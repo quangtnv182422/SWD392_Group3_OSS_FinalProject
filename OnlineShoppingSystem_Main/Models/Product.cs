@@ -22,6 +22,9 @@ public partial class Product
 
     public double Price { get; set; }
 
+    public bool IsFeatured { get; set; } = false;
+
+
     [Column(TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 

@@ -13,7 +13,7 @@ using Service.Interface;
 
 
 var builder = WebApplication.CreateBuilder(args);
-1
+
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 

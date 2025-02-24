@@ -46,6 +46,35 @@ namespace Repository.Implementation
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<Product>> GetProductsAsync(int? categoryId, int page, int pageSize)
+        {
+            var products = _context.Products
+                                   .Include(p => p.Category)
+                                   .Include(p => p.ProductImages)
+                                   .AsQueryable();
+
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                products = products.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            return await products.Skip((page - 1) * pageSize)
+                                 .Take(pageSize)
+                                 .ToListAsync();
+        }
+
+        public async Task<Product> GetProductByIdAsync(int productId)
+        {
+            return await _context.Products
+                                 .Include(p => p.Category)
+                                 .Include(p => p.ProductImages)
+                                 .FirstOrDefaultAsync(p => p.ProductId == productId);
+        }
+
+        public async Task<IEnumerable<Category>> GetCategoriesAsync()
+        {
+            return await _context.Categories.ToListAsync();
+        }
     }
 
 }

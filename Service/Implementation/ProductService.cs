@@ -32,6 +32,20 @@ namespace Service.Implementation
         {
             return await _productRepository.GetAllProductsAsync();
         }
+        public async Task<IEnumerable<Product>> GetProductsAsync(int? categoryId, int page, int pageSize)
+        {
+            return await _productRepository.GetProductsAsync(categoryId, page, pageSize);
+        }
+
+        public async Task<Product> GetProductDetailsAsync(int productId)
+        {
+            return await _productRepository.GetProductByIdAsync(productId);
+        }
+
+        public async Task<IEnumerable<Category>> GetCategoriesAsync()
+        {
+            return await _productRepository.GetCategoriesAsync();
+        }
     }
 
 }

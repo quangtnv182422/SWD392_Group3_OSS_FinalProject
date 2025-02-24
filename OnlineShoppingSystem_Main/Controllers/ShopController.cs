@@ -2,47 +2,46 @@
 using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Data.Models;
 using OnlineShoppingSystem_Main.Models;
+using Service.Interface;
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly Swd392OssContext _context;
+        private readonly IProductService _context;
+        private readonly ILogger<ProductController> _logger;
 
-        public ProductController(Swd392OssContext context)
+
+
+        public ProductController(IProductService context, ILogger<ProductController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int? categoryId, int page = 1)
         {
-            var categories = _context.Categories.ToList();
+            int pageSize = 9;
+            var categories = await _context.GetCategoriesAsync();
 
-            var products = _context.Products
-                                   .Include(p => p.Category)
-                                   .Include(p => p.ProductImages)
-                                   .ToList();
+            var products = await _context.GetProductsAsync(categoryId, page, pageSize);
+            var totalProducts = products.Count();
 
             ViewBag.Categories = categories;
+            ViewBag.SelectedCategoryId = categoryId;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = Math.Ceiling(totalProducts / (double)pageSize);
 
-            return View(products); 
+            return View(products);
         }
 
-      
-
-
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var product = _context.Products
-                                 .Include(p => p.Category)
-                                 .Include(p => p.ProductImages)
-                                 .FirstOrDefault(p => p.ProductId == id);
-
+            var product = await _context.GetProductDetailsAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
-
             return View(product);
         }
     }

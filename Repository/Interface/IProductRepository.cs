@@ -12,6 +12,9 @@ namespace Repository.Interface
         Task<List<Product>> GetFeaturedProductsAsync();
         Task<List<Product>> GetLatestProductsAsync();
         Task<List<Product>> GetAllProductsAsync();
+        Task<IEnumerable<Product>> GetProductsAsync(int? categoryId, int page, int pageSize);
+        Task<Product> GetProductByIdAsync(int productId);
+        Task<IEnumerable<Category>> GetCategoriesAsync();
     }
 
 }

@@ -2,15 +2,21 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Data.Models;
 using OnlineShoppingSystem_Main.Models;
+using Repository.Implementation;
+using Repository.Interface;
 using Service;
+using Service.Implementation;
+using Service.Interface;
 
 
 
 
 
 var builder = WebApplication.CreateBuilder(args);
+1
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
-builder.Services.AddScoped<IEntityService<Product>, EntityService<Product>>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 

@@ -1,0 +1,50 @@
+﻿@using OnlineShoppingSystem_Main.Models
+@model List<Product>
+
+@{
+    ViewData["Title"] = "Shop";
+    var categories = ViewBag.Categories as List<Category>;
+}
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4"><span class="orange-text">Shop</span> Our Products</h3>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="product-filters">
+                <ul>
+                    <li class="active" data-category-id="0">All</li>
+                    @foreach (var category in categories)
+                    {
+                        <li data-category-id="@category.CategoryId">@category.CategoryName</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="product-list" class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var product in Model)
+        {
+            <div class="col">
+                <div class="card text-center shadow-sm p-3">
+                    <a href="@Url.Action("ProductDetail", "Home", new { id = product.ProductId })">
+                        <img src="@((product.ProductImages != null && product.ProductImages.Any())
+                            ? product.ProductImages.FirstOrDefault()?.ProductImageUrl
+                            : "/assets/img/default-product.jpg")"
+                             class="img-fluid product-image" alt="@product.ProductName">
+                    </a>
+                    <div class="card-body">
+                        <h5 class="text-uppercase">@product.ProductName</h5>
+                        <p class="text-danger font-weight-bold">@string.Format("{0:N0}", product.Price) VND</p>
+                        <a href="@Url.Action("AddToCart", "Cart", new { id = product.ProductId })" class="btn btn-warning">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+

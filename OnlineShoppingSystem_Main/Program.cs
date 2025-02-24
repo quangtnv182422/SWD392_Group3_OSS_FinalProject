@@ -1,12 +1,17 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OnlineShoppingSystem_Main.Data.Models;
 using OnlineShoppingSystem_Main.Models;
+using Service;
 
 
 
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<IEntityService<Product>, EntityService<Product>>();
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<Swd392OssContext>(options => options.UseSqlServer(connectionString));

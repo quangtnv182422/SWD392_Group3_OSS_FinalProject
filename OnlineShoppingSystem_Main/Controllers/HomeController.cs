@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using OnlineShoppingSystem_Main.Data.Models;
 using OnlineShoppingSystem_Main.Models;
 using System.Diagnostics;
 
-namespace OnlineShoppingSystem_Main.Controllers
+namespace OnlineShoppingSystem_Main
 {
     public class HomeController : Controller
     {

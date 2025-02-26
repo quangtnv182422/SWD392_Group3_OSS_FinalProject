@@ -10,6 +10,7 @@
 	  <Content Remove="Properties\launchSettings.json" />
 	  <Content Remove="Properties\serviceDependencies.json" />
 	  <Content Remove="Properties\serviceDependencies.local.json" />
+	  <Content Remove="wwwroot\assets\css\all.min.css" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -66,9 +66,10 @@ namespace Repository.Implementation
         public async Task<Product> GetProductByIdAsync(int productId)
         {
             return await _context.Products
-                                 .Include(p => p.Category)
-                                 .Include(p => p.ProductImages)
-                                 .FirstOrDefaultAsync(p => p.ProductId == productId);
+                .Where(p => p.ProductId == productId && p.ProductStatusId == 1) 
+                .Include(p => p.ProductImages) 
+                .Include(p => p.ProductStatus)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Category>> GetCategoriesAsync()

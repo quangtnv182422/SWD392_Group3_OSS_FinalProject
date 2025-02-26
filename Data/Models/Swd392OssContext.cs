@@ -43,8 +43,6 @@ public partial class Swd392OssContext : IdentityDbContext
 
     public virtual DbSet<SettingsStatus> SettingsStatuses { get; set; }
 
-    public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)

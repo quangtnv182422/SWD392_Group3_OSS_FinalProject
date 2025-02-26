@@ -28,14 +28,14 @@
         {
             <div class="single-featured-product">
                 <div class="card text-center shadow-sm p-3">
-                    <a href="@Url.Action("ProductDetail", "Home", new { id = product.ProductId })">
+                    <a href="@Url.Action("Details", "Product", new { id = product.ProductId })">
                         <img src="@((product.ProductImages != null && product.ProductImages.Any()) ? product.ProductImages.FirstOrDefault()?.ProductImageUrl : "/assets/img/default-product.jpg")"
                              class="img-fluid product-image" alt="@product.ProductName">
                     </a>
-                    <div class="card-body">
+                    <div class="card-body"> 
                         <h5>@product.ProductName</h5>
-                        <p class="text-danger font-weight-bold">@string.Format("{0:N0}", product.Price) VND</p>
-                        <a href="@Url.Action("AddToCart", "Cart", new { id = product.ProductId })" class="btn btn-warning">
+                        <p class="product-price">@string.Format("{0:N0}", product.Price) VND</p>
+                        <a href="@Url.Action("AddToCart", "Cart", new { id = product.ProductId })" class="cart-btn">
                             <i class="fas fa-shopping-cart"></i> Add to Cart
                         </a>
                     </div>
@@ -58,8 +58,8 @@
                     </a>
                     <div class="card-body">
                         <h5 class="text-uppercase">@product.ProductName</h5>
-                        <p class="text-danger font-weight-bold">@string.Format("{0:N0}", product.Price) VND</p>
-                        <a href="@Url.Action("AddToCart", "Cart", new { id = product.ProductId })" class="btn btn-warning">
+                        <p class="product-price">@string.Format("{0:N0}", product.Price) VND</p>
+                        <a href="@Url.Action("AddToCart", "Cart", new { id = product.ProductId })" class="cart-btn">
                             <i class="fas fa-shopping-cart"></i> Add to Cart
                         </a>
                     </div>

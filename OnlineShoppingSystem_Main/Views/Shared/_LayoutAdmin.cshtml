@@ -11,15 +11,18 @@
 
     <!-- favicon -->
     <link rel="shortcut icon" href="~/assets1/images/favicon.ico.png">
+    <!-- icon-->
+    <link href="https://unicons.iconscout.com/release/v3.0.6/css/line.css" rel="stylesheet">
 
     <!-- Bootstrap -->
-    <link href="~/assets1/" rel="stylesheet" />
+    <link href="~/assets1/css/bootstrap.min.css" rel="stylesheet" />
     <link href="~/assets1/css/simplebar.css" rel="stylesheet" />
     <link href="~/assets1/css/select2.min.css" rel="stylesheet" />
     <link href="~/assets1/css/materialdesignicons.min.css" rel="stylesheet" />
     <link href="~/assets1/css/remixicon.css" rel="stylesheet" />
     <link href="~/assets1/css/tiny-slider.css" rel="stylesheet" />
     <link href="~/assets1/css/style.min.css" rel="stylesheet" id="theme-opt" />
+
 </head>
 <body>
 
@@ -34,7 +37,9 @@
                 </div>
                 <ul class="sidebar-menu pt-3">
                     <li><a href="@Url.Action("Index", "Admin")"><i class="uil uil-dashboard me-2"></i>Dashboard</a></li>
+                    <li><a href="@Url.Action("ProductList", "AdminProduct")"><i class="uil uil-box me-2"></i>Product List</a></li>
                     <li><a href="@Url.Action("Index", "Appointment")"><i class="uil uil-stethoscope me-2"></i>Appointments</a></li>
+                    
                 </ul>
             </div>
         </nav>

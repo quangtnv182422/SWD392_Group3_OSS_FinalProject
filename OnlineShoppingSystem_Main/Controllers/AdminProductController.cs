@@ -2,35 +2,37 @@
 using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Data.Models;
 using OnlineShoppingSystem_Main.Models;
+using Service.Interface;
 using System.Linq;
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
     public class AdminProductController : Controller
     {
-        private readonly Swd392OssContext _context;
+        private readonly IProductService _context;
+        private readonly ILogger<HomeController> _logger;
 
-        public AdminProductController(Swd392OssContext context)
+        public AdminProductController(IProductService context, ILogger<HomeController> logger)
         {
             _context = context;
+            _logger = logger;
         }
-
         public IActionResult ProductList(int page = 1, int pageSize = 10)
         {
-            var products = _context.Products
-                                   .Include(p => p.ProductStatus) 
-                                   .Skip((page - 1) * pageSize)
-                                   .Take(pageSize)
-                                   .ToList();
+            var products = _context.GetPagedProducts(page, pageSize, out int totalCount);
 
-            var totalCount = _context.Products.Count();
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
             ViewBag.CurrentPage = page;
 
             return View(products);
         }
 
+        [HttpPost]
+        public IActionResult ChangeProductStatus(int productId, int statusId)
+        {
+            bool result = _context.ChangeProductStatus(productId, statusId);
+            return Json(new { success = result });
+        }
 
-       
     }
 }

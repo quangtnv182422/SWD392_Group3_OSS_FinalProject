@@ -46,6 +46,25 @@ namespace Service.Implementation
         {
             return await _productRepository.GetCategoriesAsync();
         }
+        public List<Product> GetPagedProducts(int page, int pageSize, out int totalCount)
+        {
+            return _productRepository.GetPagedProducts(page, pageSize, out totalCount);
+        }
+
+        public bool ChangeProductStatus(int productId, int statusId)
+        {
+            var product = _productRepository.GetProductById(productId);
+            if (product == null)
+                return false;
+
+            if (statusId == 3)
+                product.Quantity = 0;
+
+            product.ProductStatusId = statusId;
+            _productRepository.UpdateProduct(product);
+
+            return true;
+        }
     }
 
 }

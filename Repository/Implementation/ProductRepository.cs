@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Data.Models;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
@@ -49,6 +50,7 @@ namespace Repository.Implementation
         public async Task<IEnumerable<Product>> GetProductsAsync(int? categoryId, int page, int pageSize)
         {
             var products = _context.Products
+                                   .Where(p => p.ProductStatusId == 1)
                                    .Include(p => p.Category)
                                    .Include(p => p.ProductImages)
                                    .AsQueryable();
@@ -75,6 +77,26 @@ namespace Repository.Implementation
         public async Task<IEnumerable<Category>> GetCategoriesAsync()
         {
             return await _context.Categories.ToListAsync();
+        }
+        public List<Product> GetPagedProducts(int page, int pageSize, out int totalCount)
+        {
+            totalCount = _context.Products.Count();
+            return _context.Products
+                           .Include(p => p.ProductStatus)
+                           .Skip((page - 1) * pageSize)
+                           .Take(pageSize)
+                           .ToList();
+        }
+
+        public Product GetProductById(int productId)
+        {
+            return _context.Products.FirstOrDefault(p => p.ProductId == productId);
+        }
+
+        public void UpdateProduct(Product product)
+        {
+            _context.Products.Update(product);
+            _context.SaveChanges();
         }
     }
 

@@ -15,6 +15,9 @@ namespace Service.Interface
         Task<IEnumerable<Product>> GetProductsAsync(int? categoryId, int page, int pageSize);
         Task<Product> GetProductDetailsAsync(int productId);
         Task<IEnumerable<Category>> GetCategoriesAsync();
+
+        List<Product> GetPagedProducts(int page, int pageSize, out int totalCount);
+        bool ChangeProductStatus(int productId, int statusId);
     }
 
 }

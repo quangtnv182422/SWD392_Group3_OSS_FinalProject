@@ -18,6 +18,10 @@ namespace Repository.Interface
         List<Product> GetPagedProducts(int page, int pageSize, out int totalCount);
         Product GetProductById(int productId);
         void UpdateProduct(Product product);
+        bool AddProductWithImages(Product product, List<ProductImage> productImages);
+
+
+
     }
 
 }

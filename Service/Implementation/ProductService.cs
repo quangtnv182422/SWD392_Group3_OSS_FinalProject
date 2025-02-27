@@ -65,6 +65,13 @@ namespace Service.Implementation
 
             return true;
         }
+
+    
+
+        public bool AddProductWithImages(Product product, List<ProductImage> productImages)
+        {
+            return _productRepository.AddProductWithImages(product, productImages);
+        }
     }
 
 }

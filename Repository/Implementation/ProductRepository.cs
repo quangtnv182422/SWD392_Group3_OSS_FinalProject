@@ -83,6 +83,7 @@ namespace Repository.Implementation
             totalCount = _context.Products.Count();
             return _context.Products
                            .Include(p => p.ProductStatus)
+                           .Include(p => p.ProductImages)
                            .Skip((page - 1) * pageSize)
                            .Take(pageSize)
                            .ToList();
@@ -90,7 +91,10 @@ namespace Repository.Implementation
 
         public Product GetProductById(int productId)
         {
-            return _context.Products.FirstOrDefault(p => p.ProductId == productId);
+            return _context.Products
+                           .Include(p => p.ProductImages)
+                           .FirstOrDefault(p => p.ProductId == productId);
+
         }
 
         public void UpdateProduct(Product product)
@@ -98,6 +102,25 @@ namespace Repository.Implementation
             _context.Products.Update(product);
             _context.SaveChanges();
         }
+        public bool AddProductWithImages(Product product, List<ProductImage> productImages)
+        {
+            if (product.ProductStatusId == 0) 
+            {
+                product.ProductStatusId = 1; 
+            }
+
+            _context.Products.Add(product);
+            _context.SaveChanges();  
+
+            foreach (var image in productImages)
+            {
+                image.ProductId = product.ProductId; 
+                _context.ProductImages.Add(image);  
+            }
+
+            return _context.SaveChanges() > 0; 
+        }
+
     }
 
 }

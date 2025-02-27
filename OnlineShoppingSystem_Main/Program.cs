@@ -1,3 +1,5 @@
+using Api.Implementation;
+using Api.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
@@ -6,16 +8,19 @@ using OnlineShoppingSystem_Main.Data.Models;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Implementation;
 using Repository.Interface;
+using Repository.Interface.Api.Interface;
 using Service;
 using Service.Implementation;
 using Service.Interface;
+using System.Xml;
 
 
 
 
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); 
+builder.Services.AddScoped<ICategoryService, CategoryService>(); 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
@@ -24,6 +29,8 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
 builder.Services.AddSingleton<GhnApiService>();
 builder.Services.AddScoped<GhnApiService>();
 

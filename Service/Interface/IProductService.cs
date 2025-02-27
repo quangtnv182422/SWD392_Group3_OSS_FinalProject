@@ -18,6 +18,10 @@ namespace Service.Interface
 
         List<Product> GetPagedProducts(int page, int pageSize, out int totalCount);
         bool ChangeProductStatus(int productId, int statusId);
+
+        bool AddProductWithImages(Product product, List<ProductImage> productImages);
+
+
     }
 
 }

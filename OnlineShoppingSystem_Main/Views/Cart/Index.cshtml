@@ -1,76 +1,104 @@
 ﻿@model OnlineShoppingSystem_Main.Models.Cart
-
-<h2>Giỏ hàng của bạn</h2>
-
-@if (Model.CartItems.Any())
-{
-    <form method="post" asp-controller="Order" asp-action="ConfirmOrder">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Chọn</th>
-                    <th>Sản phẩm</th>
-                    <th>Giá</th>
-                    <th>Số lượng</th>
-                    <th>Tổng</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.CartItems)
-                {
-                    <tr>
-                        <td>
-                            <input type="checkbox" name="selectedItems" value="@item.CartItemId" />
-                        </td>
-                        <td>@item.Product?.ProductName</td>
-                        <td>@item.Product?.Price.ToString("C")</td>
-                        <td>
-                            <input type="hidden" class="cartItemId" value="@item.CartItemId" />
-                            <input type="number" class="quantity" value="@item.Quantity" min="1" />
-                            <button type="button" class="btn btn-sm btn-primary update-btn">Cập nhật</button>
-                        </td>
-                        <td>@(item.Quantity * item.Product?.Price).ToString("C")</td>
-                        <td>
-                            <form asp-controller="Cart" asp-action="RemoveItem" method="post">
-                                <input type="hidden" name="cartItemId" value="@item.CartItemId" />
-                                <button type="submit" class="btn btn-danger">Xóa</button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-
-        <h3>Tổng tiền: @Model.CartItems.Sum(ci => ci.Quantity * ci.Product.Price).ToString("C")</h3>
-        <button type="submit" class="btn btn-primary">Đặt hàng</button>
-    </form>
-}
-else
-{
-    <p>Giỏ hàng của bạn đang trống.</p>
+@{
+    ViewData["Title"] = "Giỏ hàng";
 }
 
-<script>
-    document.querySelectorAll('.update-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            let row = this.closest('tr');
-            let cartItemId = row.querySelector('.cartItemId').value;
-            let quantity = row.querySelector('.quantity').value;
+<!-- Sử dụng layout -->
+@section Styles {
+    <link rel="stylesheet" href="~/assets/css/main.css">
+    <link rel="stylesheet" href="~/assets/css/responsive.css">
+}
 
-            fetch('/Cart/UpdateQuantity', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: `cartItemId=${cartItemId}&quantity=${quantity}`
-            })
-            .then(response => response.text())
-            .then(data => {
-                console.log("Cập nhật thành công", data);
-                location.reload();
-            })
-            .catch(error => console.error('Lỗi khi cập nhật:', error));
+<div class="breadcrumb-section breadcrumb-bg">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2 text-center">
+                <div class="breadcrumb-text">
+                    <p>Fresh and Organic</p>
+                    <h1>Cart</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cart Section -->
+<div class="cart-section mt-150 mb-150">
+    <div class="container">
+        @if (Model.CartItems.Any())
+        {
+            <form method="post" asp-controller="Order" asp-action="ConfirmOrder">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Chọn</th>
+                            <th>Sản phẩm</th>
+                            <th>Giá</th>
+                            <th>Số lượng</th>
+                            <th>Tổng</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="selectedItems" value="@item.CartItemId" />
+                                </td>
+                                <td>@item.Product?.ProductName</td>
+                                <td>@(item.Product?.Price.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) + "VND")</td>
+                                <td>
+                                    <input type="hidden" class="cartItemId" value="@item.CartItemId" />
+                                    <input type="number" class="quantity" value="@item.Quantity" min="1" />
+                                    <button type="button" class="btn btn-sm btn-primary update-btn">Cập nhật</button>
+                                </td>
+                                <td>@((item.Quantity * item.Product?.Price)?.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) + " VND")</td>
+                                <td>
+                                    <form asp-controller="Cart" asp-action="RemoveItem" method="post">
+                                        <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                                        <button type="submit" class="btn btn-danger">Xóa</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <h3>Tổng tiền: @(Model.CartItems.Sum(ci => ci.Quantity * ci.Product.Price).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) + " VND")</h3>
+
+                <button type="submit" class="btn btn-primary">Đặt hàng</button>
+            </form>
+        }
+        else
+        {
+            <p>Giỏ hàng của bạn đang trống.</p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.update-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                let row = this.closest('tr');
+                let cartItemId = row.querySelector('.cartItemId').value;
+                let quantity = row.querySelector('.quantity').value;
+
+                fetch('/Cart/UpdateQuantity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `cartItemId=${cartItemId}&quantity=${quantity}`
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log("Cập nhật thành công", data);
+                    location.reload();
+                })
+                .catch(error => console.error('Lỗi khi cập nhật:', error));
+            });
         });
-    });
-</script>
+    </script>
+}

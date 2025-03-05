@@ -17,6 +17,8 @@ namespace Repository.Interface
         Task RemoveCartAsync(Cart cart);
         Task RemoveCartItemsAsync(IEnumerable<CartItem> cartItems);
         Task SaveChangesAsync();
+
+        Task UpdateCartAsync(Cart cart);
     }
 
 }

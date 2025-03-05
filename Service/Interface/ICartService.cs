@@ -10,6 +10,9 @@ namespace Service.Interface
         Task<bool> RemoveCartItemAsync(int cartItemId);
         Task<Order> PlaceOrderAsync(string userId);
         Task<Order> PlaceSelectedOrderAsync(string userId, List<int> selectedCartItemIds);
+
+        Task UpdateCartAsync(Cart cart); // New method
+        Task UpdateCartItemAsync(CartItem cartItem); // New method
     }
 
 }

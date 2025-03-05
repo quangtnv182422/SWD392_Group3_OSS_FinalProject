@@ -1,13 +1,195 @@
-﻿
-
-@model OnlineShoppingSystem_Main.Models.OrderConfirmationViewModel
+﻿@model OnlineShoppingSystem_Main.Models.OrderConfirmationViewModel
 @{
     ViewData["Title"] = "Order Confirmation";
+    // Get selected cart item IDs from TempData
+    List<int> selectedCartItemIds = TempData["SelectedCartItemIds"] != null
+        ? Newtonsoft.Json.JsonConvert.DeserializeObject<List<int>>(TempData["SelectedCartItemIds"].ToString())
+        : new List<int>();
+    // Keep TempData alive for the next request
+    TempData.Keep("SelectedCartItemIds");
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/assets/css/main.css">
     <link rel="stylesheet" href="~/assets/css/responsive.css">
+    <style>
+        /* Reduce margins for the section */
+        .checkout-section {
+            margin-top: 50px !important;
+            margin-bottom: 50px !important;
+        }
+
+        /* Adjust table styling for full-width product list */
+        .order-details table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .order-details th, .order-details td {
+            padding: 10px;
+            vertical-align: middle;
+        }
+
+        .order-details img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+
+        /* Add product button */
+        .add-product-btn {
+            background-color: #f28123;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-product-btn:hover {
+            background-color: #e06b1f;
+        }
+
+        /* Redesign form layout */
+        .billing-address-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .billing-address-form input[type="text"],
+        .billing-address-form input[type="email"],
+        .billing-address-form select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .billing-address-form .row {
+            margin-bottom: 15px;
+        }
+
+        .boxed-btn {
+            background-color: #f28123;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .boxed-btn:hover {
+            background-color: #e06b1f;
+        }
+
+        /* Remove extra space below */
+        .checkout-section .container {
+            padding-bottom: 0;
+        }
+
+        /* Style the Order Summary section to fill the space */
+        .order-details-wrap {
+            height: 100%;
+            background-color: #f9f9f9;
+            border: 1px solid #e1e1e1;
+            border-radius: 5px;
+            padding: 0; /* Remove padding to split sections */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Order Summary Section */
+        .order-summary-section {
+            flex: 1; /* Takes 50% of the space */
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .order-details {
+            width: 100%;
+        }
+
+        .order-details th, .order-details td {
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .order-details-wrap thead th {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #e1e1e1;
+        }
+
+        .order-details-body td {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .checkout-details td {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Ensure the right column matches the height of the left column */
+        .col-lg-8, .col-lg-4 {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .order-details-wrap {
+            flex-grow: 1;
+        }
+
+        /* Full-width product list section */
+        .full-width-section {
+            margin-bottom: 20px;
+        }
+
+        .product-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        /* Style the Payment Method section inside Order Summary */
+        .payment-method-section {
+            flex: 1; /* Takes 50% of the space */
+            padding: 15px;
+            border-top: 1px solid #e1e1e1; /* Add a separator for visual distinction */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+        }
+
+        .payment-method-section h4 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .payment-method label {
+            margin-right: 20px;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .payment-method input[type="radio"] {
+            margin-right: 5px;
+        }
+    </style>
 }
 
 <!-- breadcrumb-section -->
@@ -24,137 +206,120 @@
     </div>
 </div>
 <!-- end breadcrumb section -->
+
 <!-- Order Confirmation section -->
 <div class="checkout-section mt-150 mb-150">
     <div class="container">
+        <!-- Full-width Product List Section -->
+        <div class="full-width-section">
+            <div class="product-list-header">
+                <h5>Your Order Items</h5>
+                <form id="addMoreProductsForm" asp-controller="Cart" asp-action="Index" method="get" style="display:inline;">
+                    <input type="hidden" name="fromOrderConfirmation" value="true" />
+                    <button type="submit" class="add-product-btn">Add More Products</button>
+                </form>
+            </div>
+            <div class="order-details">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Picture</th>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.SelectedCartItems)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="@item.Product.ProductImages.FirstOrDefault()?.ProductImageUrl" alt="@item.Product.ProductName" width="50" height="50" />
+                                </td>
+                                <td>
+                                    <strong>@item.Product.ProductName</strong>
+                                    <br />
+                                    Category: @item.Product.Category?.CategoryName, Available: @item.Product.Quantity
+                                </td>
+                                <td>@item.Product.Price.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) VND</td>
+                                <td>@item.Quantity</td>
+                                <td>@((item.Quantity * item.Product.Price).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) + "VND")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Delivery Details and Order Summary Section -->
         <div class="row">
             <div class="col-lg-8">
                 <div class="checkout-accordion-wrap">
-                    <div class="accordion" id="accordionExample">
-                        <div class="card single-accordion">
-                            <div class="card-header" id="headingOne">
-                                <h5 class="mb-0">
-                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                        Your Order Items
-                                    </button>
-                                </h5>
-                            </div>
+                    <div class="card single-accordion">
+                        <div class="card-header">
+                            <h5>Delivery Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" asp-action="PlaceOrder" class="billing-address-form">
+                                <input type="hidden" name="selectedItems" value="@string.Join(",", Model.SelectedCartItems.Select(i => i.CartItemId))" />
 
-                            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
-                                <div class="card-body">
-                                    <div class="order-details">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Picture</th>
-                                                    <th>Product</th>
-                                                    <th>Price</th>
-                                                    <th>Quantity</th>
-                                                    <th>Amount</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var item in Model.SelectedCartItems)
-                                                {
-                                                    <tr>
-                                                        <td>
-                                                            <img src="@item.Product.ProductImages.FirstOrDefault()?.ProductImageUrl" width="50" height="50" />
-                                                        </td>
-                                                        <td>
-                                                            <strong>@item.Product.ProductName</strong>
-                                                            <br />
-                                                            Category: @item.Product.Category?.CategoryName, Available: @item.Product.Quantity
-                                                        </td>
-                                                        <td>@item.Product.Price.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) VND</td>
-                                                        <td>@item.Quantity</td>
-                                                        <td>@((item.Quantity * item.Product.Price).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN"))) VND</td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="fullName">Full Name*</label>
+                                        <input type="text" id="fullName" name="fullName" value="@Model.FullName" placeholder="Full Name" required />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="email">Email*</label>
+                                        <input type="email" id="email" name="email" value="@Model.Email" placeholder="Email" required />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="mobile">Mobile*</label>
+                                        <input type="text" id="mobile" name="mobile" value="@Model.Mobile" placeholder="Mobile" required />
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div class="card single-accordion">
-                            <div class="card-header" id="headingTwo">
-                                <h5 class="mb-0">
-                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-                                        Delivery Details
-                                    </button>
-                                </h5>
-                            </div>
-
-                            <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionExample">
-                                <div class="card-body">
-                                    <form method="post" asp-action="PlaceOrder" class="billing-address-form">
-                                        <input type="hidden" name="selectedItems" value="@string.Join(",", Model.SelectedCartItems.Select(i => i.CartItemId))" />
-
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <p><input type="text" name="fullName" value="@Model.FullName" placeholder="Full Name*" required /></p>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <p><input type="email" name="email" value="@Model.Email" placeholder="Email*" required /></p>
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <p><input type="text" name="mobile" value="@Model.Mobile" placeholder="Mobile*" required /></p>
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <div class="col-md-4">
-                                                <p>
-                                                    <select id="province" name="SelectedProvince" class="form-control" required>
-                                                        <option value="">-- Select Province --</option>
-                                                    </select>
-                                                </p>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <p>
-                                                    <select id="district" name="SelectedDistrict" class="form-control" required>
-                                                        <option value="">-- Select District --</option>
-                                                    </select>
-                                                </p>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <p>
-                                                    <select id="ward" name="SelectedWard" class="form-control" required>
-                                                        <option value="">-- Select Ward --</option>
-                                                    </select>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <div class="col-md-12">
-                                                <p><input type="text" name="address" placeholder="Detailed Address*" required /></p>
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <div class="col-md-12">
-                                                <h4>Payment Method</h4>
-                                                <div class="payment-method mt-3">
-                                                    <label class="mr-4"><input type="radio" name="paymentMethod" value="Cash" checked /> Cash on Delivery</label>
-                                                    <label class="mr-4"><input type="radio" name="paymentMethod" value="Banking" /> Internet Banking</label>
-                                                    <label><input type="radio" name="paymentMethod" value="Transfer" /> Bank Transfer</label>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row mt-4">
-                                            <div class="col-md-12">
-                                                <button type="submit" class="boxed-btn">Place Order</button>
-                                            </div>
-                                        </div>
-                                    </form>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="province">City/Province*</label>
+                                        <select id="province" name="SelectedProvince" class="form-control" required>
+                                            <option value="">-- Select Province --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="district">District*</label>
+                                        <select id="district" name="SelectedDistrict" class="form-control" required>
+                                            <option value="">-- Select District --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="ward">Wards*</label>
+                                        <select id="ward" name="SelectedWard" class="form-control" required>
+                                            <option value="">-- Select Ward --</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="address">Address*</label>
+                                        <input type="text" id="address" name="address" value="@Model.Address" placeholder="Address" required />
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="deliveryNotes">Delivery Notes</label>
+                                        <input type="text" id="deliveryNotes" name="deliveryNotes" placeholder="Delivery Notes" />
+                                    </div>
+                                </div>
+
+                                <div class="row mt-4">
+                                    <div class="col-md-12">
+                                        <button type="submit" class="boxed-btn">Checkout</button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -162,35 +327,49 @@
 
             <div class="col-lg-4">
                 <div class="order-details-wrap">
-                    <table class="order-details">
-                        <thead>
-                            <tr>
-                                <th colspan="2">Order Summary</th>
-                            </tr>
-                        </thead>
-                        <tbody class="order-details-body">
-                            <tr>
-                                <td>Sub Total</td>
-                                <td>@Model.SubTotal.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) VND</td>
-                            </tr>
-                            <tr>
-                                <td>Shipping Fee</td>
-                                <td><span id="shipping-fee">Calculating...</span></td>
-                            </tr>
-                        </tbody>
-                        <tbody class="checkout-details">
-                            <tr>
-                                <td>Total Cost</td>
-                                <td><span id="total-cost">@Model.TotalCost.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) VND</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <!-- Order Summary Section -->
+                    <div class="order-summary-section">
+                        <table class="order-details">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">Order Summary</th>
+                                </tr>
+                            </thead>
+                            <tbody class="order-details-body">
+                                <tr>
+                                    <td>Sub Total</td>
+                                    <td>@Model.SubTotal.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) VND</td>
+                                </tr>
+                                <tr>
+                                    <td>Shipping Fee</td>
+                                    <td><span id="shipping-fee">Calculating...</span></td>
+                                </tr>
+                            </tbody>
+                            <tbody class="checkout-details">
+                                <tr>
+                                    <td>Total Cost</td>
+                                    <td><span id="total-cost">@Model.TotalCost.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) VND</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Payment Method Section -->
+                    <div class="payment-method-section">
+                        <h4>Payment Method</h4>
+                        <div class="payment-method">
+                            <label><input type="radio" name="paymentMethod" value="Cash" checked /> Cash on Delivery</label>
+                            <label><input type="radio" name="paymentMethod" value="Banking" /> Internet Banking</label>
+                            <label><input type="radio" name="paymentMethod" value="Transfer" /> Bank Transfer</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 <!-- end Order Confirmation section -->
+
 @section Scripts {
     <script>
         $(document).ready(function () {
@@ -207,7 +386,6 @@
                 $("#shipping-fee").text("Calculating...");
             });
 
-            // Calculate shipping after ward selection
             $("#ward").change(function () {
                 if ($(this).val()) {
                     getAvailableServices();
@@ -263,13 +441,10 @@
                     }),
                     success: function (data) {
                         try {
-                            // Try to parse if it's a string, otherwise use as is
                             var response = typeof data === 'string' ? JSON.parse(data) : data;
-
                             if (response.code === 200 && response.data && response.data.length > 0) {
-                                // Get first service to calculate fee
                                 var serviceId = response.data[0].service_id;
-                                var serviceTypeId = 2; // Usually 2 for regular delivery
+                                var serviceTypeId = 2;
                                 calculateShipping(serviceId, serviceTypeId);
                             } else {
                                 $("#shipping-fee").text("Không có dịch vụ vận chuyển phù hợp");
@@ -288,11 +463,11 @@
             }
 
             function calculateShipping(serviceId, serviceTypeId) {
-                var fromDistrictId = 1711; // ID kho hàng
+                var fromDistrictId = 1711;
                 var toDistrictId = $("#district").val();
-                var weight = 500; // Assuming weight in grams
-                var length = 20, width = 20, height = 10; // cm
-                var shopId = 5656073; // Shop ID
+                var weight = 500;
+                var length = 20, width = 20, height = 10;
+                var shopId = 5656073;
 
                 $.ajax({
                     url: "/api/ghn/calculate-shipping",
@@ -311,9 +486,7 @@
                     }),
                     success: function (data) {
                         try {
-                            // Try to parse if it's a string, otherwise use as is
                             var response = typeof data === 'string' ? JSON.parse(data) : data;
-
                             if (response.code === 200 && response.data) {
                                 var fee = response.data.total;
                                 $("#shipping-fee").text(fee.toLocaleString() + " VND");

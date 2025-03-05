@@ -64,6 +64,12 @@ namespace Repository.Implementation
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task UpdateCartAsync(Cart cart)
+        {
+            _context.Update(cart);
+            await _context.SaveChangesAsync();
+        }
     }
 
 }

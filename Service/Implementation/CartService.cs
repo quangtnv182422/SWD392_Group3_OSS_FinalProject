@@ -128,6 +128,16 @@ namespace Service.Implementation
 
             return order;
         }
+
+        public async Task UpdateCartAsync(Cart cart)
+        {
+            await _cartRepository.UpdateCartAsync(cart);
+        }
+
+        public async Task UpdateCartItemAsync(CartItem cartItem)
+        {
+            await _cartRepository.UpdateCartItemAsync(cartItem);
+        }
     }
 
 }

@@ -8,7 +8,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using OnlineShoppingSystem_Main.Models;
-using Newtonsoft.Json; // For JSON serialization/deserialization
+using Newtonsoft.Json;
+using Data.Models; // For JSON serialization/deserialization
 
 namespace OnlineShoppingSystem_Main.Controllers
 {

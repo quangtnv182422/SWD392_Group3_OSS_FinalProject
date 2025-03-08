@@ -1,35 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
-using OnlineShoppingSystem_Main.Data.Models;
+﻿using Microsoft.AspNetCore.Identity;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
 using System.Diagnostics;
-
 
 namespace Repository.Implementation
 {
     public class UserRepository : IUserRepository
     {
-        private readonly Swd392OssContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public UserRepository(Swd392OssContext context)
+        public UserRepository(UserManager<IdentityUser> userManager)
         {
-            _context = context;
+            _userManager = userManager;
         }
-        public AspNetUser GetUserById(string userId)
+
+        public async Task<IdentityUser> GetUserByIdAsync(string userId)
         {
             Debug.WriteLine($"[DEBUG] Looking for user with ID: {userId}");
-
-            var user = _context.AspNetUsers
-                .AsNoTracking()
-                .Where(u => u.Id == userId)
-                .Select(u => new AspNetUser
-                {
-                    Id = u.Id,
-                    UserName = u.UserName,
-                    Email = u.Email,
-                    PhoneNumber = u.PhoneNumber
-                })
-                .FirstOrDefault();
+            var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
             {

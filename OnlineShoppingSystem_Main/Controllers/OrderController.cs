@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using OnlineShoppingSystem_Main.Models;
 using Service.Interface;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using OnlineShoppingSystem_Main.Models;
-using Newtonsoft.Json; 
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
@@ -23,20 +21,17 @@ namespace OnlineShoppingSystem_Main.Controllers
             _cartService = cartService;
         }
 
-        private AspNetUser GetCurrentUser()
+        private async Task<IdentityUser> GetCurrentUserAsync()
         {
             string userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!string.IsNullOrEmpty(userId))
             {
-                var user = _userService.GetCurrentUser(userId);
+                var user = await _userService.GetCurrentUserAsync(userId);
                 if (user == null)
                 {
                     throw new Exception("Không tìm thấy user với ID: " + userId);
                 }
-                else
-                {
-                    Debug.WriteLine($"[DEBUG] Đã tìm thấy user: {{ Id: {user.Id}, UserName: {user.UserName}, Email: {user.Email}, Phone: {user.PhoneNumber} }}");
-                }
+                Debug.WriteLine($"[DEBUG] Đã tìm thấy user: {{ Id: {user.Id}, UserName: {user.UserName}, Email: {user.Email}, Phone: {user.PhoneNumber} }}");
                 return user;
             }
             return null;
@@ -52,9 +47,8 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             List<int> selectedCartItemIds = selectedItems.Select(int.Parse).ToList();
             string userId = await _userService.GetUserIdAsync(HttpContext);
-            var currentUser = GetCurrentUser();
+            var currentUser = await GetCurrentUserAsync(); 
 
-            
             TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds);
 
             var model = await _orderService.CreateOrderConfirmationViewModelAsync(selectedCartItemIds, currentUser);
@@ -64,10 +58,9 @@ namespace OnlineShoppingSystem_Main.Controllers
         [HttpPost]
         public async Task<IActionResult> BuyNow(int productId, int quantity = 1)
         {
-            string userId = await _userService.GetUserIdAsync(HttpContext);
-            var currentUser = GetCurrentUser();
+            string userId = await _userService.GetUserIdAsync(HttpContext); 
+            var currentUser = await GetCurrentUserAsync(); 
 
-            
             var cart = await _cartService.GetUserCartAsync(userId);
             var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
 
@@ -88,23 +81,17 @@ namespace OnlineShoppingSystem_Main.Controllers
                 await _cartService.UpdateCartItemAsync(cartItem);
             }
 
-           
-            List<int> selectedCartItemIds = new List<int>();
-            if (TempData["SelectedCartItemIds"] != null)
-            {
-                selectedCartItemIds = JsonConvert.DeserializeObject<List<int>>(TempData["SelectedCartItemIds"].ToString());
-            }
+            List<int> selectedCartItemIds = TempData["SelectedCartItemIds"] != null
+                ? JsonConvert.DeserializeObject<List<int>>(TempData["SelectedCartItemIds"].ToString())
+                : new List<int>();
 
-            
             if (!selectedCartItemIds.Contains(cartItem.CartItemId))
             {
                 selectedCartItemIds.Add(cartItem.CartItemId);
             }
 
-           
             TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds);
 
-            
             var model = await _orderService.CreateOrderConfirmationViewModelAsync(selectedCartItemIds, currentUser);
             return View("OrderConfirmation", model);
         }

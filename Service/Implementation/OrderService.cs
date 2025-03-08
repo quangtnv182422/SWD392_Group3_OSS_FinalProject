@@ -1,8 +1,7 @@
-﻿using OnlineShoppingSystem_Main.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
 using Service.Interface;
-
-
 
 namespace Service.Implementation
 {
@@ -20,7 +19,7 @@ namespace Service.Implementation
             return await _orderRepository.GetOrderByIdAsync(orderId);
         }
 
-        public async Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, AspNetUser currentUser)
+        public async Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, IdentityUser currentUser)
         {
             var selectedCartItems = await _orderRepository.GetCartItemsByIdsAsync(selectedCartItemIds);
             double totalPrice = selectedCartItems.Sum(ci => ci.Quantity * ci.Product.Price);
@@ -63,5 +62,6 @@ namespace Service.Implementation
             await _orderRepository.CreateOrderAsync(order);
             return order;
         }
+
     }
 }

@@ -1,14 +1,9 @@
-﻿using OnlineShoppingSystem_Main.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Repository.Interface
 {
     public interface IUserRepository
     {
-        AspNetUser GetUserById(string userId);
+        Task<IdentityUser> GetUserByIdAsync(string userId);
     }
 }

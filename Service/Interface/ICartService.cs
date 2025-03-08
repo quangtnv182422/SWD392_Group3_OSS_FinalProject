@@ -12,8 +12,8 @@ namespace Service.Interface
         Task<Order> PlaceOrderAsync(string userId);
         Task<Order> PlaceSelectedOrderAsync(string userId, List<int> selectedCartItemIds);
 
-        Task UpdateCartAsync(Cart cart); // New method
-        Task UpdateCartItemAsync(CartItem cartItem); // New method
+        Task UpdateCartAsync(Cart cart); 
+        Task UpdateCartItemAsync(CartItem cartItem); 
     }
 
 }

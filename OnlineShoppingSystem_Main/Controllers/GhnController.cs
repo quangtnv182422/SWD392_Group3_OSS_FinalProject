@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OnlineShoppingSystem_Main.Models;
 using Service;
 
 
@@ -76,25 +77,5 @@ namespace OnlineShoppingSystem_Main.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-    }
-
-    public class AvailableServicesRequest
-    {
-        public int shopId { get; set; }
-        public int fromDistrictId { get; set; }
-        public int toDistrictId { get; set; }
-    }
-
-    public class ShippingRequest
-    {
-        public int fromDistrictId { get; set; }
-        public int toDistrictId { get; set; }
-        public int weight { get; set; }
-        public int length { get; set; }
-        public int width { get; set; }
-        public int height { get; set; }
-        public int service_id { get; set; }
-        public int service_type_id { get; set; }
-        public int shopId { get; set; }
     }
 }

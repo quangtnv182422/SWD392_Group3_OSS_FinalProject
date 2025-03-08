@@ -40,19 +40,15 @@ public partial class Swd392OssContext : IdentityDbContext
 
 	public virtual DbSet<SettingCategory> SettingCategories { get; set; }
 
-	public virtual DbSet<SettingsStatus> SettingsStatuses { get; set; }
-
-	public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
-
-
-
-	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	{
-		if (!optionsBuilder.IsConfigured)
-		{
-			var ConnectionString = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetConnectionString("DefaultConnection");
-			optionsBuilder.UseSqlServer(ConnectionString);
-		}
+    public virtual DbSet<SettingsStatus> SettingsStatuses { get; set; }
+    public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var ConnectionString = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetConnectionString("DefaultConnection");
+            optionsBuilder.UseSqlServer(ConnectionString);
+        }
 
 	}
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -181,10 +177,8 @@ public partial class Swd392OssContext : IdentityDbContext
 				.IsUnicode(false)
 				.HasColumnName("ProductImageURL");
 
-			entity.HasOne(d => d.Product).WithMany(p => p.ProductImages)
-				.HasForeignKey(d => d.ProductId)
-				.HasConstraintName("FK__ProductIm__Produ__7E37BEF6");
-		});
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductImages).HasConstraintName("FK__ProductIm__Produ__7C4F7684");
+        });
 
 		modelBuilder.Entity<ProductStatus>(entity =>
 		{

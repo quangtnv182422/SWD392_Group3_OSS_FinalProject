@@ -159,48 +159,9 @@
 @section Styles {
     <link rel="stylesheet" href="~/assets/css/main.css">
     <link rel="stylesheet" href="~/assets/css/responsive.css">
+    <link rel="stylesheet" href="~/assets/css/cart.css">
     <!-- Add Font Awesome for delete icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* Style for the breadcrumb section to reduce bottom margin */
-        .breadcrumb-section {
-            margin-bottom: 30px !important;
-        }
-
-        /* Style for the table to adjust spacing */
-        .cart-section {
-            margin-top: 50px !important;
-            margin-bottom: 50px !important;
-        }
-
-        /* Style for the product name cell to align delete icon */
-        .product-cell {
-            position: relative;
-            padding-right: 40px;
-        }
-
-        /* Style for the delete button */
-        .delete-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: red;
-        }
-
-        /* Ensure table cells have consistent padding */
-        .table td, .table th {
-            padding: 10px;
-            vertical-align: middle;
-        }
-
-        /* Adjust table width and center it */
-        .table {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-    </style>
 }
 
 <div class="breadcrumb-section breadcrumb-bg">
@@ -260,40 +221,20 @@
                     </tbody>
                 </table>
 
-                <h3>Tổng tiền: @(Model.CartItems.Sum(ci => ci.Quantity * ci.Product.Price).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) + " VND")</h3>
+                <div class="cart-total">
+                    <h3>Tổng tiền: @(Model.CartItems.Sum(ci => ci.Quantity * ci.Product.Price).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) + " VND")</h3>
+                </div>
 
-                <button type="submit" class="btn btn-primary">Đặt hàng</button>
+                <button type="submit" class="order-button">Đặt hàng</button>
             </form>
         }
         else
         {
-            <p>Giỏ hàng của bạn đang trống.</p>
+            <p class="empty-cart-message">Giỏ hàng của bạn đang trống.</p>
         }
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        document.querySelectorAll('.quantity').forEach(input => {
-            input.addEventListener('change', function () {
-                let row = this.closest('tr');
-                let cartItemId = row.querySelector('.cartItemId').value;
-                let quantity = this.value;
-
-                fetch('/Cart/UpdateQuantity', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: `cartItemId=${cartItemId}&quantity=${quantity}`
-                })
-                .then(response => response.text())
-                .then(data => {
-                    console.log("Cập nhật thành công", data);
-                    location.reload();
-                })
-                .catch(error => console.error('Lỗi khi cập nhật:', error));
-            });
-        });
-    </script>
+    <script src="~/assets/js/cart.js"></script>
 }

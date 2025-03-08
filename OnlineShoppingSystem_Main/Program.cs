@@ -1,4 +1,4 @@
-using Api.Implementation;
+﻿using Api.Implementation;
 using Api.Interface;
 using Api.vnPay.Implementation;
 using Api.vnPay.Interface;
@@ -14,11 +14,6 @@ using Repository.Interface.Api.Interface;
 using Service;
 using Service.Implementation;
 using Service.Interface;
-using System.Xml;
-
-
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,16 +37,8 @@ builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 //vnPay
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 
-builder.Services.AddSingleton<GhnApiService>();
 builder.Services.AddScoped<GhnApiService>();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        builder => builder.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader());
-});
 
 
 
@@ -64,31 +51,38 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // Trang ??ng nh?p
-    options.AccessDeniedPath = "/Account/AccessDenied"; // Trang t? ch?i truy c?p
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
     options.Cookie.Name = "UserAuthCookie";
 });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
 app.UseCors("AllowAll");
-// Configure the HTTP request pipeline.
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseAuthentication();

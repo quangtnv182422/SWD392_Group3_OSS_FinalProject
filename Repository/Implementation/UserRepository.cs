@@ -19,7 +19,6 @@ namespace Repository.Implementation
         {
             Debug.WriteLine($"[DEBUG] Looking for user with ID: {userId}");
 
-            // Use explicit mapping and disable tracking
             var user = _context.AspNetUsers
                 .AsNoTracking()
                 .Where(u => u.Id == userId)
@@ -29,7 +28,6 @@ namespace Repository.Implementation
                     UserName = u.UserName,
                     Email = u.Email,
                     PhoneNumber = u.PhoneNumber
-                    // Add other properties you need
                 })
                 .FirstOrDefault();
 

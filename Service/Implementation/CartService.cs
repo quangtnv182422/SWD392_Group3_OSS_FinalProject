@@ -80,8 +80,6 @@ namespace Service.Implementation
                 }).ToList()
             };
 
-            // Save order will be handled by the OrderService
-            // Remove cart items
             await _cartRepository.RemoveCartAsync(cart);
 
             return order;

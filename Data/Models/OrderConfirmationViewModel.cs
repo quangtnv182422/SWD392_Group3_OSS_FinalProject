@@ -17,7 +17,8 @@ namespace OnlineShoppingSystem_Main.Models
         public int SelectedProvince { get; set; }
         public int SelectedDistrict { get; set; }
         public int SelectedWard { get; set; }
-
+        public string PaymentMethod {  get; set; }
+        public string DeliveryNotes {  get; set; }
         public double SubTotal { get; set; }
         public double ShippingFee { get; set; }
         public double TotalCost => SubTotal + ShippingFee;

@@ -15,6 +15,9 @@ public partial class Product
 
     public double Price { get; set; }
 
+    public double? SalePrice { get; set; }
+
+
     public DateTime CreatedAt { get; set; }
 
     public int? CategoryId { get; set; }

@@ -4,8 +4,10 @@ using Api.vnPay.Implementation;
 using Api.vnPay.Interface;
 using Data.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Implementation;
@@ -17,6 +19,8 @@ using Service.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//emailSender
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 //Category
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); 
 builder.Services.AddScoped<ICategoryService, CategoryService>(); 
@@ -40,14 +44,24 @@ builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddScoped<GhnApiService>();
 
 
-
-
 //Connect DB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<Swd392OssContext>(options => options.UseSqlServer(connectionString));
 
 //Config Identity
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<Swd392OssContext>();
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<Swd392OssContext>();
+
+builder.Services.AddAuthentication()
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]
+            ?? throw new Exception("Invalid google client Id");
+        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
+            ?? throw new Exception("Invalid google client secret");
+        googleOptions.CallbackPath = "/signin-google";
+        googleOptions.SaveTokens = true;
+    });
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -55,6 +69,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.Cookie.Name = "UserAuthCookie";
 });
+
 
 builder.Services.AddCors(options =>
 {

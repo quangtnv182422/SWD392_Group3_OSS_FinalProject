@@ -32,13 +32,6 @@
 
 
 	<ItemGroup>
-		<Folder Include="Service\" />
-		<Folder Include="Repository\" />
-	</ItemGroup>
-
-
-
-	<ItemGroup>
 	  <None Include="Properties\launchSettings.json" />
 	</ItemGroup>
 

@@ -1,6 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Data.Models;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using OnlineShoppingSystem_Main.Data.Models;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
 using System;

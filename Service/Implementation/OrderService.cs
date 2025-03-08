@@ -1,4 +1,5 @@
-﻿using OnlineShoppingSystem_Main.Models;
+﻿using Data.Models;
+using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
 using Service.Interface;
 
@@ -36,7 +37,7 @@ namespace Service.Implementation
             };
         }
 
-        public async Task<Order> CreateOrderAsync(string fullName, string email, string mobile, string address, string paymentMethod, List<int> cartItemIds)
+        public async Task<Order> CreateOrderAsync(string fullName, string email, string mobile, string address, string paymentMethod, List<int> cartItemIds, float totalCost, int orderStatus)
         {
             var cartItems = await _orderRepository.GetCartItemsByIdsAsync(cartItemIds);
 
@@ -45,13 +46,18 @@ namespace Service.Implementation
                 OrderedAt = DateTime.Now,
                 PaymentMethod = paymentMethod,
                 Address = address,
-                OrderStatusId = 1,
+                OrderStatusId = orderStatus,
                 OrderItems = cartItems.Select(ci => new OrderItem
                 {
                     ProductId = ci.ProductId,
                     Quantity = ci.Quantity,
                     PriceEachItem = ci.Product.Price
-                }).ToList()
+                }).ToList(),
+                TotalCost = totalCost,
+                FullName = fullName,
+                Email = email,
+                PhoneNumber = mobile
+                
             };
 
             await _orderRepository.CreateOrderAsync(order);

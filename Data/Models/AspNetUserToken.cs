@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace OnlineShoppingSystem_Main.Models;
+namespace Data.Models;
 
 [PrimaryKey("UserId", "LoginProvider", "Name")]
 public partial class AspNetUserToken

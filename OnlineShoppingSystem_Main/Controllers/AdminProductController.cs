@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OnlineShoppingSystem_Main.Data.Models;
 using OnlineShoppingSystem_Main.Models;
 using Service.Implementation;
 using Service.Interface;
 using System.Linq;
 using Api.Implementation;
 using Api.Interface;
+using Data.Models;
 
 namespace OnlineShoppingSystem_Main.Controllers
 {

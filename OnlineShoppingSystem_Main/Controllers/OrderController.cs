@@ -79,7 +79,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using OnlineShoppingSystem_Main.Models;
-using Newtonsoft.Json; // For JSON serialization/deserialization
+using Newtonsoft.Json;
+using Data.Models; // For JSON serialization/deserialization
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
@@ -182,16 +183,16 @@ namespace OnlineShoppingSystem_Main.Controllers
             return View("OrderConfirmation", model);
         }
 
-        [HttpPost]
+       /* [HttpPost]
         public async Task<IActionResult> PlaceOrder(string fullName, string email, string mobile, string address, string paymentMethod, string selectedItems)
         {
             var cartItemIds = selectedItems.Split(",").Select(int.Parse).ToList();
-            var order = await _orderService.CreateOrderAsync(fullName, email, mobile, address, paymentMethod, cartItemIds);
+            //var order = await _orderService.CreateOrderAsync(fullName, email, mobile, address, paymentMethod, cartItemIds);
 
             // Clear TempData after placing the order
             TempData.Remove("SelectedCartItemIds");
 
             return RedirectToAction("OrderSuccess", "Cart");
-        }
+        }*/
     }
 }

@@ -1,4 +1,5 @@
-﻿using OnlineShoppingSystem_Main.Models;
+﻿using Data.Models;
+using OnlineShoppingSystem_Main.Models;
 
 
 namespace Service.Interface

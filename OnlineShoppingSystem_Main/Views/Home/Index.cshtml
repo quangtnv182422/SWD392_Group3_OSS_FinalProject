@@ -1,11 +1,11 @@
-﻿@using OnlineShoppingSystem_Main.Models
+﻿@using Data.Models
 @model List<Product>
 
 
 @{
     ViewData["Title"] = "Home";
-    var featuredProducts = ViewBag.FeaturedProducts as List<OnlineShoppingSystem_Main.Models.Product> ?? new List<OnlineShoppingSystem_Main.Models.Product>();
-    var latestProducts = ViewBag.LatestProducts as List<OnlineShoppingSystem_Main.Models.Product> ?? new List<OnlineShoppingSystem_Main.Models.Product>();
+    var featuredProducts = ViewBag.FeaturedProducts as List<Data.Models.Product> ?? new List<Data.Models.Product>();
+    var latestProducts = ViewBag.LatestProducts as List<Data.Models.Product> ?? new List<Data.Models.Product>();
 }
 
 @section Styles {

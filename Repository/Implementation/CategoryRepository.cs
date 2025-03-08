@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using OnlineShoppingSystem_Main.Data.Models;
+﻿using Data.Models;
+using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface.Api.Interface;
 using System;

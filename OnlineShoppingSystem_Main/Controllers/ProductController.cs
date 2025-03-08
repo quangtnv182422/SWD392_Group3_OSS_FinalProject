@@ -1,8 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OnlineShoppingSystem_Main.Data.Models;
-using OnlineShoppingSystem_Main.Models;
-using Service.Implementation;
 using Service.Interface;
 
 namespace OnlineShoppingSystem_Main.Controllers

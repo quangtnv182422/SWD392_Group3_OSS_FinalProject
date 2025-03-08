@@ -1,4 +1,6 @@
-﻿using OnlineShoppingSystem_Main.Models;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Identity;
+using OnlineShoppingSystem_Main.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +12,6 @@ namespace Repository.Interface
     public interface IUserRepository
     {
         AspNetUser GetUserById(string userId);
+        /*Task<IdentityUser> GetUserById(string userId);*/
     }
 }

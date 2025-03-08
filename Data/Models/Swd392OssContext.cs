@@ -3,169 +3,236 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using OnlineShoppingSystem_Main.Models;
 
-namespace OnlineShoppingSystem_Main.Data.Models;
+namespace Data.Models;
 
 public partial class Swd392OssContext : IdentityDbContext
 {
-    public Swd392OssContext()
-    {
-    }
+	public Swd392OssContext()
+	{
+	}
 
-    public Swd392OssContext(DbContextOptions<Swd392OssContext> options)
-        : base(options)
-    {
-    }
+	public Swd392OssContext(DbContextOptions<Swd392OssContext> options)
+		: base(options)
+	{
+	}
 
-   
-    public virtual DbSet<Cart> Carts { get; set; }
 
-    public virtual DbSet<CartItem> CartItems { get; set; }
+	public virtual DbSet<Cart> Carts { get; set; }
 
-    public virtual DbSet<Category> Categories { get; set; }
+	public virtual DbSet<CartItem> CartItems { get; set; }
 
-    public virtual DbSet<Order> Orders { get; set; }
+	public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<OrderItem> OrderItems { get; set; }
+	public virtual DbSet<Order> Orders { get; set; }
 
-    public virtual DbSet<OrderStatus> OrderStatuses { get; set; }
+	public virtual DbSet<OrderItem> OrderItems { get; set; }
 
-    public virtual DbSet<Product> Products { get; set; }
+	public virtual DbSet<OrderStatus> OrderStatuses { get; set; }
 
-    public virtual DbSet<ProductImage> ProductImages { get; set; }
+	public virtual DbSet<Product> Products { get; set; }
 
-    public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
+	public virtual DbSet<ProductImage> ProductImages { get; set; }
 
-    public virtual DbSet<Setting> Settings { get; set; }
+	public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
 
-    public virtual DbSet<SettingCategory> SettingCategories { get; set; }
+	public virtual DbSet<Setting> Settings { get; set; }
 
-    public virtual DbSet<SettingsStatus> SettingsStatuses { get; set; }
-    public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            var ConnectionString = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetConnectionString("DefaultConnection");
-            optionsBuilder.UseSqlServer(ConnectionString);
-        }
+	public virtual DbSet<SettingCategory> SettingCategories { get; set; }
 
-    }
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
+	public virtual DbSet<SettingsStatus> SettingsStatuses { get; set; }
 
-        modelBuilder.Entity<Cart>(entity =>
-        {
-            entity.HasKey(e => e.CartId).HasName("PK__Cart__51BCD7B783078B66");
+	public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
 
-            entity.Property(e => e.CartId).ValueGeneratedNever();
 
-            entity.HasOne(d => d.Customer).WithMany(p => p.Carts).HasConstraintName("FK__Cart__CustomerId__73BA3083");
-        });
 
-        modelBuilder.Entity<CartItem>(entity =>
-        {
-            entity.HasKey(e => e.CartItemId).HasName("PK__CartItem__488B0B0AD89A9D68");
+	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+	{
+		if (!optionsBuilder.IsConfigured)
+		{
+			var ConnectionString = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetConnectionString("DefaultConnection");
+			optionsBuilder.UseSqlServer(ConnectionString);
+		}
 
-            entity.Property(e => e.CartItemId).ValueGeneratedNever();
+	}
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		base.OnModelCreating(modelBuilder);
 
-            entity.HasOne(d => d.Cart).WithMany(p => p.CartItems).HasConstraintName("FK__CartItem__CartId__74AE54BC");
 
-            entity.HasOne(d => d.Product).WithMany(p => p.CartItems).HasConstraintName("FK__CartItem__Produc__75A278F5");
-        });
+		modelBuilder.Entity<Cart>(entity =>
+		{
+			entity.HasKey(e => e.CartId).HasName("PK__Cart__51BCD7B7E0E01DD5");
 
-        modelBuilder.Entity<Category>(entity =>
-        {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A0B16135AAE");
+			entity.ToTable("Cart");
 
-            entity.Property(e => e.CategoryId).ValueGeneratedNever();
-        });
+			entity.Property(e => e.CustomerId).HasMaxLength(450);
 
-        modelBuilder.Entity<Order>(entity =>
-        {
-            entity.HasKey(e => e.OrderId).HasName("PK__Order__C3905BCF506E0C4F");
+			entity.HasOne(d => d.Customer).WithMany(p => p.Carts)
+				.HasForeignKey(d => d.CustomerId)
+				.HasConstraintName("FK__Cart__CustomerId__75A278F5");
+		});
 
-            entity.Property(e => e.OrderId).ValueGeneratedNever();
+		modelBuilder.Entity<CartItem>(entity =>
+		{
+			entity.HasKey(e => e.CartItemId).HasName("PK__CartItem__488B0B0AC955D3DD");
 
-            entity.HasOne(d => d.Customer).WithMany(p => p.Orders).HasConstraintName("FK__Order__CustomerI__76969D2E");
+			entity.ToTable("CartItem");
 
-            entity.HasOne(d => d.OrderStatus).WithMany(p => p.Orders).HasConstraintName("FK__Order__OrderStat__778AC167");
-        });
+			entity.HasOne(d => d.Cart).WithMany(p => p.CartItems)
+				.HasForeignKey(d => d.CartId)
+				.HasConstraintName("FK__CartItem__CartId__76969D2E");
 
-        modelBuilder.Entity<OrderItem>(entity =>
-        {
-            entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__57ED06819EFA39A1");
+			entity.HasOne(d => d.Product).WithMany(p => p.CartItems)
+				.HasForeignKey(d => d.ProductId)
+				.HasConstraintName("FK__CartItem__Produc__778AC167");
+		});
 
-            entity.Property(e => e.OrderItemId).ValueGeneratedNever();
+		modelBuilder.Entity<Category>(entity =>
+		{
+			entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A0B95A48F83");
 
-            entity.HasOne(d => d.Order).WithMany(p => p.OrderItems).HasConstraintName("FK__OrderItem__Order__787EE5A0");
+			entity.ToTable("Category");
 
-            entity.HasOne(d => d.Product).WithMany(p => p.OrderItems).HasConstraintName("FK__OrderItem__Produ__797309D9");
-        });
+			entity.Property(e => e.CategoryName).HasMaxLength(255);
+		});
 
-        modelBuilder.Entity<OrderStatus>(entity =>
-        {
-            entity.HasKey(e => e.StatusId).HasName("PK__OrderSta__C8EE206368290E58");
+		modelBuilder.Entity<Order>(entity =>
+		{
+			entity.HasKey(e => e.OrderId).HasName("PK__Order__C3905BCF54F2F264");
 
-            entity.Property(e => e.StatusId).ValueGeneratedNever();
-        });
+			entity.ToTable("Order");
 
-        modelBuilder.Entity<Product>(entity =>
-        {
-            entity.HasKey(e => e.ProductId).HasName("PK__Product__B40CC6CDB565A516");
+			entity.Property(e => e.Address)
+				.HasMaxLength(255)
+				.IsUnicode(false);
+			entity.Property(e => e.CustomerId).HasMaxLength(450);
+			entity.Property(e => e.Email).HasMaxLength(255);
+			entity.Property(e => e.FullName).HasMaxLength(255);
+			entity.Property(e => e.Note)
+				.HasMaxLength(255)
+				.IsUnicode(false);
+			entity.Property(e => e.OrderedAt).HasColumnType("datetime");
+			entity.Property(e => e.PaymentMethod).HasMaxLength(255);
+			entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+			entity.Property(e => e.StaffId).HasMaxLength(450);
 
-            entity.Property(e => e.ProductId).ValueGeneratedNever();
+			entity.HasOne(d => d.Customer).WithMany(p => p.Orders)
+				.HasForeignKey(d => d.CustomerId)
+				.HasConstraintName("FK__Order__CustomerI__787EE5A0");
 
-            entity.HasOne(d => d.Category).WithMany(p => p.Products).HasConstraintName("FK__Product__Categor__7A672E12");
+			entity.HasOne(d => d.OrderStatus).WithMany(p => p.Orders)
+				.HasForeignKey(d => d.OrderStatusId)
+				.HasConstraintName("FK__Order__OrderStat__797309D9");
+		});
 
-            entity.HasOne(d => d.ProductStatus).WithMany(p => p.Products).HasConstraintName("FK__Product__Product__7B5B524B");
-        });
+		modelBuilder.Entity<OrderItem>(entity =>
+		{
+			entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__57ED06812D9F44D4");
 
-        modelBuilder.Entity<ProductImage>(entity =>
-        {
-            entity.HasKey(e => e.ProductImageId).HasName("PK__ProductI__07B2B1B8736038EC");
+			entity.ToTable("OrderItem");
 
-            entity.Property(e => e.ProductImageId).ValueGeneratedNever();
+			entity.HasOne(d => d.Order).WithMany(p => p.OrderItems)
+				.HasForeignKey(d => d.OrderId)
+				.HasConstraintName("FK__OrderItem__Order__7A672E12");
 
-            entity.HasOne(d => d.Product).WithMany(p => p.ProductImages).HasConstraintName("FK__ProductIm__Produ__7C4F7684");
-        });
+			entity.HasOne(d => d.Product).WithMany(p => p.OrderItems)
+				.HasForeignKey(d => d.ProductId)
+				.HasConstraintName("FK__OrderItem__Produ__7B5B524B");
+		});
 
-        modelBuilder.Entity<ProductStatus>(entity =>
-        {
-            entity.HasKey(e => e.ProductStatusId).HasName("PK__ProductS__2082058B41599682");
+		modelBuilder.Entity<OrderStatus>(entity =>
+		{
+			entity.HasKey(e => e.StatusId).HasName("PK__OrderSta__C8EE20634002C90E");
 
-            entity.Property(e => e.ProductStatusId).ValueGeneratedNever();
-        });
+			entity.ToTable("OrderStatus");
 
-        modelBuilder.Entity<Setting>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Settings__3214EC075FF73A0E");
+			entity.Property(e => e.StatusName).HasMaxLength(255);
+		});
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
+		modelBuilder.Entity<Product>(entity =>
+		{
+			entity.HasKey(e => e.ProductId).HasName("PK__Product__B40CC6CD6D3638C6");
 
-            entity.HasOne(d => d.SettingCategory).WithMany(p => p.Settings).HasConstraintName("FK__Settings__Settin__7D439ABD");
+			entity.ToTable("Product");
 
-            entity.HasOne(d => d.SettingStatus).WithMany(p => p.Settings).HasConstraintName("FK__Settings__Settin__7E37BEF6");
-        });
+			entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+			entity.Property(e => e.Description).HasMaxLength(255);
+			entity.Property(e => e.IsFeatured).HasDefaultValue(true);
+			entity.Property(e => e.ProductName).HasMaxLength(255);
 
-        modelBuilder.Entity<SettingCategory>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__SettingC__3214EC072622F75D");
+			entity.HasOne(d => d.Category).WithMany(p => p.Products)
+				.HasForeignKey(d => d.CategoryId)
+				.HasConstraintName("FK__Product__Categor__7C4F7684");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
-        });
+			entity.HasOne(d => d.ProductStatus).WithMany(p => p.Products)
+				.HasForeignKey(d => d.ProductStatusId)
+				.HasConstraintName("FK__Product__Product__7D439ABD");
+		});
 
-        modelBuilder.Entity<SettingsStatus>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Settings__3214EC07AC166F9E");
+		modelBuilder.Entity<ProductImage>(entity =>
+		{
+			entity.HasKey(e => e.ProductImageId).HasName("PK__ProductI__07B2B1B8C139F9CC");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
-        });
+			entity.ToTable("ProductImage");
 
-        OnModelCreatingPartial(modelBuilder);
-    }
+			entity.Property(e => e.ProductImageUrl)
+				.HasMaxLength(255)
+				.IsUnicode(false)
+				.HasColumnName("ProductImageURL");
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+			entity.HasOne(d => d.Product).WithMany(p => p.ProductImages)
+				.HasForeignKey(d => d.ProductId)
+				.HasConstraintName("FK__ProductIm__Produ__7E37BEF6");
+		});
+
+		modelBuilder.Entity<ProductStatus>(entity =>
+		{
+			entity.HasKey(e => e.ProductStatusId).HasName("PK__ProductS__2082058BB6EC726F");
+
+			entity.ToTable("ProductStatus");
+
+			entity.Property(e => e.StatusDescription)
+				.HasMaxLength(255)
+				.IsUnicode(false);
+		});
+
+		modelBuilder.Entity<Setting>(entity =>
+		{
+			entity.HasKey(e => e.Id).HasName("PK__Settings__3214EC07A1ADA655");
+
+			entity.Property(e => e.SettingName).HasMaxLength(255);
+			entity.Property(e => e.SettingValue).HasMaxLength(255);
+
+			entity.HasOne(d => d.SettingCategory).WithMany(p => p.Settings)
+				.HasForeignKey(d => d.SettingCategoryId)
+				.HasConstraintName("FK__Settings__Settin__7F2BE32F");
+
+			entity.HasOne(d => d.SettingStatus).WithMany(p => p.Settings)
+				.HasForeignKey(d => d.SettingStatusId)
+				.HasConstraintName("FK__Settings__Settin__00200768");
+		});
+
+		modelBuilder.Entity<SettingCategory>(entity =>
+		{
+			entity.HasKey(e => e.Id).HasName("PK__SettingC__3214EC07E1169F2E");
+
+			entity.ToTable("SettingCategory");
+
+			entity.Property(e => e.CategoryName).HasMaxLength(255);
+		});
+
+		modelBuilder.Entity<SettingsStatus>(entity =>
+		{
+			entity.HasKey(e => e.Id).HasName("PK__Settings__3214EC07EB1BB1FE");
+
+			entity.ToTable("SettingsStatus");
+
+			entity.Property(e => e.StatusName).HasMaxLength(255);
+		});
+
+		OnModelCreatingPartial(modelBuilder);
+	}
+
+	partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

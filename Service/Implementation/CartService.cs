@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
 using Service.Interface;

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Security.Claims;
 
 using Microsoft.AspNetCore.Authentication;
+using Data.Models;
 
 
 namespace Service.Implementation

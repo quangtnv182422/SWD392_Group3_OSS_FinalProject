@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Data.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OnlineShoppingSystem_Main.Models
+namespace Data.Models
 {
     public class OrderConfirmationViewModel
     {

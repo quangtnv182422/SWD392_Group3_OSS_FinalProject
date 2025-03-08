@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using OnlineShoppingSystem_Main.Data.Models;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
 using System.Diagnostics;
@@ -10,10 +11,11 @@ namespace Repository.Implementation
     public class UserRepository : IUserRepository
     {
         private readonly Swd392OssContext _context;
-
-        public UserRepository(Swd392OssContext context)
+        private readonly UserManager<IdentityUser> _userManager;
+        public UserRepository(Swd392OssContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
         public AspNetUser GetUserById(string userId)
         {
@@ -44,5 +46,7 @@ namespace Repository.Implementation
 
             return user;
         }
+
+       
     }
 }

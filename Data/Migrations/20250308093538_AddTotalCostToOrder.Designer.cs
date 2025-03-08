@@ -4,6 +4,7 @@ using Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace OnlineShoppingSystem_Main.Migrations
 {
     [DbContext(typeof(Swd392OssContext))]
-    partial class Swd392OssContextModelSnapshot : ModelSnapshot
+    [Migration("20250308093538_AddTotalCostToOrder")]
+    partial class AddTotalCostToOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -462,9 +465,6 @@ namespace OnlineShoppingSystem_Main.Migrations
                     b.Property<string>("StaffId")
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<float>("TotalCost")
-                        .HasColumnType("real");
 
                     b.HasKey("OrderId")
                         .HasName("PK__Order__C3905BCF506E0C4F");

@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using OnlineShoppingSystem_Main.Models;
-using Service;
-
+﻿using Api.GHN.Implementation;
+using Data.Models.GHN;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace OnlineShoppingSystem_Main.Controllers

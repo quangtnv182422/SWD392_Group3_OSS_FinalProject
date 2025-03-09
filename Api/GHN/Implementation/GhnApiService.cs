@@ -1,34 +1,35 @@
-﻿using System.Text;
+﻿using Data.Models.GHN;
+using Microsoft.Extensions.Configuration;
+using System.Text;
 using System.Text.Json;
 
 
-namespace Service
+namespace Api.GHN.Implementation
 {
     public class GhnApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly GHNSettings _ghnSettings;
 
-        public GhnApiService()
+        public GhnApiService(IConfiguration configuration)
         {
             _httpClient = new HttpClient();
-            _httpClient.DefaultRequestHeaders.Add("Token", "d7291c5c-f3f4-11ef-9f11-72d076f64f74");
+            _ghnSettings = configuration.GetSection("GHNSettings").Get<GHNSettings>();
+            _httpClient.DefaultRequestHeaders.Add("Token", _ghnSettings.Token);
         }
 
         public async Task<string> GetProvincesAsync()
         {
-            var response = await _httpClient.GetAsync("https://online-gateway.ghn.vn/shiip/public-api/master-data/province");
-
+            var response = await _httpClient.GetAsync($"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.Provinces}");
             var result = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"[DEBUG] Response from GHN API: {result}");
-
             return result;
         }
-
 
         public async Task<string> GetDistrictsAsync(int provinceId)
         {
             var jsonBody = JsonSerializer.Serialize(new { province_id = provinceId });
-            var response = await _httpClient.PostAsync("https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
+            var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.Districts}",
                 new StringContent(jsonBody, System.Text.Encoding.UTF8, "application/json"));
             return await response.Content.ReadAsStringAsync();
         }
@@ -36,10 +37,11 @@ namespace Service
         public async Task<string> GetWardsAsync(int districtId)
         {
             var jsonBody = JsonSerializer.Serialize(new { district_id = districtId });
-            var response = await _httpClient.PostAsync("https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
+            var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.Wards}",
                 new StringContent(jsonBody, System.Text.Encoding.UTF8, "application/json"));
             return await response.Content.ReadAsStringAsync();
         }
+
         public async Task<string> GetAvailableServicesAsync(int shopId, int fromDistrictId, int toDistrictId)
         {
             var jsonBody = JsonSerializer.Serialize(new
@@ -49,13 +51,11 @@ namespace Service
                 to_district = toDistrictId
             });
 
-            var response = await _httpClient.PostAsync(
-                "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services",
+            var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.AvailableServices}",
                 new StringContent(jsonBody, Encoding.UTF8, "application/json"));
 
             var result = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"[DEBUG] Available Services Response: {result}");
-
             return result;
         }
 
@@ -74,15 +74,12 @@ namespace Service
                 service_type_id = serviceTypeId
             });
 
-            var response = await _httpClient.PostAsync(
-                "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee",
+            var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.ShippingFee}",
                 new StringContent(jsonBody, Encoding.UTF8, "application/json"));
 
             var result = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"[DEBUG] Response from GHN API: {result}");
-
             return result;
         }
-
     }
 }

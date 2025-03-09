@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OnlineShoppingSystem_Main.Models
+namespace Data.Models.GHN
 {
     public class ShippingRequest
     {

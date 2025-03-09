@@ -52,12 +52,20 @@ builder.Services.AddDbContext<Swd392OssContext>(options => options.UseSqlServer(
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<Swd392OssContext>();
 
+var clientId = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_ID");
+var clientSecret = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_SECRET");
+
+
 builder.Services.AddAuthentication()
     .AddGoogle(googleOptions =>
     {
-        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]
+        /* googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]
+             ?? throw new Exception("Invalid google client Id");
+         googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
+             ?? throw new Exception("Invalid google client secret");*/
+        googleOptions.ClientId = clientId
             ?? throw new Exception("Invalid google client Id");
-        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
+        googleOptions.ClientSecret = clientSecret
             ?? throw new Exception("Invalid google client secret");
         googleOptions.CallbackPath = "/signin-google";
         googleOptions.SaveTokens = true;

@@ -59,14 +59,10 @@ var clientSecret = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_SECRE
 builder.Services.AddAuthentication()
     .AddGoogle(googleOptions =>
     {
-        /* googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]
              ?? throw new Exception("Invalid google client Id");
          googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
-             ?? throw new Exception("Invalid google client secret");*/
-        googleOptions.ClientId = clientId
-            ?? throw new Exception("Invalid google client Id");
-        googleOptions.ClientSecret = clientSecret
-            ?? throw new Exception("Invalid google client secret");
+             ?? throw new Exception("Invalid google client secret");
         googleOptions.CallbackPath = "/signin-google";
         googleOptions.SaveTokens = true;
     });

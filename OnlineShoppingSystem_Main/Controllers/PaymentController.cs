@@ -1,6 +1,9 @@
-﻿using Api.vnPay.Interface;
+﻿using Api.Payos.Interface;
+using Api.vnPay.Interface;
+using Azure;
 using Data.Models.Vnpay;
 using Microsoft.AspNetCore.Mvc;
+using Net.payOS.Types;
 using Service.Interface;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -10,12 +13,19 @@ namespace OnlineShoppingSystem_Main.Controllers
 	public class PaymentController : Controller
 	{
 		private readonly IVnPayService _vnPayService;
-		private readonly IOrderService _orderService; // Thêm OrderService để xử lý COD
+		private readonly IPayosService _payOsService;
+		private readonly IOrderService _orderService;
+		private readonly IConfiguration _configuration;
 
-		public PaymentController(IVnPayService vnPayService, IOrderService orderService)
+		public PaymentController(IVnPayService vnPayService,
+								IOrderService orderService,
+								IPayosService payOsService,
+								IConfiguration configuration)
 		{
 			_vnPayService = vnPayService;
+			_payOsService = payOsService;
 			_orderService = orderService;
+			_configuration = configuration;
 		}
 
 		/// <summary>
@@ -45,7 +55,16 @@ namespace OnlineShoppingSystem_Main.Controllers
 					return RedirectToAction("CreatePaymentUrlVnpay", "Payment", paymentModel);
 
 				case "PayOS":
-					return RedirectToAction("CreatePaymentPayOS", "Payment", new { fullName, email, mobile, address, selectedItems, totalCost });
+
+					var paymentLinkRequest = new PaymentData(
+											  orderCode: int.Parse(DateTimeOffset.Now.ToString("ffffff")),
+											  amount: (int)totalCost,
+											  description: "Thanh toan ma QR",
+											  items: [new("Item test", 1, 2000)],
+											  returnUrl: _configuration["PayOS:ReturnUrl"],
+											  cancelUrl: _configuration["PayOS:CancelUrl"]);
+
+					return RedirectToAction("CreatePaymentPayOS", "Payment", paymentLinkRequest);
 
 				default:
 					return RedirectToAction("Checkout", "Cart");
@@ -63,29 +82,66 @@ namespace OnlineShoppingSystem_Main.Controllers
 		}
 
 		/// <summary>
+		/// Trả về trang thanh toán thất bại
+		/// </summary>
+		public IActionResult PaymentFail()
+		{
+			return View();
+		}
+		/// <summary>
+		/// Trả về trang thanh toán thành công
+		/// </summary>
+		public IActionResult PaymentSuccess()
+		{
+			return View();
+		}
+
+		/// <summary>
 		/// Xử lý phản hồi từ VNPay sau khi thanh toán
 		/// </summary>
 		[HttpGet]
 		public IActionResult PaymentCallbackVnpay()
 		{
 			var response = _vnPayService.PaymentExecute(Request.Query);
-			return Json(response);
+			if (response == null || response.VnPayResponseCode != "00")
+			{
+				TempData["Message"] = $"Lỗi thanh toán: {response.VnPayResponseCode}";
+				return RedirectToAction("PaymentFail");
+			}
+
+			//Add order vào DB
+			TempData["Message"] = $"Thanh toán thành công: {response.VnPayResponseCode}";
+			return RedirectToAction("PaymentSuccess");
 		}
 
-		
+
 
 		/// <summary>
 		/// Xử lý thanh toán qua PayOS
 		/// </summary>
-		public IActionResult CreatePaymentPayOS(string fullName, string email, string mobile, string address, string selectedItems, decimal totalCost)
+		public async Task<IActionResult> CreatePaymentPayOS(PaymentData data)
 		{
-			// TODO: Thêm logic gọi API PayOS để tạo QR Code thanh toán
-			return Content("Tính năng thanh toán PayOS đang được triển khai...");
+			var url = await _payOsService.CreatePayOSPaymentUrl(data);
+			Response.Headers.Append("Location", url.checkoutUrl);
+			return new StatusCodeResult(303);
 		}
 
-		public IActionResult Index()
+		/*/// <summary>
+		/// Xử lý thông tin thanh toán trả về từ PayOS
+		/// </summary>
+		[HttpGet]
+		public async Task<IActionResult> PaymentCallbackPayOS()
 		{
-			return View();
-		}
+			if (response == null || response.VnPayResponseCode != "00")
+			{
+				TempData["Message"] = $"Lỗi thanh toán: {response.VnPayResponseCode}";
+				return RedirectToAction("PaymentFail");
+			}
+
+			//Add order vào DB
+			TempData["Message"] = $"Thanh toán thành công: {response.VnPayResponseCode}";
+			return RedirectToAction("PaymentSuccess");
+		}*/
+
 	}
 }

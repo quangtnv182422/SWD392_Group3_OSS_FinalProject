@@ -1,5 +1,7 @@
 ﻿using Api.Implementation;
 using Api.Interface;
+using Api.Payos.Implementation;
+using Api.Payos.Interface;
 using Api.vnPay.Implementation;
 using Api.vnPay.Interface;
 using Data.Models;
@@ -38,6 +40,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 //Cloundinary
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+//PayOS
+builder.Services.AddScoped<IPayosService, PayosService>();
 //vnPay
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 

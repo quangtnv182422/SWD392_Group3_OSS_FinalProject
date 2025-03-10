@@ -82,5 +82,19 @@ namespace Service.Implementation
         {
             return await _orderRepository.CancelOrderAsync(orderId);
         }
+
+
+
+        // Lấy thông tin chi tiết của đơn hàng (bao gồm tiến độ vận chuyển)
+        public async Task<Order?> GetOrderDetailsAsync(int orderId)
+        {
+            return await _orderRepository.GetOrderDetailsAsync(orderId);
+        }
+
+        // Cập nhật thông tin đơn hàng
+        public async Task<bool> UpdateOrderAsync(Order order)
+        {
+            return await _orderRepository.UpdateOrderAsync(order);
+        }
     }
 }

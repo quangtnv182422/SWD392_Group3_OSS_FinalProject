@@ -67,5 +67,31 @@ namespace Repository.Implementation
             await _context.SaveChangesAsync();
             return true;
         }
+
+
+
+        // Lấy thông tin chi tiết của đơn hàng (bao gồm tiến độ vận chuyển)
+        public async Task<Order?> GetOrderDetailsAsync(int orderId)
+        {
+            return await _context.Orders
+                .Include(o => o.OrderStatus)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+        }
+
+        // Cập nhật thông tin đơn hàng
+        public async Task<bool> UpdateOrderAsync(Order order)
+        {
+            var existingOrder = await _context.Orders.FindAsync(order.OrderId);
+            if (existingOrder == null)
+            {
+                return false;
+            }
+
+            _context.Entry(existingOrder).CurrentValues.SetValues(order);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

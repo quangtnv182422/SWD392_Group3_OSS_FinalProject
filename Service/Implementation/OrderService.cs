@@ -69,5 +69,18 @@ namespace Service.Implementation
             return order;
         }
 
+
+
+        // Lấy danh sách đơn hàng theo UserId
+        public async Task<List<Order>> GetOrdersByUserIdAsync(string userId)
+        {
+            return await _orderRepository.GetOrdersByUserIdAsync(userId);
+        }
+
+        // Hủy đơn hàng theo OrderId
+        public async Task<bool> CancelOrderAsync(int orderId)
+        {
+            return await _orderRepository.CancelOrderAsync(orderId);
+        }
     }
 }

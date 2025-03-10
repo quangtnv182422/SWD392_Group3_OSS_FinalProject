@@ -101,15 +101,71 @@ namespace OnlineShoppingSystem_Main.Controllers
             return View("OrderConfirmation", model);
         }
 
-       /* [HttpPost]
-        public async Task<IActionResult> PlaceOrder(string fullName, string email, string mobile, string address, string paymentMethod, string selectedItems)
+        /* [HttpPost]
+         public async Task<IActionResult> PlaceOrder(string fullName, string email, string mobile, string address, string paymentMethod, string selectedItems)
+         {
+             var cartItemIds = selectedItems.Split(",").Select(int.Parse).ToList();
+             //var order = await _orderService.CreateOrderAsync(fullName, email, mobile, address, paymentMethod, cartItemIds);
+
+             TempData.Remove("SelectedCartItemIds");
+
+             return RedirectToAction("OrderSuccess", "Cart");
+         }*/
+
+
+        // Lấy danh sách đơn hàng của người dùng
+        [HttpGet]
+        public async Task<IActionResult> OrderList(string searchOrderId, string paymentMethod, string status)
         {
-            var cartItemIds = selectedItems.Split(",").Select(int.Parse).ToList();
-            //var order = await _orderService.CreateOrderAsync(fullName, email, mobile, address, paymentMethod, cartItemIds);
+            var currentUser = await GetCurrentUserAsync();
 
-            TempData.Remove("SelectedCartItemIds");
+            if (currentUser == null)
+            {
+                TempData["ErrorMessage"] = "Bạn cần đăng nhập để xem danh sách đơn hàng.";
+                return RedirectToAction("Index", "Home");
+            }
 
-            return RedirectToAction("OrderSuccess", "Cart");
-        }*/
+            var orders = await _orderService.GetOrdersByUserIdAsync(currentUser.Id);
+
+            // Lọc theo OrderID (tìm kiếm một phần số OrderID)
+            if (!string.IsNullOrEmpty(searchOrderId))
+            {
+                orders = orders.Where(o => o.OrderId.ToString().Contains(searchOrderId)).ToList();
+            }
+
+            // Lọc theo phương thức thanh toán
+            if (!string.IsNullOrEmpty(paymentMethod))
+            {
+                orders = orders.Where(o => o.PaymentMethod == paymentMethod).ToList();
+            }
+
+            // Lọc theo trạng thái đơn hàng
+            if (!string.IsNullOrEmpty(status))
+            {
+                orders = orders.Where(o => o.OrderStatus.StatusName == status).ToList();
+            }
+
+            ViewBag.SearchOrderId = searchOrderId;
+            ViewBag.PaymentMethod = paymentMethod;
+            ViewBag.Status = status;
+
+            return View("OrderList", orders);
+        }
+
+        // Hủy đơn hàng
+        [HttpPost]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            bool isCancelled = await _orderService.CancelOrderAsync(orderId);
+            if (!isCancelled)
+            {
+                TempData["ErrorMessage"] = "Không thể hủy đơn hàng hoặc đơn hàng không tồn tại.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công.";
+            }
+            return RedirectToAction("OrderList");
+        }
     }
 }

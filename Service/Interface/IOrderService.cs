@@ -10,7 +10,12 @@ namespace Service.Interface
         Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, IdentityUser currentUser);
         Task<Order> CreateOrderAsync(string fullName, string email, string mobile, string address, string paymentMethod, List<int> cartItemIds, float totalCost, int orderStatus);
         Task<Order> SaveOrderAsync(Order order);
-      
+
+
+        // Track Order Detail
+        Task<List<Order>> GetOrdersByUserIdAsync(string userId);
+
+        Task<bool> CancelOrderAsync(int orderId);
     }
 
 }

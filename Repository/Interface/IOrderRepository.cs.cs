@@ -14,6 +14,11 @@ namespace Repository.Interface
         Task<List<CartItem>> GetCartItemsByIdsAsync(List<int> cartItemIds);
         Task CreateOrderAsync(Order order);
         Task SaveChangesAsync();
+
+
+        // Track Order Detail
+        Task<List<Order>> GetOrdersByUserIdAsync(string userId);
+        Task<bool> CancelOrderAsync(int orderId);
     }
 
 }

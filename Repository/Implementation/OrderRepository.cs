@@ -40,6 +40,32 @@ namespace Repository.Implementation
         {
             await _context.SaveChangesAsync();
         }
-    }
 
+
+        // Lấy danh sách đơn hàng theo UserId
+        public async Task<List<Order>> GetOrdersByUserIdAsync(string userId)
+        {
+            return await _context.Orders
+                .Where(o => o.CustomerId == userId)
+                .Include(o => o.OrderStatus)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .ToListAsync();
+        }
+
+        // Hủy đơn hàng (cập nhật trạng thái thành 'Cancelled')
+        public async Task<bool> CancelOrderAsync(int orderId)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+            {
+                return false;
+            }
+
+            // Cập nhật trạng thái đơn hàng thành 'Cancelled'
+            order.OrderStatusId = 5; // StatusId = 5 tương ứng với 'Cancelled'
+            await _context.SaveChangesAsync();
+            return true;
+        }
+    }
 }

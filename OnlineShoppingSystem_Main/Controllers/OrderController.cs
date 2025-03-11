@@ -5,13 +5,9 @@ using OnlineShoppingSystem_Main.Models;
 using Service.Interface;
 using System.Diagnostics;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using OnlineShoppingSystem_Main.Models;
-using Newtonsoft.Json;
 using Data.Models;
 using Api.GHN.Interface;
-using Data.Models.GHN; // For JSON serialization/deserialization
+using Data.Models.GHN; 
 
 namespace OnlineShoppingSystem_Main.Controllers
 {

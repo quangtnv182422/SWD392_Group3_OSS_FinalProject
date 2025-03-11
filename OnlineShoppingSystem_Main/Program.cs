@@ -1,4 +1,5 @@
 ﻿using Api.GHN.Implementation;
+using Api.GHN.Interface;
 using Api.Implementation;
 using Api.Interface;
 using Api.Payos.Implementation;
@@ -42,7 +43,7 @@ builder.Services.AddScoped<IPayosService, PayosService>();
 //vnPay
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 
-builder.Services.AddScoped<GhnApiService>();
+builder.Services.AddScoped<IGhnService,GhnApiService>();
 
 
 //Connect DB
@@ -84,7 +85,7 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader());
 });
 
-builder.Services.AddControllersWithViews();
+
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

@@ -45,6 +45,12 @@ public partial class AspNetUser : IdentityUser
 
     public int AccessFailedCount { get; set; }
 
+    [StringLength(500)]
+    public string? Address { get; set; }
+
+    [StringLength(100)]
+    public string? Province { get; set; }
+
     [InverseProperty("User")]
     public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; } = new List<AspNetUserClaim>();
 

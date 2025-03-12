@@ -5,11 +5,9 @@ using OnlineShoppingSystem_Main.Models;
 using Service.Interface;
 using System.Diagnostics;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using OnlineShoppingSystem_Main.Models;
-using Newtonsoft.Json;
-using Data.Models; // For JSON serialization/deserialization
+using Data.Models;
+using Api.GHN.Interface;
+using Data.Models.GHN; 
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
@@ -18,12 +16,14 @@ namespace OnlineShoppingSystem_Main.Controllers
         private readonly IOrderService _orderService;
         private readonly IUserService _userService;
         private readonly ICartService _cartService;
+        private readonly IGhnService _ghnService;
 
-        public OrderController(IOrderService orderService, IUserService userService, ICartService cartService)
+        public OrderController(IOrderService orderService, IUserService userService, ICartService cartService, IGhnService ghnService)
         {
             _orderService = orderService;
             _userService = userService;
             _cartService = cartService;
+            _ghnService = ghnService;
         }
 
         private async Task<IdentityUser> GetCurrentUserAsync()
@@ -40,6 +40,45 @@ namespace OnlineShoppingSystem_Main.Controllers
                 return user;
             }
             return null;
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetProvinces()
+        {
+            var result = await _ghnService.GetProvincesAsync();
+            return Content(result, "application/json");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDistricts(int provinceId)
+        {
+            var result = await _ghnService.GetDistrictsAsync(provinceId);
+            return Content(result, "application/json");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWards(int districtId)
+        {
+            var result = await _ghnService.GetWardsAsync(districtId);
+            return Content(result, "application/json");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CalculateShipping([FromBody] ShippingRequest request)
+        {
+            var result = await _ghnService.CalculateShippingFeeAsync(
+                request.shopId, request.fromDistrictId, request.toDistrictId,
+                request.weight, request.length, request.width, request.height,
+                request.service_id, request.service_type_id);
+            return Content(result, "application/json");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetAvailableServices([FromBody] AvailableServicesRequest request)
+        {
+            var result = await _ghnService.GetAvailableServicesAsync(request.shopId, request.fromDistrictId, request.toDistrictId);
+            return Content(result, "application/json");
         }
 
         [HttpPost]

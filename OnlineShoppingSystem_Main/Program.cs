@@ -1,4 +1,5 @@
 ﻿using Api.GHN.Implementation;
+using Api.GHN.Interface;
 using Api.Implementation;
 using Api.Interface;
 using Api.vnPay.Implementation;
@@ -37,7 +38,7 @@ builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 //vnPay
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 
-builder.Services.AddScoped<GhnApiService>();
+builder.Services.AddScoped<IGhnService,GhnApiService>();
 
 
 
@@ -64,7 +65,7 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader());
 });
 
-builder.Services.AddControllersWithViews();
+
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

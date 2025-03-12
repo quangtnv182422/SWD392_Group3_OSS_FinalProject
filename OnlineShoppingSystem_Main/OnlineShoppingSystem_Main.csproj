@@ -7,25 +7,50 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="Properties\launchSettings.json" />
+	  <Content Remove="Properties\serviceDependencies.json" />
+	  <Content Remove="Properties\serviceDependencies.local.json" />
+	  <Content Remove="wwwroot\assets\css\all.min.css" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CloudinaryDotNet" Version="1.27.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+		<PackageReference Include="payOS" Version="1.0.9" />
 	</ItemGroup>
 
 
 
 	<ItemGroup>
-		<Folder Include="Models\" />
-		<Folder Include="Service\" />
-		<Folder Include="Repository\" />
+	  <None Include="Properties\launchSettings.json" />
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Api\Api.csproj" />
+	  <ProjectReference Include="..\Data\Data.csproj" />
+	  <ProjectReference Include="..\Service\Service.csproj" />
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <Content Update="appsettings.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 </Project>

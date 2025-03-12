@@ -1,22 +1,35 @@
+using Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using OnlineShoppingSystem_Main.Models;
+using Service.Interface;
 using System.Diagnostics;
 
-namespace OnlineShoppingSystem_Main.Controllers
+namespace OnlineShoppingSystem_Main
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IProductService _productService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IProductService productService)
         {
             _logger = logger;
+            _productService = productService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var featuredProducts = await _productService.GetFeaturedProductsAsync();
+            var latestProducts = await _productService.GetLatestProductsAsync();
+            var allProducts = await _productService.GetAllProductsAsync();
+
+            ViewBag.FeaturedProducts = featuredProducts ?? new List<Product>();
+            ViewBag.LatestProducts = latestProducts ?? new List<Product>();
+
+            return View(allProducts);
         }
 
         [Authorize]

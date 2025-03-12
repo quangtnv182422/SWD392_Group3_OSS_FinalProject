@@ -1,0 +1,111 @@
+﻿@model Data.Models.Product
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+@{
+    ViewData["Title"] = "Single Product";
+}
+
+<div class="loader" id="loader">
+    <div class="loader-inner">
+        <div class="circle"></div>
+    </div>
+</div>
+
+<div class="single-product mt-150 mb-150">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="single-product-img">
+                    <img src="@((Model.ProductImages.Any()) ? Model.ProductImages.FirstOrDefault()?.ProductImageUrl : "/assets/img/default-product.jpg")" alt="@Model.ProductName" class="img-fluid">
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="single-product-content">
+                    <h3>@Model.ProductName</h3>
+                    <p class="single-product-pricing">
+                        @string.Format("{0:N0}", Model.Price) VND
+                    </p>
+                    <p>@Model.Description</p>
+
+                    <p><strong>Quantity Available:</strong> @Model.Quantity</p>
+
+                    <div class="single-product-form">
+                        <form action="@Url.Action("AddToCart", "Cart", new { id = Model.ProductId })" method="post">
+                            <div class="form-group">
+                                <label for="quantity">Quantity</label>
+                                <input type="number" id="quantity" name="quantity" min="1" max="@Model.Quantity" value="1" class="form-control">
+                            </div>
+
+                            <button type="submit" class="cart-btn">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <div>
+        <div>
+            <div>
+                <div>
+
+                    <p><strong>Categories: </strong>@string.Join(", ", Model.Category?.CategoryName ?? "N/A")</p>
+                    <h4>Share:</h4>
+                    <ul class="product-share">
+                        <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                        <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                        <li><a href="#"><i class="fab fa-google-plus-g"></i></a></li>
+                        <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="more-products mb-150">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2 text-center">
+                <div class="section-title">
+                    <h3><span class="orange-text">Related</span> Products</h3>
+                    <p>Find more products that may interest you.</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+    <script>
+     window.onload = function() {
+        console.log("Page Loaded, now hiding loader...");
+        setTimeout(function() {
+            $('#loader').fadeOut();
+        }, 3000);  
+    };
+</script>
+
+<style>
+    .single-product-form a.cart-btn {
+        font-family: 'Poppins', sans-serif;
+        display: inline-block;
+        background-color: #F28123;
+        color: #fff;
+        padding: 10px 20px;
+        text-align: center;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-bottom: 15px;
+        transition: background-color 0.3s ease;
+    }
+
+        .single-product-form a.cart-btn:hover {
+            background-color: #e27d1f;
+            cursor: pointer;
+        }
+</style>

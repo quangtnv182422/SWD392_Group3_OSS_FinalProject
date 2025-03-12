@@ -1,0 +1,184 @@
+﻿@model List<Data.Models.Order>
+
+@{
+    ViewData["Title"] = "Order List";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .red-icon {
+            color: red;
+            cursor: pointer;
+        }
+
+        .delete-button {
+            border: none;
+            background: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px; /* Cách bảng bên dưới một chút */
+        }
+
+            .search-container input,
+            .search-container select {
+                padding: 8px;
+                font-size: 14px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                height: 36px; /* Đảm bảo cùng chiều cao */
+            }
+
+            .search-container button {
+                padding: 8px 15px;
+                font-size: 14px;
+                border: none;
+                border-radius: 4px;
+                background-color: #28a745; /* Màu xanh lá */
+                color: white;
+                cursor: pointer;
+                height: 36px
+            }
+
+            .search-container button:hover {
+                background-color: #218838; /* Màu xanh lá đậm hơn khi hover */
+            }
+
+    </style>
+</head>
+<body>
+
+    <h1>Order information</h1>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Bộ lọc tìm kiếm -->
+    <form method="get" asp-action="OrderList">
+        <div class="search-container">
+            <input type="text" name="searchOrderId" value="@ViewBag.SearchOrderId" placeholder="Search OrderID">
+
+            <select name="paymentMethod">
+                <option value="">Payment Method</option>
+                <option value="COD" selected="@(ViewBag.PaymentMethod == "COD")">COD</option>
+                <option value="PayOS" selected="@(ViewBag.PaymentMethod == "PayOS")">PayOS</option>
+                <option value="Payvn" selected="@(ViewBag.PaymentMethod == "Payvn")">Payvn</option>
+            </select>
+
+            <select name="status">
+                <option value="">Status</option>
+                <option value="Pending Confirmation" selected="@(ViewBag.Status == "Pending Confirmation")">Pending Confirmation</option>
+                <option value="Confirmed" selected="@(ViewBag.Status == "Confirmed")">Confirmed</option>
+                <option value="Shipped" selected="@(ViewBag.Status == "Shipped")">Shipped</option>
+                <option value="Delivered" selected="@(ViewBag.Status == "Delivered")">Delivered</option>
+                <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Cancelled</option>
+                <option value="Returned" selected="@(ViewBag.Status == "Returned")">Returned</option>
+            </select>
+
+            <button type="submit">Search</button>
+        </div>
+    </form>
+
+    @if (Model == null || !Model.Any())
+    {
+        <p>Bạn chưa đặt 1 đơn hàng nào.</p>
+    }
+    
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>OrderID</th>
+                    <th>Order At</th>
+                    <th>Address</th>
+                    <th>Payment Method</th>
+                    <th>Status</th>
+                    <th>Note</th>
+                    <th>TotalCost</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td>@order.OrderId</td>
+                        <td>@order.OrderedAt.ToString("yyyy-MM-dd")</td>
+                        <td>@order.Address</td>
+                        <td>@order.PaymentMethod</td>
+                        <td>@order.OrderStatus?.StatusName</td>
+                        <td>@order.Note</td>
+                        <td>@order.TotalCost</td>
+                        <td>
+                            <!-- Nút xem đơn hàng -->
+                            <a asp-controller="Order" asp-action="GetOrderDetails" asp-route-orderId="@order.OrderId">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                            <!-- Nút hủy đơn hàng có xác nhận -->
+                            @if (order.OrderStatusId == 1) // Chỉ cho phép hủy đơn hàng đang chờ xác nhận
+                            {
+                                <form id="cancelForm-@order.OrderId" asp-controller="Order" asp-action="CancelOrder" method="post" style="display:inline;">
+                                    <input type="hidden" name="orderId" value="@order.OrderId" />
+                                    <button type="button" class="delete-button delete-order" data-order-id="@order.OrderId">
+                                        <i class="fas fa-trash red-icon"></i>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <script>
+        $(document).ready(function () {
+            $(".delete-order").click(function () {
+                var orderId = $(this).data("order-id");
+                var confirmDelete = confirm("Bạn có muốn xóa đơn hàng (" + orderId + ")?");
+                if (confirmDelete) {
+                    $("#cancelForm-" + orderId).submit();
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

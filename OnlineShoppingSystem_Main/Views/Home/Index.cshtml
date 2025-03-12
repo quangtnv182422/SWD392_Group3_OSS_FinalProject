@@ -1,8 +1,145 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Data.Models
+@model List<Product>
+
+
+@{
+    ViewData["Title"] = "Home";
+    var featuredProducts = ViewBag.FeaturedProducts as List<Data.Models.Product> ?? new List<Data.Models.Product>();
+    var latestProducts = ViewBag.LatestProducts as List<Data.Models.Product> ?? new List<Data.Models.Product>();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
+}
+
+<div class="hero-area hero-bg d-flex align-items-center justify-content-center text-center">
+    <div class="container">
+        <h1 class="text-white display-4">Welcome to Our Online Store</h1>
+        <p class="text-white lead">Discover the best products at unbeatable prices!</p>
+        <a href="@Url.Action("Shop", "Home")" class="btn btn-warning btn-lg">Shop Now</a>
+    </div>
 </div>
+ 
+<div class="container mt-5">
+    <h3 class="text-center mb-4"><span class="orange-text">Featured</span> Products</h3>
+    <div class="featured-slider">
+        @foreach (var product in featuredProducts)
+        {
+            <div class="single-featured-product">
+                <div class="card text-center shadow-sm p-3">
+                    <a href="@Url.Action("Details", "Product", new { id = product.ProductId })">
+                        <img src="@((product.ProductImages != null && product.ProductImages.Any()) ? product.ProductImages.FirstOrDefault()?.ProductImageUrl : "/assets/img/default-product.jpg")"
+                             class="img-fluid product-image" alt="@product.ProductName">
+                    </a>
+                    <div class="card-body"> 
+                        <h5>@product.ProductName</h5>
+                        <p class="product-price">@string.Format("{0:N0}", product.Price) VND</p>
+                        <a href="@Url.Action("AddToCart", "Cart", new { id = product.ProductId })" class="cart-btn">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4"><span class="orange-text">Latest</span> Products</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var product in latestProducts)
+        {
+            <div class="col">
+                <div class="card text-center shadow-sm p-3">
+                    <a href="@Url.Action("ProductDetail", "Home", new { id = product.ProductId })">
+                        <img src="@((product.ProductImages != null && product.ProductImages.Any()) ? product.ProductImages.FirstOrDefault()?.ProductImageUrl : "/assets/img/default-product.jpg")"
+                             class="img-fluid product-image" alt="@product.ProductName">
+                    </a>
+                    <div class="card-body">
+                        <h5 class="text-uppercase">@product.ProductName</h5>
+                        <p class="product-price">@string.Format("{0:N0}", product.Price) VND</p>
+                        <a href="@Url.Action("AddToCart", "Cart", new { id = product.ProductId })" class="cart-btn">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<div class="container my-5">
+    <div class="banner bg-warning text-center py-5">
+        <h2 class="text-white">Limited Time Offer! Get 30% Off</h2>
+        <p class="text-white lead">Shop your favorite products now before the sale ends!</p>
+        <a href="@Url.Action("Shop", "Home")" class="btn btn-dark btn-lg">Shop Now</a>
+    </div>
+</div>
+
+<div class="container my-5">
+    <h3 class="text-center mb-4"><span class="orange-text">What Our</span> Customers Say</h3>
+    <div class="testimonial-slider">
+        <div class="single-testimonial text-center">
+            <img src="~/assets/img/avaters/avatar1.png" class="rounded-circle mb-3" width="80" />
+            <p>"Amazing products and great customer service!"</p>
+            <h5>- John Doe</h5>
+        </div>
+        <div class="single-testimonial text-center">
+            <img src="~/assets/img/avaters/avatar2.png" class="rounded-circle mb-3" width="80" />
+            <p>"Fast shipping and high-quality items. Highly recommend!"</p>
+            <h5>- Sarah Lee</h5>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            $('.featured-slider').slick({
+                slidesToShow: 3,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 2000,
+                dots: true,
+                arrows: true,
+                infinite: true,
+                responsive: [
+                    { breakpoint: 1024, settings: { slidesToShow: 2 } },
+                    { breakpoint: 768, settings: { slidesToShow: 1 } }
+                ]
+            });
+
+            $('.testimonial-slider').slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 3000,
+                dots: true,
+                arrows: false,
+                infinite: true
+            });
+        });
+    </script>
+}
+<style>
+    .product-image {
+        width: 100%;
+        height: 200px;
+        object-fit: contain; 
+        display: block;
+        margin: auto;
+    }
+
+    .card-body {
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    </style>

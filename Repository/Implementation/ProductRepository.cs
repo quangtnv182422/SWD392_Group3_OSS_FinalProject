@@ -1,4 +1,5 @@
-﻿using Data.Models;
+﻿using Api.Interface;
+using Data.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
@@ -14,10 +15,12 @@ namespace Repository.Implementation
     public class ProductRepository : IProductRepository
     {
         private readonly Swd392OssContext _context;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public ProductRepository(Swd392OssContext context)
+        public ProductRepository(Swd392OssContext context, ICloudinaryService cloudinaryService)
         {
             _context = context;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<List<Product>> GetFeaturedProductsAsync()
@@ -120,7 +123,77 @@ namespace Repository.Implementation
 
             return _context.SaveChanges() > 0; 
         }
+        public void RemoveProduct(int productId)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.ProductId == productId);
+            if (product != null)
+            {
+                _context.Products.Remove(product);
+                _context.SaveChanges();
+            }
+        }
+        public bool UpdateProductWithImages(Product product, List<ProductImage> newImages)
+        {
+            try
+            {
+                var existingProduct = _context.Products.Include(p => p.ProductImages)
+                                                       .FirstOrDefault(p => p.ProductId == product.ProductId);
+                if (existingProduct == null)
+                    return false;
 
+                existingProduct.ProductName = product.ProductName;
+                existingProduct.Description = product.Description;
+                existingProduct.Price = product.Price;
+                existingProduct.SalePrice = product.SalePrice;
+                existingProduct.Quantity = product.Quantity;
+                existingProduct.CategoryId = product.CategoryId;
+                existingProduct.ProductStatusId = product.ProductStatusId;
+                existingProduct.IsFeatured = product.IsFeatured;
+                existingProduct.CreatedAt = existingProduct.CreatedAt;  
+
+
+                if (newImages != null && newImages.Count > 0)
+                {
+                    _context.ProductImages.RemoveRange(existingProduct.ProductImages);
+                    existingProduct.ProductImages = newImages;
+                }
+
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error updating product: " + ex.Message);
+                return false;
+            }
+        }
+
+        public async Task<ProductStatus?> GetProductStatusByIdAsync(int productStatusId)
+        {
+            return await _context.ProductStatuses
+                .Where(s => s.ProductStatusId == productStatusId)
+                .FirstOrDefaultAsync();
+        }
+        public async Task<List<ProductStatus>> GetProductStatusesAsync()
+        {
+            return await _context.ProductStatuses.ToListAsync();
+        }
+        public void RemoveProductImages(int id)
+        {
+            var product = _context.Products.Include(p => p.ProductImages)
+                                              .FirstOrDefault(p => p.ProductId == id);
+            if (product != null && product.ProductImages != null)
+            {
+                foreach (var image in product.ProductImages)
+                {
+                    _cloudinaryService.DeleteImage(image.ProductImageUrl); 
+                }
+
+                _context.ProductImages.RemoveRange(product.ProductImages);
+                _context.SaveChanges();
+            }
+        }
     }
+
 
 }

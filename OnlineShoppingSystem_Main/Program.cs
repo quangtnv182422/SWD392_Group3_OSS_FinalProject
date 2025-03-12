@@ -1,25 +1,22 @@
 ﻿using Api.GHN.Implementation;
 using Api.Implementation;
 using Api.Interface;
-using Api.Payos.Implementation;
-using Api.Payos.Interface;
 using Api.vnPay.Implementation;
 using Api.vnPay.Interface;
 using Data.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using OnlineShoppingSystem_Main.Models;
 using Repository.Implementation;
 using Repository.Interface;
 using Repository.Interface.Api.Interface;
-using Service;
 using Service.Implementation;
 using Service.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//emailSender
-builder.Services.AddTransient<IEmailSender, EmailSender>();
 //Category
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); 
 builder.Services.AddScoped<ICategoryService, CategoryService>(); 
@@ -37,12 +34,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 //Cloundinary
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-//PayOS
-builder.Services.AddScoped<IPayosService, PayosService>();
 //vnPay
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 
 builder.Services.AddScoped<GhnApiService>();
+
+
 
 
 //Connect DB
@@ -50,23 +47,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<Swd392OssContext>(options => options.UseSqlServer(connectionString));
 
 //Config Identity
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<Swd392OssContext>();
-
-var clientId = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_ID");
-var clientSecret = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_SECRET");
-
-
-builder.Services.AddAuthentication()
-    .AddGoogle(googleOptions =>
-    {
-        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]
-             ?? throw new Exception("Invalid google client Id");
-         googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
-             ?? throw new Exception("Invalid google client secret");
-        googleOptions.CallbackPath = "/signin-google";
-        googleOptions.SaveTokens = true;
-    });
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<Swd392OssContext>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -74,7 +55,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.Cookie.Name = "UserAuthCookie";
 });
-
 
 builder.Services.AddCors(options =>
 {

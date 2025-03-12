@@ -1,14 +1,13 @@
 ﻿using Data.Models;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface.Api.Interface;
-using Service.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Service
+namespace Service.Interface
 {
     public class CategoryService : ICategoryService
     {

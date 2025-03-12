@@ -1,4 +1,5 @@
 ﻿using Data.Models;
+using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
 using Service.Interface;
@@ -13,6 +14,7 @@ namespace Service.Implementation
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+
 
         public ProductService(IProductRepository productRepository)
         {
@@ -72,6 +74,38 @@ namespace Service.Implementation
         public bool AddProductWithImages(Product product, List<ProductImage> productImages)
         {
             return _productRepository.AddProductWithImages(product, productImages);
+        }
+
+        public void RemoveProduct(int productId)
+        {
+            _productRepository.RemoveProduct(productId);
+        }
+
+        public void UpdateProduct(Product product)
+        {
+            _productRepository.UpdateProduct(product);
+        }
+
+        public bool UpdateProductWithImages(Product product, List<ProductImage> newImages)
+        {
+            return _productRepository.UpdateProductWithImages(product, newImages);
+        }
+        public async Task<ProductStatus?> GetProductStatusByIdAsync(int productStatusId)
+        {
+            return await _productRepository.GetProductStatusByIdAsync(productStatusId);
+        }
+
+        public async Task<List<ProductStatus>> GetProductStatusesAsync()
+        {
+            return await _productRepository.GetProductStatusesAsync();
+        }
+        public Product GetProductById(int id)
+        {
+            return _productRepository.GetProductById(id);
+        }
+        public void RemoveProductImages(int id)
+        {
+             _productRepository.RemoveProductImages(id);
         }
     }
 

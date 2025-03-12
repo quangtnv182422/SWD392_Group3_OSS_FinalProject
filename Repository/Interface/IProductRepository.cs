@@ -20,8 +20,11 @@ namespace Repository.Interface
         Product GetProductById(int productId);
         void UpdateProduct(Product product);
         bool AddProductWithImages(Product product, List<ProductImage> productImages);
-
-
+        void RemoveProduct(int productId);
+        bool UpdateProductWithImages(Product product, List<ProductImage> newImages);
+        Task<ProductStatus?> GetProductStatusByIdAsync(int productStatusId);
+        Task<List<ProductStatus>> GetProductStatusesAsync();
+        void RemoveProductImages(int id);
 
     }
 

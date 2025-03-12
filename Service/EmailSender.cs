@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Mail;
@@ -43,5 +44,22 @@ public class EmailSender : IEmailSender
 
             await client.SendMailAsync(mailMessage);
         }
+    }
+
+    public async Task SendWelcomeEmail(string email, string username, string password)
+    {
+        string subject = "Welcome to Our Platform!";
+        string message = $@"
+                <h3>Hello {username},</h3>
+                <p>Your account has been successfully created.</p>
+                <p><strong>Username:</strong> {username}</p>
+                <p><strong>Password:</strong> {password}</p>
+                <p>Please change your password after logging in.</p>
+                <p>Best regards,</p>
+                <p>Your Company Name</p>
+            
+        ";
+
+        await SendEmailAsync(email, subject, message);
     }
 }

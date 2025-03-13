@@ -12,14 +12,14 @@ namespace OnlineShoppingSystem_Main.Controllers
 {
 	public class PaymentController : Controller
 	{
-		private readonly IVnPayService _vnPayService;
-		private readonly IPayosService _payOsService;
+		private readonly IVnPayProxy _vnPayService;
+		private readonly IPayosProxy _payOsService;
 		private readonly IOrderService _orderService;
 		private readonly IConfiguration _configuration;
 
-		public PaymentController(IVnPayService vnPayService,
+		public PaymentController(IVnPayProxy vnPayService,
 								IOrderService orderService,
-								IPayosService payOsService,
+								IPayosProxy payOsService,
 								IConfiguration configuration)
 		{
 			_vnPayService = vnPayService;

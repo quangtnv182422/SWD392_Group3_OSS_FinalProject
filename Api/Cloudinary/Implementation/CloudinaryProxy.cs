@@ -8,11 +8,11 @@ using Api.Interface;
 
 namespace Api.Implementation
 {
-    public class CloudinaryService : ICloudinaryService
+    public class CloudinaryProxy : ICloudinaryProxy
     {
         private readonly Cloudinary _cloudinary;
 
-        public CloudinaryService(IConfiguration configuration)
+        public CloudinaryProxy(IConfiguration configuration)
         {
             var cloudinarySettings = configuration.GetSection("CloudinarySettings");
             string cloudName = cloudinarySettings["CloudName"];
@@ -47,6 +47,7 @@ namespace Api.Implementation
             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
             return uploadResult?.SecureUrl.AbsoluteUri;
         }
+
         public void DeleteImage(string imageUrl)
         {
             var publicId = GetPublicIdFromUrl(imageUrl);
@@ -70,7 +71,5 @@ namespace Api.Implementation
             var segments = uri.AbsolutePath.Split('/');
             return segments.Length > 0 ? segments[segments.Length - 1].Split('.')[0] : null;
         }
-
-       
     }
 }

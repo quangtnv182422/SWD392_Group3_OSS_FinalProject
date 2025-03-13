@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Api.Payos.Interface
 {
-	public interface IPayosService
+	public interface IPayosProxy
 	{
 		Task<CreatePaymentResult> CreatePayOSPaymentUrl(PaymentData paymentData);
 		Task<PaymentLinkInformation> GetPaymentLinkInfor(long id);

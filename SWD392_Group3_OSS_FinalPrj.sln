@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineShoppingSystem_Main", "OnlineShoppingSystem_Main\OnlineShoppingSystem_Main.csproj", "{AB1C6DAB-F8AA-4E10-AA5B-4DC5ABF11037}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineShoppingSystem_Main", "OnlineShoppingSystem_Main\OnlineShoppingSystem_Main.csproj", "{AB1C6DAB-F8AA-4E10-AA5B-4DC5ABF11037}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{AFE9388A-9DC1-424D-A731-2013CEB2F285}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "Data\Data.csproj", "{AFE9388A-9DC1-424D-A731-2013CEB2F285}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{59F279AD-F422-441F-866E-15F11E9E77FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service", "Service\Service.csproj", "{59F279AD-F422-441F-866E-15F11E9E77FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{4DC79D2C-5953-45BB-A307-02DAE6D83FFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proxy", "Api\Proxy.csproj", "{4DC79D2C-5953-45BB-A307-02DAE6D83FFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "Repository\Repository.csproj", "{20D5E9CA-1102-436B-B119-4286518C3D77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repository", "Repository\Repository.csproj", "{20D5E9CA-1102-436B-B119-4286518C3D77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace Api.vnPay.Implementation
 {
-	public class VnPayService : IVnPayService
+	public class VnPayProxy : IVnPayProxy
 	{
 
 		private readonly IConfiguration _configuration;
 
-		public VnPayService(IConfiguration configuration)
+		public VnPayProxy(IConfiguration configuration)
 		{
 			_configuration = configuration;
 		}

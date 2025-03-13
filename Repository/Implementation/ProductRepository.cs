@@ -15,9 +15,9 @@ namespace Repository.Implementation
     public class ProductRepository : IProductRepository
     {
         private readonly Swd392OssContext _context;
-        private readonly ICloudinaryService _cloudinaryService;
+        private readonly ICloudinaryProxy _cloudinaryService;
 
-        public ProductRepository(Swd392OssContext context, ICloudinaryService cloudinaryService)
+        public ProductRepository(Swd392OssContext context, ICloudinaryProxy cloudinaryService)
         {
             _context = context;
             _cloudinaryService = cloudinaryService;

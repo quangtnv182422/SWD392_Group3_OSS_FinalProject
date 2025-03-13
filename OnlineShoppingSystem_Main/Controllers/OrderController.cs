@@ -16,9 +16,9 @@ namespace OnlineShoppingSystem_Main.Controllers
         private readonly IOrderService _orderService;
         private readonly IUserService _userService;
         private readonly ICartService _cartService;
-        private readonly IGhnService _ghnService;
+        private readonly IGhnProxy _ghnService;
 
-        public OrderController(IOrderService orderService, IUserService userService, ICartService cartService, IGhnService ghnService)
+        public OrderController(IOrderService orderService, IUserService userService, ICartService cartService, IGhnProxy ghnService)
         {
             _orderService = orderService;
             _userService = userService;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Api.GHN.Interface
 {
-    public interface IGhnService
+    public interface IGhnProxy
     {
         Task<string> GetProvincesAsync();
         Task<string> GetDistrictsAsync(int provinceId);

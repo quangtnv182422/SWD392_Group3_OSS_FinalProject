@@ -7,12 +7,12 @@ using System.Text.Json;
 
 namespace Api.GHN.Implementation
 {
-    public class GhnApiService : IGhnService
+    public class GhnApiProxy : IGhnProxy
     {
         private readonly HttpClient _httpClient;
         private readonly GHNSettings _ghnSettings;
 
-        public GhnApiService(IConfiguration configuration)
+        public GhnApiProxy(IConfiguration configuration)
         {
             _httpClient = new HttpClient();
             _ghnSettings = configuration.GetSection("GHNSettings").Get<GHNSettings>();

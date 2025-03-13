@@ -6,13 +6,13 @@ using Net.payOS.Types;
 
 namespace Api.Payos.Implementation
 {
-	public class PayosService : IPayosService
+	public class PayosProxy : IPayosProxy
 	{
 
 		
 		private readonly PayOS payOS;
 
-		public PayosService(IConfiguration configuration)
+		public PayosProxy(IConfiguration configuration)
 		{
 			var clientId = configuration["PayOS:ClientID"];
 			var apiKey = configuration["PayOS:APIKey"];

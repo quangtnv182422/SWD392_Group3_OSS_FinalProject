@@ -20,9 +20,20 @@ namespace OnlineShoppingSystem_Main.Controllers
         }
 
         // Hiển thị danh sách user với tìm kiếm
-        public async Task<IActionResult> AccountList(string searchQuery, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> AccountList(string searchQuery, string roleFilter, string statusFilter, int page = 1, int pageSize = 10)
         {
             var users = await _userService.GetUsersAsync(searchQuery);
+
+            if (!string.IsNullOrEmpty(roleFilter))
+            {
+                users = users.Where(u => u.Roles.Any(r => r.Name == roleFilter));
+            }
+
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                users = users.Where(u => u.LockoutEnabled == (statusFilter == "Deactivated"));
+            }
+
 
             int totalUsers = users.Count();
             var pagedUsers = users.Skip((page - 1) * pageSize).Take(pageSize).ToList();
@@ -30,6 +41,8 @@ namespace OnlineShoppingSystem_Main.Controllers
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
             ViewBag.CurrentPage = page;
             ViewBag.SearchQuery = searchQuery;
+            ViewBag.RoleFilter = roleFilter;
+            ViewBag.StatusFilter = statusFilter;
 
             return View(pagedUsers);
         }
@@ -49,7 +62,7 @@ namespace OnlineShoppingSystem_Main.Controllers
                 return NotFound(new { message = "User not found." });
             }
 
-            return View(user);
+            return View("AccountDetail", user);
         }
 
         // Thêm user mới
@@ -103,5 +116,6 @@ namespace OnlineShoppingSystem_Main.Controllers
                 return Json(new { success = false, message = "Failed to delete user. User may not exist." });
             }
         }
+
     }
 }

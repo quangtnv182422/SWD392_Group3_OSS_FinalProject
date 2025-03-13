@@ -121,10 +121,9 @@ namespace Service.Implementation
         {
             var identityUser = new IdentityUser
             {
-                Id = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber,
             };
 
             return await _userRepository.UpdateUserAsync(identityUser);

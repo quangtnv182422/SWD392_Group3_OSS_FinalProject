@@ -2,6 +2,7 @@
 using Api.vnPay.Interface;
 using Azure;
 using Data.Models.Vnpay;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Net.payOS.Types;
 using Service.Interface;
@@ -16,34 +17,53 @@ namespace OnlineShoppingSystem_Main.Controllers
 		private readonly IPayosProxy _payOsService;
 		private readonly IOrderService _orderService;
 		private readonly IConfiguration _configuration;
+		private readonly IUserService _userService;
 
-		public PaymentController(IVnPayProxy vnPayService,
+        public PaymentController(IVnPayProxy vnPayService,
 								IOrderService orderService,
 								IPayosProxy payOsService,
-								IConfiguration configuration)
+								IConfiguration configuration,
+                                IUserService userService
+                              )
 		{
 			_vnPayService = vnPayService;
 			_payOsService = payOsService;
 			_orderService = orderService;
 			_configuration = configuration;
+			_userService = userService;
 		}
 
 		/// <summary>
 		/// Xử lý thanh toán từ form checkout
 		/// </summary>
 		[HttpPost]
-		public async Task<IActionResult> ProcessPayment(string fullName, string email, string mobile, string address, string paymentMethod, string selectedItems, decimal totalCost)
+		public async Task<IActionResult> ProcessPayment(string fullName,
+														string email,
+														string mobile,
+														string address,
+														string paymentMethod,
+														string selectedItems,
+														decimal totalCost, 
+														string deliveryNotes,
+														string SelectedProvinceName,
+														string SelectedDistrictName,
+														string SelectedWardname)
 		{
 			var cartItemIds = selectedItems.Split(",").Select(int.Parse).ToList();
+			string fullAddress = string.Join(", ", new[] { address, SelectedWardname, SelectedDistrictName, SelectedProvinceName }
+									  .Where(part => !string.IsNullOrEmpty(part))); 
+
 
 
 			switch (paymentMethod)
 			{
 				case "COD":
-					var order = await _orderService.CreateOrderAsync(fullName, email, mobile, address, paymentMethod, cartItemIds, (float)totalCost, 2); // 2 là confirm order luôn ko cần pending
-					return RedirectToAction("OrderSuccess", "Cart");
+					var userId = await _userService.GetCurrentUserIdAsync();
 
-				case "vnPay":
+                    var order = await _orderService.CreateOrderAsync(fullName, userId, email, mobile, fullAddress, paymentMethod, cartItemIds, (float)totalCost, 1, deliveryNotes); // 1 là pending confirm dành cho COD
+                    return RedirectToAction("PaymentSuccess");
+
+                case "vnPay":
 
 					var paymentModel = new PaymentInformationModel
 					{

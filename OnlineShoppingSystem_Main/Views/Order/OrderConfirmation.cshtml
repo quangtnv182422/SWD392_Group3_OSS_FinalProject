@@ -284,18 +284,24 @@
 								<div class="row">
 									<div class="col-md-4">
 										<label for="province">City/Province*</label>
+										<!--Lấy tên province ẩn-->
+										<input type="hidden" id="selectedProvinceName" name="SelectedProvinceName" />
 										<select id="province" name="SelectedProvince" class="form-control" required>
 											<option value="">-- Select Province --</option>
 										</select>
 									</div>
 									<div class="col-md-4">
 										<label for="district">District*</label>
+										<!--Lấy tên District ẩn-->
+										<input type="hidden" id="selectedDistrictName" name="SelectedDistrictName" />
 										<select id="district" name="SelectedDistrict" class="form-control" required>
 											<option value="">-- Select District --</option>
 										</select>
 									</div>
 									<div class="col-md-4">
 										<label for="ward">Wards*</label>
+										<!--Lấy tên Ward ẩn-->
+										<input type="hidden" id="selectedWardName" name="SelectedWardName" />
 										<select id="ward" name="SelectedWard" class="form-control" required>
 											<option value="">-- Select Ward --</option>
 										</select>
@@ -379,20 +385,41 @@
 	<script>
 		$(document).ready(function () {
 			loadProvinces();
-
+			//Province
 			$("#province").change(function () {
-				loadDistricts($(this).val());
+				//loadDistricts($(this).val());
+				//$("#shipping-fee").text("Calculating...");
+				//$("#ward").empty().append(`<option value="">-- Select Ward --</option>`);
+
+				var provinceId = $(this).val();
+				var provinceName = $("#province option:selected").data("name");
+
+				$("#selectedProvinceName").val(provinceName);
+
+				loadDistricts(provinceId);
 				$("#shipping-fee").text("Calculating...");
 				$("#ward").empty().append(`<option value="">-- Select Ward --</option>`);
 			});
 
+			//District
 			$("#district").change(function () {
-				loadWards($(this).val());
+				var districtId = $(this).val();
+				var districtName = $("#district option:selected").data("name");
+
+				$("#selectedDistrictName").val(districtName);
+
+				loadWards(districtId);
 				$("#shipping-fee").text("Calculating...");
 			});
 
+			//Ward
 			$("#ward").change(function () {
-				if ($(this).val()) {
+				var wardId = $(this).val();
+				var wardName = $("#ward option:selected").data("name");
+
+				$("#selectedWardName").val(wardName);
+
+				if (wardId) {
 					getAvailableServices();
 				}
 			});
@@ -402,7 +429,8 @@
 					var provinces = data.data;
 					$("#province").empty().append(`<option value="">-- Select Province --</option>`);
 					$.each(provinces, function (index, province) {
-						$("#province").append(`<option value="${province.ProvinceID}">${province.ProvinceName}</option>`);
+						//$("#province").append(`<option value="${province.ProvinceID}">${province.ProvinceName}</option>`);
+						$("#province").append(`<option value="${province.ProvinceID}" data-name="${province.ProvinceName}">${province.ProvinceName}</option>`);
 					});
 				});
 			}
@@ -412,7 +440,8 @@
 					var districts = data.data;
 					$("#district").empty().append(`<option value="">-- Select District --</option>`);
 					$.each(districts, function (index, district) {
-						$("#district").append(`<option value="${district.DistrictID}">${district.DistrictName}</option>`);
+						//$("#district").append(`<option value="${district.DistrictID}">${district.DistrictName}</option>`);
+						$("#district").append(`<option value="${district.DistrictID}" data-name="${district.DistrictName}">${district.DistrictName}</option>`);
 					});
 				});
 			}
@@ -422,7 +451,8 @@
 					var wards = data.data;
 					$("#ward").empty().append(`<option value="">-- Select Ward --</option>`);
 					$.each(wards, function (index, ward) {
-						$("#ward").append(`<option value="${ward.WardCode}">${ward.WardName}</option>`);
+						//$("#ward").append(`<option value="${ward.WardCode}">${ward.WardName}</option>`);
+						$("#ward").append(`<option value="${ward.WardCode}" data-name="${ward.WardName}">${ward.WardName}</option>`);
 					});
 				});
 			}

@@ -101,13 +101,13 @@ public partial class Swd392OssContext : IdentityDbContext
 
 			entity.Property(e => e.Address)
 				.HasMaxLength(255)
-				.IsUnicode(false);
+				.IsUnicode(true);
 			entity.Property(e => e.CustomerId).HasMaxLength(450);
 			entity.Property(e => e.Email).HasMaxLength(255);
 			entity.Property(e => e.FullName).HasMaxLength(255);
 			entity.Property(e => e.Note)
 				.HasMaxLength(255)
-				.IsUnicode(false);
+				.IsUnicode(true);
 			entity.Property(e => e.OrderedAt).HasColumnType("datetime");
 			entity.Property(e => e.PaymentMethod).HasMaxLength(255);
 			entity.Property(e => e.PhoneNumber).HasMaxLength(20);

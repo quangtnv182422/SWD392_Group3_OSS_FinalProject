@@ -42,9 +42,10 @@ builder.Services.AddScoped<ICloudinaryProxy, CloudinaryProxy>();
 builder.Services.AddScoped<IPayosProxy, PayosProxy>();
 //vnPay
 builder.Services.AddScoped<IVnPayProxy, VnPayProxy>();
-
+//GHN
 builder.Services.AddScoped<IGhnProxy,GhnApiProxy>();
 
+builder.Services.AddHttpContextAccessor();
 
 //Connect DB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

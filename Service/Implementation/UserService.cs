@@ -17,11 +17,13 @@ namespace Service.Implementation
     {
         private readonly IUserRepository _userRepository;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserService(IUserRepository userRepository, UserManager<IdentityUser> userManager)
+        public UserService(IUserRepository userRepository, UserManager<IdentityUser> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _userManager = userManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<string> GetUserIdAsync(HttpContext httpContext)
@@ -144,5 +146,25 @@ namespace Service.Implementation
             return await Task.FromResult(password);
         }
 
+
+        public async Task<IdentityUser> GetCurrentUserAsync()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                return await _userManager.GetUserAsync(user);
+            }
+            return null;
+        }
+
+        public async Task<string> GetCurrentUserIdAsync()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                return user.FindFirstValue(ClaimTypes.NameIdentifier);
+            }
+            return null; 
+        }
     }
 }

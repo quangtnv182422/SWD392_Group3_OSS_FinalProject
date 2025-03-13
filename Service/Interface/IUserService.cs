@@ -15,5 +15,9 @@ namespace Service.Interface
         Task<bool> UpdateUserAsync(AspNetUser user);
         Task<bool> DeleteUserAsync(string userId);
         Task<string> AutoCreatePasswords();
+
+        // Phần này Quang đang dùng cho xét điều kiện Login hay chưa để lấu infor tạo order sau khi thanh toán
+        Task<IdentityUser> GetCurrentUserAsync();
+        Task<string> GetCurrentUserIdAsync();
     }
 }

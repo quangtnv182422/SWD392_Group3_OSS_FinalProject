@@ -36,13 +36,25 @@ namespace Service.Implementation
             };
         }
 
-        public async Task<Order> CreateOrderAsync(string fullName, string email, string mobile, string address, string paymentMethod, List<int> cartItemIds, float totalCost, int orderStatus)
+        public async Task<Order> CreateOrderAsync(string fullName,
+                                                  string? customerId, 
+                                                  /*string staffId,*/
+                                                  string email,
+                                                  string mobile,
+                                                  string address, 
+                                                  string paymentMethod,
+                                                  List<int> cartItemIds,
+                                                  float totalCost, 
+                                                  int orderStatus, 
+                                                  string? note)
         {
             var cartItems = await _orderRepository.GetCartItemsByIdsAsync(cartItemIds);
 
             var order = new Order
             {
                 OrderedAt = DateTime.Now,
+                CustomerId = customerId,
+                /*StaffId = staffId,*/
                 PaymentMethod = paymentMethod,
                 Address = address,
                 OrderStatusId = orderStatus,
@@ -55,7 +67,8 @@ namespace Service.Implementation
                 TotalCost = totalCost,
                 FullName = fullName,
                 Email = email,
-                PhoneNumber = mobile
+                PhoneNumber = mobile,
+                Note = note
                 
             };
 

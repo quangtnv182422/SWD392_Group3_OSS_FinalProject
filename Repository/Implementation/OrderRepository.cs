@@ -42,7 +42,7 @@ namespace Repository.Implementation
         }
 
 
-        // Lấy danh sách đơn hàng theo UserId
+        // Track Order Detail
         public async Task<List<Order>> GetOrdersByUserIdAsync(string userId)
         {
             return await _context.Orders
@@ -53,7 +53,6 @@ namespace Repository.Implementation
                 .ToListAsync();
         }
 
-        // Hủy đơn hàng (cập nhật trạng thái thành 'Cancelled')
         public async Task<bool> CancelOrderAsync(int orderId)
         {
             var order = await _context.Orders.FindAsync(orderId);
@@ -62,34 +61,34 @@ namespace Repository.Implementation
                 return false;
             }
 
-            // Cập nhật trạng thái đơn hàng thành 'Cancelled'
-            order.OrderStatusId = 5; // StatusId = 5 tương ứng với 'Cancelled'
+            order.OrderStatusId = 5; // StatusId = 5 corresponds to 'Cancelled'
             await _context.SaveChangesAsync();
             return true;
         }
 
-
-
-        // Lấy thông tin chi tiết của đơn hàng (bao gồm tiến độ vận chuyển)
-        public async Task<Order?> GetOrderDetailsAsync(int orderId)
+        public async Task<Order> GetOrderDetailsAsync(int orderId)
         {
             return await _context.Orders
                 .Include(o => o.OrderStatus)
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(oi => oi.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
         }
 
-        // Cập nhật thông tin đơn hàng
         public async Task<bool> UpdateOrderAsync(Order order)
         {
             var existingOrder = await _context.Orders.FindAsync(order.OrderId);
             if (existingOrder == null)
             {
-                return false;
+                return false; 
             }
 
-            _context.Entry(existingOrder).CurrentValues.SetValues(order);
+            existingOrder.PaymentMethod = order.PaymentMethod;
+            existingOrder.Note = order.Note;
+            existingOrder.Address = order.Address;
+            existingOrder.OrderStatusId = order.OrderStatusId;
+
+            _context.Orders.Update(existingOrder);
             await _context.SaveChangesAsync();
             return true;
         }

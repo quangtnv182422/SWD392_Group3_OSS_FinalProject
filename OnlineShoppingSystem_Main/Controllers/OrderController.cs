@@ -152,7 +152,7 @@ namespace OnlineShoppingSystem_Main.Controllers
          }*/
 
 
-        // Lấy danh sách đơn hàng của người dùng
+        // Track Order Detail
         [HttpGet]
         public async Task<IActionResult> OrderList(string searchOrderId, string paymentMethod, string status)
         {
@@ -166,19 +166,17 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             var orders = await _orderService.GetOrdersByUserIdAsync(currentUser.Id);
 
-            // Lọc theo OrderID (tìm kiếm một phần số OrderID)
+            // Filter
             if (!string.IsNullOrEmpty(searchOrderId))
             {
                 orders = orders.Where(o => o.OrderId.ToString().Contains(searchOrderId)).ToList();
             }
 
-            // Lọc theo phương thức thanh toán
             if (!string.IsNullOrEmpty(paymentMethod))
             {
                 orders = orders.Where(o => o.PaymentMethod == paymentMethod).ToList();
             }
 
-            // Lọc theo trạng thái đơn hàng
             if (!string.IsNullOrEmpty(status))
             {
                 orders = orders.Where(o => o.OrderStatus.StatusName == status).ToList();
@@ -191,7 +189,6 @@ namespace OnlineShoppingSystem_Main.Controllers
             return View("OrderList", orders);
         }
 
-        // Hủy đơn hàng
         [HttpPost]
         public async Task<IActionResult> CancelOrder(int orderId)
         {
@@ -205,6 +202,51 @@ namespace OnlineShoppingSystem_Main.Controllers
                 TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công.";
             }
             return RedirectToAction("OrderList");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderDetails(int orderId)
+        {
+            var order = await _orderService.GetOrderDetailsAsync(orderId);
+            if (order == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                return RedirectToAction("OrderList");
+            }
+
+            return View("OrderDetails", order);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderDetails(Order updatedOrder)
+        {
+            var existingOrder = await _orderService.GetOrderByIdAsync(updatedOrder.OrderId.ToString());
+
+            if (existingOrder == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                return RedirectToAction("OrderList");
+            }
+
+            try
+            {
+                existingOrder.FullName = updatedOrder.FullName;
+                existingOrder.PhoneNumber = updatedOrder.PhoneNumber;
+                existingOrder.Email = updatedOrder.Email;
+                existingOrder.Address = updatedOrder.Address;
+                existingOrder.OrderStatusId = updatedOrder.OrderStatusId;
+                existingOrder.Note = updatedOrder.Note;
+
+                await _orderService.UpdateOrderAsync(existingOrder);
+
+                TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công.";
+                return RedirectToAction("OrderDetails", new { orderId = updatedOrder.OrderId });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Lỗi khi cập nhật đơn hàng: " + ex.Message;
+                return RedirectToAction("OrderDetails", new { orderId = updatedOrder.OrderId });
+            }
         }
     }
 }

@@ -83,31 +83,38 @@ namespace Service.Implementation
         }
 
 
-
-        // Lấy danh sách đơn hàng theo UserId
+        // Track Order Detail
         public async Task<List<Order>> GetOrdersByUserIdAsync(string userId)
         {
             return await _orderRepository.GetOrdersByUserIdAsync(userId);
         }
 
-        // Hủy đơn hàng theo OrderId
         public async Task<bool> CancelOrderAsync(int orderId)
         {
             return await _orderRepository.CancelOrderAsync(orderId);
         }
 
-
-
-        // Lấy thông tin chi tiết của đơn hàng (bao gồm tiến độ vận chuyển)
-        public async Task<Order?> GetOrderDetailsAsync(int orderId)
+        public async Task<Order> GetOrderDetailsAsync(int orderId)
         {
             return await _orderRepository.GetOrderDetailsAsync(orderId);
         }
 
-        // Cập nhật thông tin đơn hàng
         public async Task<bool> UpdateOrderAsync(Order order)
         {
-            return await _orderRepository.UpdateOrderAsync(order);
+            var existingOrder = await _orderRepository.GetOrderByIdAsync(order.OrderId.ToString());
+
+            if (existingOrder == null)
+            {
+                return false;
+            }
+
+            existingOrder.Address = order.Address;
+            existingOrder.PaymentMethod = order.PaymentMethod;
+            existingOrder.OrderStatusId = order.OrderStatusId;
+            existingOrder.Note = order.Note;
+
+            await _orderRepository.SaveChangesAsync();
+            return true;
         }
     }
 }

@@ -48,7 +48,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 15px; /* Cách bảng bên dưới một chút */
+            margin-bottom: 15px; 
         }
 
             .search-container input,
@@ -65,14 +65,14 @@
                 font-size: 14px;
                 border: none;
                 border-radius: 4px;
-                background-color: #28a745; /* Màu xanh lá */
+                background-color: #28a745;
                 color: white;
                 cursor: pointer;
                 height: 36px
             }
 
             .search-container button:hover {
-                background-color: #218838; /* Màu xanh lá đậm hơn khi hover */
+                background-color: #218838; 
             }
 
     </style>
@@ -80,6 +80,13 @@
 <body>
 
     <h1>Order information</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-danger" style="background-color: #28a745; color: white;">
+            @TempData["SuccessMessage"]
+        </div>
+    }
 
     @if (TempData["ErrorMessage"] != null)
     {
@@ -144,14 +151,14 @@
                         <td>@order.PaymentMethod</td>
                         <td>@order.OrderStatus?.StatusName</td>
                         <td>@order.Note</td>
-                        <td>@order.TotalCost</td>
+                        <td>@(order.TotalCost.ToString("#,##0") + " đ")</td>
                         <td>
-                            <!-- Nút xem đơn hàng -->
-                            <a asp-controller="Order" asp-action="GetOrderDetails" asp-route-orderId="@order.OrderId">
+                            <!-- Xem đơn hàng -->
+                            <a asp-controller="Order" asp-action="OrderDetails" asp-route-orderId="@order.OrderId">
                                 <i class="fas fa-eye"></i>
                             </a>
 
-                            <!-- Nút hủy đơn hàng có xác nhận -->
+                            <!-- Hủy đơn hàng có xác nhận -->
                             @if (order.OrderStatusId == 1) // Chỉ cho phép hủy đơn hàng đang chờ xác nhận
                             {
                                 <form id="cancelForm-@order.OrderId" asp-controller="Order" asp-action="CancelOrder" method="post" style="display:inline;">

@@ -16,13 +16,10 @@ namespace Repository.Interface
         Task SaveChangesAsync();
 
 
-        // Track Order List
+        // Track Order Detail
         Task<List<Order>> GetOrdersByUserIdAsync(string userId);
         Task<bool> CancelOrderAsync(int orderId);
-
-
-        // Track Order Detail
-        Task<Order?> GetOrderDetailsAsync(int orderId);
+        Task<Order> GetOrderDetailsAsync(int orderId);
         Task<bool> UpdateOrderAsync(Order order);
     }
 

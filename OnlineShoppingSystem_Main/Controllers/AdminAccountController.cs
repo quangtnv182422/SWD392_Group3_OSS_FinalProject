@@ -11,7 +11,7 @@ namespace OnlineShoppingSystem_Main.Controllers
     {
         private readonly IUserService _userService;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly EmailSender _emailSender;
+        private readonly IEmailService _emailService;
 
         public AdminAccountController(IUserService userService, UserManager<IdentityUser> userManager)
         {
@@ -87,7 +87,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             if (result)
             {
-                await _emailSender.SendWelcomeEmail(email, username, password);
+                await _emailService.SendWelcomeEmail(email, username, password);
                 return Json(new { success = true, message = "User added successfully." });
             }
             else

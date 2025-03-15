@@ -80,7 +80,7 @@ namespace Service.Implementation
                 
             };
 
-           /await _orderRepository.CreateOrderAsync(order);
+           await _orderRepository.CreateOrderAsync(order);
             //fix cứng tạm để test
             string link = "https://localhost:7268/Cart/Index";
 

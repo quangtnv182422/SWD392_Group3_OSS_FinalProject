@@ -61,7 +61,8 @@ namespace OnlineShoppingSystem_Main.Controllers
 					var userId = await _userService.GetCurrentUserIdAsync();
 
                     var order = await _orderService.CreateOrderAsync(fullName, userId, email, mobile, fullAddress, paymentMethod, cartItemIds, (float)totalCost, 1, deliveryNotes); // 1 là pending confirm dành cho COD
-                    return RedirectToAction("PaymentSuccess");
+                    
+					return RedirectToAction("PaymentSuccess");
 
                 case "vnPay":
 

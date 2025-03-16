@@ -13,10 +13,11 @@ namespace OnlineShoppingSystem_Main.Controllers
         private readonly UserManager<AspNetUser> _userManager;
         private readonly IEmailService _emailService;
 
-        public AdminAccountController(IUserService userService, UserManager<AspNetUser> userManager)
+        public AdminAccountController(IUserService userService, UserManager<AspNetUser> userManager, IEmailService emailService)
         {
             _userService = userService;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         // Hiển thị danh sách user với tìm kiếm
@@ -95,7 +96,7 @@ namespace OnlineShoppingSystem_Main.Controllers
             if (result)
             {
                 await _emailService.SendWelcomeEmail(email, username, password);
-                return Json(new { success = true, message = "User added successfully." });
+                return RedirectToAction("AccountList");
             }
             else
             {

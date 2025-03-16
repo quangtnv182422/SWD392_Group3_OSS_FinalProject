@@ -17,7 +17,8 @@ public class EmailSender : IEmailSender
 
 	public async Task SendEmailAsync(string email, string subject, string htmlMessage)
 	{
-		var smtpServer = _configuration["EmailSettings:SmtpServer"];
+        Console.WriteLine("\nSending welcome email to " + email + "\n");
+        var smtpServer = _configuration["EmailSettings:SmtpServer"];
 		var smtpPortString = _configuration["EmailSettings:SmtpPort"];
 		var smtpUsername = _configuration["EmailSettings:SmtpUsername"];
 		var smtpPassword = _configuration["EmailSettings:SmtpPassword"];

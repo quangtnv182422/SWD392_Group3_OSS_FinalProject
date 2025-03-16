@@ -14,6 +14,10 @@ namespace Service.Implementation
 
         public EmailService(IEmailSender emailSender)
         {
+            if (emailSender == null)
+            {
+                throw new ArgumentNullException(nameof(emailSender), "IEmailSender is null!");
+            }
             _emailSender = emailSender;
         }
 
@@ -29,7 +33,7 @@ namespace Service.Implementation
                 <p>Please change your password after logging in.</p>
                 <p>Best regards,</p>
                 <p>Your Company Name</p>
-            
+            ~
         ";
 
             await _emailSender.SendEmailAsync(email, subject, message);

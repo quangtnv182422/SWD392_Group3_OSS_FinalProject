@@ -21,6 +21,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 //emailSender
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 //Category
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); 
 builder.Services.AddScoped<ICategoryService, CategoryService>(); 
@@ -45,6 +47,15 @@ builder.Services.AddScoped<IVnPayProxy, VnPayProxy>();
 //GHN
 builder.Services.AddScoped<IGhnProxy,GhnApiProxy>();
 
+builder.Services.AddScoped<UserManager<AspNetUser>>();
+builder.Services.AddScoped<SignInManager<AspNetUser>>();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Lockout.AllowedForNewUsers = false;
+});
+
+
 builder.Services.AddHttpContextAccessor();
 
 //Connect DB
@@ -52,8 +63,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<Swd392OssContext>(options => options.UseSqlServer(connectionString));
 
 //Config Identity
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<Swd392OssContext>();
+builder.Services.AddDefaultIdentity<AspNetUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<Swd392OssContext>()
+    .AddDefaultTokenProviders();
 
 var clientId = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_ID");
 var clientSecret = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_SECRET");

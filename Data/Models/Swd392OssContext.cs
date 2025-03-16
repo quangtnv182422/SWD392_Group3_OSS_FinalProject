@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -224,9 +225,26 @@ public partial class Swd392OssContext : IdentityDbContext
 
 			entity.Property(e => e.StatusName).HasMaxLength(255);
 		});
+        modelBuilder.Entity<AspNetUser>(entity =>
+        {
+            entity.ToTable("AspNetUsers");
 
-		OnModelCreatingPartial(modelBuilder);
-	}
+            entity.Property(e => e.Address)
+                .HasMaxLength(500);
 
-	partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+            entity.Property(e => e.DateOfBirth)
+                .HasColumnType("datetime2");
+
+            entity.HasMany(e => e.Roles)
+                .WithMany(e => e.Users)
+                .UsingEntity<IdentityUserRole<string>>(
+                    l => l.HasOne<AspNetRole>().WithMany().HasForeignKey(ur => ur.RoleId),
+                    r => r.HasOne<AspNetUser>().WithMany().HasForeignKey(ur => ur.UserId),
+                    j => j.ToTable("AspNetUserRoles")
+                );
+        });
+
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

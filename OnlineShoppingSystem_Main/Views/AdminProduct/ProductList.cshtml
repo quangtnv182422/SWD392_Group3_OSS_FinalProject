@@ -191,10 +191,11 @@
                                     <label class="form-label">Product Status</label>
                                     <select name="ProductStatusId" id="editProductStatus" class="form-control">
                                         <option value="">Select Status</option>
-                                        @foreach (var status in ViewBag.ProductStatuses)
-                                        {
-                                            <option value="@status.ProductStatusId">@status.StatusDescription</option>
-                                        }
+                                       @* From TMT: khi tạo mới user thì dòng này của ông báo lỗi và không hiển thị được product list, comment xong thì hiện, tôi để tạm thế này nhé *@
+                                        @* @foreach (var status in ViewBag.ProductStatuses) *@
+                                        @* { *@
+                                        @*     <option value="@status.ProductStatusId">@status.StatusDescription</option> *@
+                                        @* } *@
                                     </select>
                                 </div>
                                 <div class="mb-3">

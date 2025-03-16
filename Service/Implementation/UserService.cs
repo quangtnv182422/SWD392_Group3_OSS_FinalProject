@@ -10,16 +10,17 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Data.Models;
 using System.Text;
+using CloudinaryDotNet.Actions;
 
 namespace Service.Implementation
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<AspNetUser> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserService(IUserRepository userRepository, UserManager<IdentityUser> userManager, IHttpContextAccessor httpContextAccessor)
+        public UserService(IUserRepository userRepository, UserManager<AspNetUser> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _userManager = userManager;
@@ -38,7 +39,7 @@ namespace Service.Implementation
             return userId ?? "User1";
         }
 
-        public async Task<IdentityUser> GetCurrentUserAsync(string userId)
+        public async Task<AspNetUser> GetCurrentUserAsync(string userId)
         {
             return await _userRepository.GetUserByIdAsync(userId);
         }
@@ -48,7 +49,7 @@ namespace Service.Implementation
             var user = await _userManager.FindByIdAsync("User1");
             if (user == null)
             {
-                user = new IdentityUser
+                user = new AspNetUser
                 {
                     Id = "User1",
                     UserName = "User1",
@@ -79,14 +80,7 @@ namespace Service.Implementation
 
         public async Task<IEnumerable<AspNetUser>> GetUsersAsync(string searchQuery)
         {
-            var users = await _userRepository.GetUsersAsync(searchQuery);
-            return users.Select(u => new AspNetUser
-            {
-                Id = u.Id,
-                UserName = u.UserName,
-                Email = u.Email,
-                PhoneNumber = u.PhoneNumber
-            });
+            return await _userRepository.GetUsersAsync(searchQuery);
         }
 
         public async Task<AspNetUser> GetUserByIdAsync(string userId)
@@ -103,31 +97,53 @@ namespace Service.Implementation
             };
         }
 
-        public async Task<bool> AddUserAsync(AspNetUser user, string passwords)
+        public async Task<bool> AddUserAsync(AspNetUser user, string passwords, string role)
         {
-            var identityUser = new IdentityUser
+            var createResult = await _userRepository.AddUserAsync(user, passwords);
+            if (!createResult)
             {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                PasswordHash = passwords
-            };
+                return false;
+            }
 
-            return await _userRepository.AddUserAsync(identityUser, "Default@123");
+            //if (!string.IsNullOrEmpty(role))
+            //{
+            //    // Kiểm tra role có tồn tại chưa (nếu bạn muốn tạo role tự động)
+            //    // var roleExist = await _roleManager.RoleExistsAsync(role);
+            //    // if (!roleExist)
+            //    // {
+            //    //     await _roleManager.CreateAsync(new IdentityRole(role));
+            //    // }
+
+            //    var addToRoleResult = await _userManager.AddToRoleAsync(user, role);
+            //    if (!addToRoleResult.Succeeded)
+            //    {
+            //        return false;
+            //    }
+            //}
+
+            return true;
         }
 
-        public async Task<bool> UpdateUserAsync(AspNetUser user)
+        public async Task<bool> UpdateUserAsync(AspNetUser userInput)
         {
-            var identityUser = new IdentityUser
-            {
-                UserName = user.UserName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-            };
+            var existingUser = await _userManager.FindByIdAsync(userInput.Id);
+            if (existingUser == null) return false;
 
-            return await _userRepository.UpdateUserAsync(identityUser);
+            existingUser.UserName = userInput.UserName;
+            existingUser.Email = userInput.Email;
+            existingUser.PhoneNumber = userInput.PhoneNumber;
+            existingUser.DateOfBirth = userInput.DateOfBirth;
+            existingUser.Address = userInput.Address;
+            existingUser.LockoutEnabled = userInput.LockoutEnabled;
+
+            // Lưu ý: Nếu bạn muốn cập nhật Roles, bạn nên dùng userManager.AddToRoleAsync /
+            // RemoveFromRoleAsync thay vì gán trực tiếp. Gán trực tiếp Roles[] vào đây 
+            // sẽ không có tác dụng, vì Identity quản lý Roles bằng bảng AspNetUserRoles.
+            // existingUser.Roles        = userInput.Roles; // Thường không update trực tiếp
+
+            return await _userRepository.UpdateUserAsync(existingUser);
         }
+
 
         public async Task<bool> DeleteUserAsync(string userId)
         {
@@ -146,7 +162,7 @@ namespace Service.Implementation
         }
 
 
-        public async Task<IdentityUser> GetCurrentUserAsync()
+        public async Task<AspNetUser> GetCurrentUserAsync()
         {
             var user = _httpContextAccessor.HttpContext?.User;
             if (user?.Identity?.IsAuthenticated == true)

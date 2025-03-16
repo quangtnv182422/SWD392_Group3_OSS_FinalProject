@@ -8,9 +8,13 @@ namespace Service.Interface
     {
         Task<Order> GetOrderByIdAsync(string orderId);
         Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, IdentityUser currentUser);
+
+        //Checkout Order
         Task<Order> CreateOrderAsync(string fullName,string? customerId,/*string staffId,*/string email, string mobile,string address,string paymentMethod,List<int> cartItemIds,float totalCost,int orderStatus,string? note);
         Task SendOrderConfirmEmail(string email, string fullName, string address, string phoneNumber, string? orderNotes, List<OrderItem> products, string returnLink, string paymentMethod);
+        Task<bool> ConfirmOrderAsync(int orderId, int confirmStatus);
 
+		//---------------
 		Task<Order> SaveOrderAsync(Order order);
 
 

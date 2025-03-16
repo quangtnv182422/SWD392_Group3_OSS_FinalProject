@@ -1,13 +1,14 @@
 ﻿using Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
 using Service.Interface;
 
 namespace Service.Implementation
 {
-    public class OrderService : IOrderService
+	public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IEmailSender _emailSender;
@@ -94,6 +95,7 @@ namespace Service.Implementation
 
 			return order;
         }
+
 		//Gửi mail sau khi order:
 		public async Task SendOrderConfirmEmail(string email, string fullName, string address, string phoneNumber, string? orderNotes, List<OrderItem> products, string returnLink, string paymentMethod)
 		{
@@ -190,9 +192,13 @@ namespace Service.Implementation
             return order;
         }
 
+		public async Task<bool> ConfirmOrderAsync(int orderId, int confirmStatus)
+		{
+			return await _orderRepository.ConfirmOrderAsync(orderId, confirmStatus);
+		}
 
-        // Track Order Detail
-        public async Task<List<Order>> GetOrdersByUserIdAsync(string userId)
+		// Track Order Detail
+		public async Task<List<Order>> GetOrdersByUserIdAsync(string userId)
         {
             return await _orderRepository.GetOrdersByUserIdAsync(userId);
         }

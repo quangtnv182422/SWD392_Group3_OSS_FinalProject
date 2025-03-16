@@ -1,7 +1,11 @@
 ﻿using Api.Payos.Interface;
+using Api.vnPay.lib;
+using Data.Models.PayOS;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Net.payOS;
 using Net.payOS.Types;
+using System.Web;
 
 
 namespace Api.Payos.Implementation
@@ -9,7 +13,6 @@ namespace Api.Payos.Implementation
 	public class PayosProxy : IPayosProxy
 	{
 
-		
 		private readonly PayOS payOS;
 
 		public PayosProxy(IConfiguration configuration)
@@ -37,5 +40,17 @@ namespace Api.Payos.Implementation
 			return await payOS.cancelPaymentLink(orderCode, cancellationReason);
 		}
 
+		public PaymentResultModel ProcessReturnUrl(IQueryCollection queryParams)
+		{
+			var result = new PaymentResultModel
+			{
+				Code = queryParams.ContainsKey("code") ? queryParams["code"] : string.Empty,
+				Id = queryParams.ContainsKey("id") ? queryParams["id"] : string.Empty,
+				Cancel = queryParams.ContainsKey("cancel") ? queryParams["cancel"] : string.Empty,
+				Status = queryParams.ContainsKey("status") ? queryParams["status"] : string.Empty,
+				OrderCode = queryParams.ContainsKey("orderCode") ? queryParams["orderCode"] : string.Empty,
+			};
+			return result;
+		}
 	}
 }

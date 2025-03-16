@@ -26,6 +26,7 @@ namespace Api.vnPay.Implementation
 			var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
 			var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
 			var tick = DateTime.Now.Ticks.ToString();
+			//var tick = orderId;
 			var pay = new VnPayLibrary();
 			var urlCallBack = _configuration["Vnpay:PaymentBackReturnUrl"];
 
@@ -37,7 +38,7 @@ namespace Api.vnPay.Implementation
 			pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
 			pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
 			pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
-			pay.AddRequestData("vnp_OrderInfo", $"{model.Name} {model.OrderDescription} {model.Amount}");
+			pay.AddRequestData("vnp_OrderInfo", $"{model.OrderId}");
 			pay.AddRequestData("vnp_OrderType", model.OrderType);
 			pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
 			pay.AddRequestData("vnp_TxnRef", tick);

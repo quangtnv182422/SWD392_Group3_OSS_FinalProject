@@ -2,15 +2,16 @@
 using Api.vnPay.Interface;
 using Azure;
 using Data.Models.Vnpay;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Net.payOS;
 using Net.payOS.Types;
 using Service.Interface;
-using System.Diagnostics;
-using System.Threading.Tasks;
-
+using Data.Models.PayOS;
 namespace OnlineShoppingSystem_Main.Controllers
 {
+	//	9704198526191432198
+	// NGUYEN VAN A
+	// 07/15
 	public class PaymentController : Controller
 	{
 		private readonly IVnPayProxy _vnPayService;
@@ -49,19 +50,21 @@ namespace OnlineShoppingSystem_Main.Controllers
 														string SelectedDistrictName,
 														string SelectedWardname)
 		{
+			//Lấy từng sản phẩm trong giỏ hàng 
 			var cartItemIds = selectedItems.Split(",").Select(int.Parse).ToList();
+			//Lấy full địa chỉ
 			string fullAddress = string.Join(", ", new[] { address, SelectedWardname, SelectedDistrictName, SelectedProvinceName }
-									  .Where(part => !string.IsNullOrEmpty(part))); 
-
-
-
+									  .Where(part => !string.IsNullOrEmpty(part)));
+			//Lấy Id user nếu có đăng nhập
+			var userId = await _userService.GetCurrentUserIdAsync();
+			//Tạo order với trạng thái pending
+			var order = await _orderService.CreateOrderAsync(fullName, userId, email, mobile,
+												fullAddress, paymentMethod, cartItemIds,
+												(float)totalCost, 1, deliveryNotes); // 1 là pending confirm dành cho COD
 			switch (paymentMethod)
 			{
 				case "COD":
-					var userId = await _userService.GetCurrentUserIdAsync();
-
-                    var order = await _orderService.CreateOrderAsync(fullName, userId, email, mobile, fullAddress, paymentMethod, cartItemIds, (float)totalCost, 1, deliveryNotes); // 1 là pending confirm dành cho COD
-                    
+                   
 					return RedirectToAction("PaymentSuccess");
 
                 case "vnPay":
@@ -71,19 +74,22 @@ namespace OnlineShoppingSystem_Main.Controllers
 						OrderType = "other",
 						Amount = (double)totalCost,
 						OrderDescription = "Thanh toán bằng vnPay tại sneaker Shoes",
-						Name = fullName
+						Name = fullName,
+						OrderId = order.OrderId.ToString(),
 					};
+
 					return RedirectToAction("CreatePaymentUrlVnpay", "Payment", paymentModel);
 
 				case "PayOS":
 
 					var paymentLinkRequest = new PaymentData(
-											  orderCode: int.Parse(DateTimeOffset.Now.ToString("ffffff")),
+											  //orderCode: int.Parse(DateTimeOffset.Now.ToString("ffffff")),
+											  orderCode: order.OrderId,
 											  amount: (int)totalCost,
 											  description: "Thanh toan ma QR",
 											  items: [new("Item test", 1, 2000)],
-											  returnUrl: _configuration["PayOS:ReturnUrl"],
-											  cancelUrl: _configuration["PayOS:CancelUrl"]);
+											  returnUrl: _configuration["PayOS:PayOSReturnUrl"],
+											  cancelUrl: _configuration["PayOS:PayOSReturnUrl"]);
 
 					return RedirectToAction("CreatePaymentPayOS", "Payment", paymentLinkRequest);
 
@@ -121,7 +127,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 		/// Xử lý phản hồi từ VNPay sau khi thanh toán
 		/// </summary>
 		[HttpGet]
-		public IActionResult PaymentCallbackVnpay()
+		public async Task<IActionResult> PaymentCallbackVnpay()
 		{
 			var response = _vnPayService.PaymentExecute(Request.Query);
 			if (response == null || response.VnPayResponseCode != "00")
@@ -130,8 +136,21 @@ namespace OnlineShoppingSystem_Main.Controllers
 				return RedirectToAction("PaymentFail");
 			}
 
-			//Add order vào DB
 			TempData["Message"] = $"Thanh toán thành công: {response.VnPayResponseCode}";
+			//Đổi order status sang 2
+			if (int.TryParse(response.OrderId, out int orderId))
+			{
+				var updateOrder = await _orderService.GetOrderByIdAsync(response.OrderId);
+				if (updateOrder != null)
+				{
+					await _orderService.ConfirmOrderAsync(updateOrder.OrderId, 2); // 2 là status đã xác nhận
+
+				}
+			}
+			else
+			{
+				TempData["Message"] = "Lỗi xác nhận đơn hàng: Không thể chuyển đổi OrderId.";
+			}
 			return RedirectToAction("PaymentSuccess");
 		}
 
@@ -143,26 +162,41 @@ namespace OnlineShoppingSystem_Main.Controllers
 		public async Task<IActionResult> CreatePaymentPayOS(PaymentData data)
 		{
 			var url = await _payOsService.CreatePayOSPaymentUrl(data);
-			Response.Headers.Append("Location", url.checkoutUrl);
-			return new StatusCodeResult(303);
+			return Redirect(url.checkoutUrl);
 		}
 
-		/*/// <summary>
+
+		/// <summary>
 		/// Xử lý thông tin thanh toán trả về từ PayOS
 		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> PaymentCallbackPayOS()
 		{
-			if (response == null || response.VnPayResponseCode != "00")
+			var response = _payOsService.ProcessReturnUrl(Request.Query);
+
+			if (response == null || response.Code != "00" )
 			{
-				TempData["Message"] = $"Lỗi thanh toán: {response.VnPayResponseCode}";
 				return RedirectToAction("PaymentFail");
 			}
+			else if (response.Status == "PAID")
+			{
+				//Đổi order status thành 2
+				if (int.TryParse(response.OrderCode, out int orderId))
+				{
+					var updateOrder = await _orderService.GetOrderByIdAsync(response.OrderCode);
+					if (updateOrder != null)
+					{
+						await _orderService.ConfirmOrderAsync(updateOrder.OrderId, 2); // 2 là status đã xác nhận
 
-			//Add order vào DB
-			TempData["Message"] = $"Thanh toán thành công: {response.VnPayResponseCode}";
+					}
+				}
+				else
+				{
+					TempData["Message"] = "Lỗi xác nhận đơn hàng: Không thể chuyển đổi OrderId.";
+				}
+			}
 			return RedirectToAction("PaymentSuccess");
-		}*/
+		}
 
 	}
 }

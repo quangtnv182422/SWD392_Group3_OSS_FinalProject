@@ -1,4 +1,6 @@
-﻿using Net.payOS.Types;
+﻿using Data.Models.PayOS;
+using Microsoft.AspNetCore.Http;
+using Net.payOS.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,6 @@ namespace Api.Payos.Interface
 		Task<CreatePaymentResult> CreatePayOSPaymentUrl(PaymentData paymentData);
 		Task<PaymentLinkInformation> GetPaymentLinkInfor(long id);
 		Task<PaymentLinkInformation> CancelPaymentLink(long orderCode, string cancellationReason);
-
+		PaymentResultModel ProcessReturnUrl(IQueryCollection queryParams);
 	}
 }

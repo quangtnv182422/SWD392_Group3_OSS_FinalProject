@@ -41,9 +41,21 @@ namespace Repository.Implementation
             await _context.SaveChangesAsync();
         }
 
+		public async Task<bool> ConfirmOrderAsync(int orderId, int confirmStatus)
+		{
+			var order = await _context.Orders.FindAsync(orderId);
+			if (order == null)
+			{
+				return false;
+			}
 
-        // Track Order Detail
-        public async Task<List<Order>> GetOrdersByUserIdAsync(string userId)
+			order.OrderStatusId = confirmStatus; 
+			await _context.SaveChangesAsync();
+			return true;
+		}
+
+		// Track Order Detail
+		public async Task<List<Order>> GetOrdersByUserIdAsync(string userId)
         {
             return await _context.Orders
                 .Where(o => o.CustomerId == userId)

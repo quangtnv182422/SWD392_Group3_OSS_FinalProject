@@ -7,7 +7,8 @@ using System.Diagnostics;
 using System.Security.Claims;
 using Data.Models;
 using Api.GHN.Interface;
-using Data.Models.GHN; 
+using Data.Models.GHN;
+using System.Text.Json;
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
@@ -269,7 +270,29 @@ namespace OnlineShoppingSystem_Main.Controllers
 
                 await _orderService.UpdateOrderAsync(existingOrder);
 
-                TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công.";
+                var ghnUpdateRequest = new GhnOrderUpdateRequest
+                {
+                    OrderCode = existingOrder.OrderId.ToString(),
+                    ToName = existingOrder.FullName,
+                    ToPhone = existingOrder.PhoneNumber,
+                    ToAddress = existingOrder.Address,
+                    Note = existingOrder.Note
+                };
+
+                var ghnResponse = await _ghnService.UpdateOrderOnGHNAsync(ghnUpdateRequest);
+                var ghnResult = System.Text.Json.JsonSerializer.Deserialize<GhnApiResponse>(ghnResponse, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (ghnResult.Code != 200)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Cập nhật đơn hàng trên GHN thất bại: " + ghnResult.Message;
+                }
                 return RedirectToAction("OrderDetails", new { orderId = updatedOrder.OrderId });
             }
             catch (Exception ex)

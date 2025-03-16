@@ -72,5 +72,15 @@ namespace Api.GHN.Implementation
                 new StringContent(jsonBody, Encoding.UTF8, "application/json"));
             return await response.Content.ReadAsStringAsync();
         }
+
+        public async Task<string> UpdateOrderOnGHNAsync(GhnOrderUpdateRequest request)
+        {
+            var jsonBody = JsonSerializer.Serialize(request);
+            var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}/v2/shipping-order/update",
+                new StringContent(jsonBody, Encoding.UTF8, "application/json"));
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
     }
 }

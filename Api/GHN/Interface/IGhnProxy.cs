@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Data.Models.GHN;
 
 namespace Api.GHN.Interface
 {
@@ -13,5 +14,6 @@ namespace Api.GHN.Interface
         Task<string> GetWardsAsync(int districtId);
         Task<string> GetAvailableServicesAsync(int shopId, int fromDistrictId, int toDistrictId);
         Task<string> CalculateShippingFeeAsync(int shopId, int fromDistrictId, int toDistrictId, int weight, int length, int width, int height, int serviceId, int serviceTypeId);
+        Task<string> UpdateOrderOnGHNAsync(GhnOrderUpdateRequest request);
     }
 }

@@ -24,7 +24,7 @@ namespace Service.Implementation
             return await _orderRepository.GetOrderByIdAsync(orderId);
         }
 
-        public async Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, IdentityUser currentUser)
+        public async Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, AspNetUser currentUser)
         {
             var selectedCartItems = await _orderRepository.GetCartItemsByIdsAsync(selectedCartItemIds);
             double totalPrice = selectedCartItems.Sum(ci => ci.Quantity * ci.Product.Price);

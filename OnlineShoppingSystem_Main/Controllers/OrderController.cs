@@ -26,7 +26,7 @@ namespace OnlineShoppingSystem_Main.Controllers
             _ghnService = ghnService;
         }
 
-        private async Task<IdentityUser> GetCurrentUserAsync()
+        private async Task<AspNetUser> GetCurrentUserAsync()
         {
             string userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!string.IsNullOrEmpty(userId))

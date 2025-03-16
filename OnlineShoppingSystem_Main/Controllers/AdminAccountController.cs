@@ -10,13 +10,14 @@ namespace OnlineShoppingSystem_Main.Controllers
     public class AdminAccountController : Controller
     {
         private readonly IUserService _userService;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<AspNetUser> _userManager;
         private readonly IEmailService _emailService;
 
-        public AdminAccountController(IUserService userService, UserManager<IdentityUser> userManager)
+        public AdminAccountController(IUserService userService, UserManager<AspNetUser> userManager, IEmailService emailService)
         {
             _userService = userService;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         // Hiển thị danh sách user với tìm kiếm
@@ -67,7 +68,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 
         // Thêm user mới
         [HttpPost]
-        public async Task<IActionResult> AddUser(string username, string email)
+        public async Task<IActionResult> AddUser(string username, string email, string phoneNumber, DateTime DOB, string address, string role)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email))
             {
@@ -82,13 +83,20 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             string password = await _userService.AutoCreatePasswords();
 
-            var user = new AspNetUser { UserName = username, Email = email };
-            bool result = await _userService.AddUserAsync(user, password);
+            var user = new AspNetUser { 
+                UserName = username, 
+                Email = email,
+                PhoneNumber = phoneNumber,
+                DateOfBirth = DOB != null && DOB >= new DateTime(1753, 1, 1) ? DOB : null,
+                Address = address,
+            };
+
+            bool result = await _userService.AddUserAsync(user, password, role);
 
             if (result)
             {
                 await _emailService.SendWelcomeEmail(email, username, password);
-                return Json(new { success = true, message = "User added successfully." });
+                return RedirectToAction("AccountList");
             }
             else
             {
@@ -109,11 +117,28 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             if (result)
             {
-                return Json(new { success = true, message = "User deleted successfully." });
+                return RedirectToAction("AccountList");
             }
             else
             {
                 return Json(new { success = false, message = "Failed to delete user. User may not exist." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateUser(AspNetUser user)
+        {
+            Console.WriteLine(user);
+
+            bool result = await _userService.UpdateUserAsync(user);
+
+            if (result)
+            {
+                return RedirectToAction("ViewUser", new { id = user.Id });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = "Failed to update user." });
             }
         }
 

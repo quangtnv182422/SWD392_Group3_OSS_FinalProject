@@ -1,149 +1,4 @@
-﻿@* @model OnlineShoppingSystem_Main.Models.Cart
-@{
-    ViewData["Title"] = "Giỏ hàng";
-}
-
-<!-- Sử dụng layout -->
-@section Styles {
-    <link rel="stylesheet" href="~/assets/css/main.css">
-    <link rel="stylesheet" href="~/assets/css/responsive.css">
-    <!-- Add Font Awesome for delete icon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* Style for the breadcrumb section to reduce bottom margin */
-        .breadcrumb-section {
-            margin-bottom: 30px !important; /* Reduce the gap between breadcrumb and table */
-        }
-
-        /* Style for the table to adjust spacing */
-        .cart-section {
-            margin-top: 50px !important; /* Reduce top margin */
-            margin-bottom: 50px !important; /* Reduce bottom margin */
-        }
-
-        /* Style for the product name cell to align delete icon */
-        .product-cell {
-            position: relative;
-            padding-right: 40px; /* Ensure space for the delete icon */
-        }
-
-        /* Style for the delete button */
-        .delete-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: red;
-        }
-
-        /* Ensure table cells have consistent padding */
-        .table td, .table th {
-            padding: 10px;
-            vertical-align: middle;
-        }
-
-        /* Adjust table width and center it */
-        .table {
-            width: 100%;
-            max-width: 1200px; /* Limit table width for better readability */
-            margin: 0 auto; /* Center the table */
-        }
-    </style>
-}
-
-<div class="breadcrumb-section breadcrumb-bg">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 offset-lg-2 text-center">
-                <div class="breadcrumb-text">
-                    <p>Online Shopping</p>
-                    <h1>Cart</h1>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Cart Section -->
-<div class="cart-section mt-150 mb-150">
-    <div class="container">
-        @if (Model.CartItems.Any())
-        {
-            <form method="post" asp-controller="Order" asp-action="ConfirmOrder">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Chọn</th>
-                            <th>Sản phẩm</th>
-                            <th>Giá</th>
-                            <th>Số lượng</th>
-                            <th>Tổng</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.CartItems)
-                        {
-                            <tr>
-                                <td>
-                                    <input type="checkbox" name="selectedItems" value="@item.CartItemId" />
-                                </td>
-                                <td class="product-cell">
-                                    <span>@item.Product?.ProductName</span>
-                                    <form asp-controller="Cart" asp-action="RemoveItem" method="post" style="display:inline;">
-                                        <input type="hidden" name="cartItemId" value="@item.CartItemId" />
-                                        <button type="submit" class="btn btn-link delete-btn">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                                <td>@(item.Product?.Price.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) + " VND")</td>
-                                <td>
-                                    <input type="hidden" class="cartItemId" value="@item.CartItemId" />
-                                    <input type="number" class="quantity" value="@item.Quantity" min="1" />
-                                </td>
-                                <td>@((item.Quantity * item.Product?.Price)?.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) + " VND")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-
-                <h3>Tổng tiền: @(Model.CartItems.Sum(ci => ci.Quantity * ci.Product.Price).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) + " VND")</h3>
-
-                <button type="submit" class="btn btn-primary">Đặt hàng</button>
-            </form>
-        }
-        else
-        {
-            <p>Giỏ hàng của bạn đang trống.</p>
-        }
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        document.querySelectorAll('.quantity').forEach(input => {
-            input.addEventListener('change', function () {
-                let row = this.closest('tr');
-                let cartItemId = row.querySelector('.cartItemId').value;
-                let quantity = this.value;
-
-                fetch('/Cart/UpdateQuantity', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: `cartItemId=${cartItemId}&quantity=${quantity}`
-                })
-                .then(response => response.text())
-                .then(data => {
-                    console.log("Cập nhật thành công", data);
-                    location.reload(); // Reload the page to reflect the updated total and quantity
-                })
-                .catch(error => console.error('Lỗi khi cập nhật:', error));
-            });
-        });
-    </script>
-} *@
+﻿
 @model Data.Models.Cart
 @{
     ViewData["Title"] = "Giỏ hàng";
@@ -176,7 +31,12 @@
         </div>
     </div>
 </div>
-
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" style="margin: 20px auto; max-width: 800px; text-align: center;">
+        @TempData["Error"]
+    </div>
+}
 <!-- Cart Section -->
 <div class="cart-section mt-150 mb-150">
     <div class="container">

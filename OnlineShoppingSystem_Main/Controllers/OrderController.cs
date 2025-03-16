@@ -91,11 +91,41 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             List<int> selectedCartItemIds = selectedItems.Select(int.Parse).ToList();
             string userId = await _userService.GetUserIdAsync(HttpContext);
-            var currentUser = await GetCurrentUserAsync(); 
+            var currentUser = await GetCurrentUserAsync();
 
-            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds);
+            var cart = await _cartService.GetUserCartAsync(userId);
+            var validCartItemIds = new List<int>();
+            var outOfStockItems = new List<string>();
 
-            var model = await _orderService.CreateOrderConfirmationViewModelAsync(selectedCartItemIds, currentUser);
+            // Kiểm tra tồn kho
+            foreach (var cartItemId in selectedCartItemIds)
+            {
+                var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CartItemId == cartItemId);
+                if (cartItem != null)
+                {
+                    if (cartItem.Product.Quantity >= cartItem.Quantity) // Còn hàng
+                    {
+                        validCartItemIds.Add(cartItemId);
+                    }
+                    else // Hết hàng
+                    {
+                        outOfStockItems.Add(cartItem.Product.ProductName);
+                    }
+                }
+            }
+
+            if (outOfStockItems.Any())
+            {
+                TempData["OutOfStockError"] = $"Sản phẩm {string.Join(", ", outOfStockItems)} đã hết hàng.";
+            }
+
+            if (!validCartItemIds.Any() && outOfStockItems.Any())
+            {
+                TempData["OutOfStockError"] = "Tất cả sản phẩm đã chọn đều hết hàng!";
+            }
+
+            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds); // Lưu tất cả sản phẩm đã chọn
+            var model = await _orderService.CreateOrderConfirmationViewModelAsync(validCartItemIds, currentUser); // Chỉ gửi sản phẩm còn hàng vào view model
             return View("OrderConfirmation", model);
         }
 

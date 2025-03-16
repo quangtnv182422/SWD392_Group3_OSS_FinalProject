@@ -205,6 +205,12 @@
 		</div>
 	</div>
 </div>
+@if (TempData["OutOfStockError"] != null)
+{
+	<div class="alert alert-danger" style="margin: 20px auto; max-width: 800px; text-align: center;">
+		@TempData["OutOfStockError"]
+	</div>
+}
 <!-- end breadcrumb section -->
 <!-- Order Confirmation section -->
 <div class="checkout-section mt-150 mb-150">
@@ -367,7 +373,10 @@
 						<!-- Checkout Button (Phải nằm trong form) -->
 						<div class="row mt-4">
 							<div class="col-md-12">
-								<button type="submit" class="boxed-btn w-100">Checkout</button>
+								<button type="submit" class="boxed-btn w-100"
+								@(Model.SelectedCartItems.Any() ? "" : "disabled")>
+									Checkout
+								</button>
 							</div>
 						</div>
 					</div> <!-- End Order Details Wrap -->

@@ -7,6 +7,9 @@ using Net.payOS;
 using Net.payOS.Types;
 using Service.Interface;
 using Data.Models.PayOS;
+using Api.GHN.Implementation;
+using Data.Models.GHN;
+using Api.GHN.Interface;
 namespace OnlineShoppingSystem_Main.Controllers
 {
 	//	9704198526191432198
@@ -19,19 +22,22 @@ namespace OnlineShoppingSystem_Main.Controllers
 		private readonly IOrderService _orderService;
 		private readonly IConfiguration _configuration;
 		private readonly IUserService _userService;
+		private readonly IGhnProxy _ghnService;
 
-        public PaymentController(IVnPayProxy vnPayService,
+		public PaymentController(IVnPayProxy vnPayService,
 								IOrderService orderService,
 								IPayosProxy payOsService,
 								IConfiguration configuration,
-                                IUserService userService
-                              )
+								IUserService userService,
+								IGhnProxy ghnService
+							  )
 		{
 			_vnPayService = vnPayService;
 			_payOsService = payOsService;
 			_orderService = orderService;
 			_configuration = configuration;
 			_userService = userService;
+			_ghnService = ghnService;
 		}
 
 		/// <summary>
@@ -44,11 +50,14 @@ namespace OnlineShoppingSystem_Main.Controllers
 														string address,
 														string paymentMethod,
 														string selectedItems,
-														decimal totalCost, 
+														decimal totalCost,
 														string deliveryNotes,
 														string SelectedProvinceName,
 														string SelectedDistrictName,
-														string SelectedWardname)
+														string SelectedWardname,
+														string SelectedProvinceId,
+														int SelectedDistrictId,
+														string SelectedWardId)
 		{
 			//Lấy từng sản phẩm trong giỏ hàng 
 			var cartItemIds = selectedItems.Split(",").Select(int.Parse).ToList();
@@ -57,17 +66,50 @@ namespace OnlineShoppingSystem_Main.Controllers
 									  .Where(part => !string.IsNullOrEmpty(part)));
 			//Lấy Id user nếu có đăng nhập
 			var userId = await _userService.GetCurrentUserIdAsync();
-			//Tạo order với trạng thái pending
+			//Tạo order lưu vào DB với trạng thái pending
 			var order = await _orderService.CreateOrderAsync(fullName, userId, email, mobile,
 												fullAddress, paymentMethod, cartItemIds,
 												(float)totalCost, 1, deliveryNotes); // 1 là pending confirm dành cho COD
 			switch (paymentMethod)
 			{
 				case "COD":
-                   
+					var shippingOrder = new ShippingOrder
+					{
+						payment_type_id = 2,
+						note = deliveryNotes,
+						required_note = "KHONGCHOXEMHANG",
+						to_name = fullName,
+						to_phone = mobile,
+						to_address = fullAddress,
+						to_ward_code = SelectedWardId,
+						to_district_id = SelectedDistrictId,
+						cod_amount = 20000,//max tối đa COD của GHN là 300k
+						weight = 200,
+						length = 20,
+						width = 15,
+						height = 5,
+						service_type_id = 2,
+						items = new List<ShippingOrder.ItemOrderGHN>
+							{
+								new ShippingOrder.ItemOrderGHN
+								{
+									name = "Sách đọc",
+									quantity = 1,
+									weight = 1200,
+									category = new ShippingOrder.ItemOrderGHN.CategoryGHN { level1 = "Sách" }
+								}
+							}
+
+					};
+
+					var shippingResponse = await _ghnService.SendShippingOrderAsync(shippingOrder);
+					if (shippingResponse.Contains("Error"))
+					{
+						return BadRequest("Failed to create shipping order: " + shippingResponse);
+					}
 					return RedirectToAction("PaymentSuccess");
 
-                case "vnPay":
+				case "vnPay":
 
 					var paymentModel = new PaymentInformationModel
 					{
@@ -174,7 +216,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 		{
 			var response = _payOsService.ProcessReturnUrl(Request.Query);
 
-			if (response == null || response.Code != "00" )
+			if (response == null || response.Code != "00")
 			{
 				return RedirectToAction("PaymentFail");
 			}

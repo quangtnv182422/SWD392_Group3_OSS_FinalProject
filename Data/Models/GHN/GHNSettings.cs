@@ -10,6 +10,8 @@ namespace Data.Models.GHN
     {
         public string Token { get; set; }
         public string BaseUrl { get; set; }
-        public GHNEndpoints Endpoints { get; set; }
+        public string TestBaseUrl { get; set; }
+		public string ShopId { get; set; }
+		public GHNEndpoints Endpoints { get; set; }
     }
 }

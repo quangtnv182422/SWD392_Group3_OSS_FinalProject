@@ -21,6 +21,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 //emailSender
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 //Category
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); 
 builder.Services.AddScoped<ICategoryService, CategoryService>(); 
@@ -37,22 +39,33 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 //Cloundinary
-builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<ICloudinaryProxy, CloudinaryProxy>();
 //PayOS
-builder.Services.AddScoped<IPayosService, PayosService>();
+builder.Services.AddScoped<IPayosProxy, PayosProxy>();
 //vnPay
-builder.Services.AddScoped<IVnPayService, VnPayService>();
+builder.Services.AddScoped<IVnPayProxy, VnPayProxy>();
+//GHN
+builder.Services.AddScoped<IGhnProxy,GhnApiProxy>();
 
-builder.Services.AddScoped<IGhnService,GhnApiService>();
+builder.Services.AddScoped<UserManager<AspNetUser>>();
+builder.Services.AddScoped<SignInManager<AspNetUser>>();
 
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Lockout.AllowedForNewUsers = false;
+});
+
+
+builder.Services.AddHttpContextAccessor();
 
 //Connect DB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<Swd392OssContext>(options => options.UseSqlServer(connectionString));
 
 //Config Identity
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<Swd392OssContext>();
+builder.Services.AddDefaultIdentity<AspNetUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<Swd392OssContext>()
+    .AddDefaultTokenProviders();
 
 var clientId = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_ID");
 var clientSecret = Environment.GetEnvironmentVariable("GOOGLE_OAUTH_CLIENT_SECRET");

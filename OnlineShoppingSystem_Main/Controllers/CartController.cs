@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Service.Interface;
 using Newtonsoft.Json;
+using Data.Models;
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
@@ -70,20 +71,42 @@ namespace OnlineShoppingSystem_Main.Controllers
                 .Select(id => id.Value)
                 .ToList();
 
-            List<int> existingSelectedCartItemIds = new List<int>();
-            if (TempData["SelectedCartItemIds"] != null)
+            var cart = await _cartService.GetUserCartAsync(userId);
+            var validCartItemIds = new List<int>();
+            var outOfStockItems = new List<string>();
+
+            // Kiểm tra tồn kho
+            foreach (var cartItemId in selectedCartItemIds)
             {
-                existingSelectedCartItemIds = JsonConvert.DeserializeObject<List<int>>(TempData["SelectedCartItemIds"].ToString());
+                var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CartItemId == cartItemId);
+                if (cartItem != null)
+                {
+                    if (cartItem.Product.Quantity >= cartItem.Quantity) // Còn hàng
+                    {
+                        validCartItemIds.Add(cartItemId);
+                    }
+                    else // Hết hàng
+                    {
+                        outOfStockItems.Add(cartItem.Product.ProductName);
+                    }
+                }
             }
 
-            selectedCartItemIds = selectedCartItemIds
-                .Union(existingSelectedCartItemIds)
-                .Distinct()
-                .ToList();
+            if (outOfStockItems.Any())
+            {
+                TempData["Error"] = $"Sản phẩm {string.Join(", ", outOfStockItems)} đã hết hàng. Vui lòng kiểm tra lại!";
+                TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds); // Giữ lại lựa chọn
+                return RedirectToAction("Index");
+            }
 
-            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds);
+            if (!validCartItemIds.Any())
+            {
+                TempData["Error"] = "Không có sản phẩm hợp lệ để đặt hàng!";
+                return RedirectToAction("Index");
+            }
 
-            var order = await _cartService.PlaceSelectedOrderAsync(userId, selectedCartItemIds);
+            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(validCartItemIds);
+            var order = await _cartService.PlaceSelectedOrderAsync(userId, validCartItemIds);
 
             if (order == null)
             {
@@ -92,7 +115,6 @@ namespace OnlineShoppingSystem_Main.Controllers
             }
 
             order = await _orderService.SaveOrderAsync(order);
-
             TempData.Remove("SelectedCartItemIds");
 
             TempData["Message"] = "Đặt hàng thành công!";

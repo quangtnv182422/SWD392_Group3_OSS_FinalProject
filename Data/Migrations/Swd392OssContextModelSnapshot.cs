@@ -238,8 +238,8 @@ namespace OnlineShoppingSystem_Main.Migrations
 
                     b.Property<string>("Address")
                         .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)");
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("CustomerId")
                         .HasMaxLength(450)
@@ -255,8 +255,8 @@ namespace OnlineShoppingSystem_Main.Migrations
 
                     b.Property<string>("Note")
                         .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)");
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<int?>("OrderStatusId")
                         .HasColumnType("int");
@@ -347,6 +347,7 @@ namespace OnlineShoppingSystem_Main.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
 
                     b.Property<int?>("CategoryId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -370,6 +371,7 @@ namespace OnlineShoppingSystem_Main.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<int?>("ProductStatusId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -721,6 +723,14 @@ namespace OnlineShoppingSystem_Main.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasMaxLength(100)
+                        .HasColumnType("datetime2");
+
                     b.HasDiscriminator().HasValue("AspNetUser");
                 });
 
@@ -849,11 +859,15 @@ namespace OnlineShoppingSystem_Main.Migrations
                     b.HasOne("Data.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK__Product__Categor__7C4F7684");
 
                     b.HasOne("Data.Models.ProductStatus", "ProductStatus")
                         .WithMany("Products")
                         .HasForeignKey("ProductStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK__Product__Product__7D439ABD");
 
                     b.Navigation("Category");

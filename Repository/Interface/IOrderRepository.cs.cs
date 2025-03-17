@@ -14,15 +14,12 @@ namespace Repository.Interface
         Task<List<CartItem>> GetCartItemsByIdsAsync(List<int> cartItemIds);
         Task CreateOrderAsync(Order order);
         Task SaveChangesAsync();
+        Task<bool> ConfirmOrderAsync(int orderId, int confirmStatus);
 
-
-        // Track Order List
-        Task<List<Order>> GetOrdersByUserIdAsync(string userId);
+		// Track Order Detail
+		Task<List<Order>> GetOrdersByUserIdAsync(string userId);
         Task<bool> CancelOrderAsync(int orderId);
-
-
-        // Track Order Detail
-        Task<Order?> GetOrderDetailsAsync(int orderId);
+        Task<Order> GetOrderDetailsAsync(int orderId);
         Task<bool> UpdateOrderAsync(Order order);
     }
 

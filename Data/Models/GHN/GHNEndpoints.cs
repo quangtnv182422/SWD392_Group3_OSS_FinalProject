@@ -13,5 +13,6 @@ namespace Data.Models.GHN
         public string Wards { get; set; }
         public string AvailableServices { get; set; }
         public string ShippingFee { get; set; }
-    }
+        public string CreateOrder { get; set; }
+	}
 }

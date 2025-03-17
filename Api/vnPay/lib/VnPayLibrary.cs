@@ -44,8 +44,8 @@ namespace Api.vnPay.lib
             {
                 Success = true,
                 PaymentMethod = "VnPay",
-                OrderDescription = orderInfo,
-                OrderId = orderId.ToString(),
+				OrderId = orderInfo,
+				OrderResponseId = orderId.ToString(),
                 PaymentId = vnPayTranId.ToString(),
                 TransactionId = vnPayTranId.ToString(),
                 Token = vnpSecureHash,

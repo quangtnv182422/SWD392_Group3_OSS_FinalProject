@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Repository.Interface
 {
     public interface IUserRepository
     {
-        Task<IdentityUser> GetUserByIdAsync(string userId);
+        Task<AspNetUser> GetUserByIdAsync(string userId);
+        Task<IEnumerable<AspNetUser>> GetUsersAsync(string searchQuery);
+        Task<bool> AddUserAsync(AspNetUser user, string password);
+        Task<bool> UpdateUserAsync(AspNetUser user);
+        Task<bool> DeleteUserAsync(string userId);
     }
 }

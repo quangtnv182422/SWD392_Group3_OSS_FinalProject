@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace Api.Interface
 {
-    public interface ICloudinaryService
+    public interface ICloudinaryProxy
     {
         Task<string> UploadImageAsync(IFormFile file);
+       void DeleteImage(string imageUrl);
     }
 }

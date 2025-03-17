@@ -14,11 +14,11 @@ namespace OnlineShoppingSystem_Main.Controllers
     {
         private readonly IProductService _context;
         private readonly ILogger<HomeController> _logger;
-        private readonly ICloudinaryService _cloudinaryService;
+        private readonly ICloudinaryProxy _cloudinaryService;
         private readonly ICategoryService _categoryService;
 
 
-        public AdminProductController(IProductService context, ILogger<HomeController> logger, ICloudinaryService cloudinaryService, ICategoryService categoryService)
+        public AdminProductController(IProductService context, ILogger<HomeController> logger, ICloudinaryProxy cloudinaryService, ICategoryService categoryService)
         {
             _context = context;
             _logger = logger;

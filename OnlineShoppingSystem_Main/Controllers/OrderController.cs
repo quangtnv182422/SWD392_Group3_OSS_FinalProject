@@ -7,7 +7,8 @@ using System.Diagnostics;
 using System.Security.Claims;
 using Data.Models;
 using Api.GHN.Interface;
-using Data.Models.GHN; 
+using Data.Models.GHN;
+using System.Text.Json;
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
@@ -16,9 +17,9 @@ namespace OnlineShoppingSystem_Main.Controllers
         private readonly IOrderService _orderService;
         private readonly IUserService _userService;
         private readonly ICartService _cartService;
-        private readonly IGhnService _ghnService;
+        private readonly IGhnProxy _ghnService;
 
-        public OrderController(IOrderService orderService, IUserService userService, ICartService cartService, IGhnService ghnService)
+        public OrderController(IOrderService orderService, IUserService userService, ICartService cartService, IGhnProxy ghnService)
         {
             _orderService = orderService;
             _userService = userService;
@@ -26,7 +27,7 @@ namespace OnlineShoppingSystem_Main.Controllers
             _ghnService = ghnService;
         }
 
-        private async Task<IdentityUser> GetCurrentUserAsync()
+        private async Task<AspNetUser> GetCurrentUserAsync()
         {
             string userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!string.IsNullOrEmpty(userId))
@@ -91,11 +92,41 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             List<int> selectedCartItemIds = selectedItems.Select(int.Parse).ToList();
             string userId = await _userService.GetUserIdAsync(HttpContext);
-            var currentUser = await GetCurrentUserAsync(); 
+            var currentUser = await GetCurrentUserAsync();
 
-            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds);
+            var cart = await _cartService.GetUserCartAsync(userId);
+            var validCartItemIds = new List<int>();
+            var outOfStockItems = new List<string>();
 
-            var model = await _orderService.CreateOrderConfirmationViewModelAsync(selectedCartItemIds, currentUser);
+            // Kiểm tra tồn kho
+            foreach (var cartItemId in selectedCartItemIds)
+            {
+                var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CartItemId == cartItemId);
+                if (cartItem != null)
+                {
+                    if (cartItem.Product.Quantity >= cartItem.Quantity) // Còn hàng
+                    {
+                        validCartItemIds.Add(cartItemId);
+                    }
+                    else // Hết hàng
+                    {
+                        outOfStockItems.Add(cartItem.Product.ProductName);
+                    }
+                }
+            }
+
+            if (outOfStockItems.Any())
+            {
+                TempData["OutOfStockError"] = $"Sản phẩm {string.Join(", ", outOfStockItems)} đã hết hàng.";
+            }
+
+            if (!validCartItemIds.Any() && outOfStockItems.Any())
+            {
+                TempData["OutOfStockError"] = "Tất cả sản phẩm đã chọn đều hết hàng!";
+            }
+
+            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds); // Lưu tất cả sản phẩm đã chọn
+            var model = await _orderService.CreateOrderConfirmationViewModelAsync(validCartItemIds, currentUser); // Chỉ gửi sản phẩm còn hàng vào view model
             return View("OrderConfirmation", model);
         }
 
@@ -152,7 +183,7 @@ namespace OnlineShoppingSystem_Main.Controllers
          }*/
 
 
-        // Lấy danh sách đơn hàng của người dùng
+        // Track Order Detail
         [HttpGet]
         public async Task<IActionResult> OrderList(string searchOrderId, string paymentMethod, string status)
         {
@@ -166,19 +197,17 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             var orders = await _orderService.GetOrdersByUserIdAsync(currentUser.Id);
 
-            // Lọc theo OrderID (tìm kiếm một phần số OrderID)
+            // Filter
             if (!string.IsNullOrEmpty(searchOrderId))
             {
                 orders = orders.Where(o => o.OrderId.ToString().Contains(searchOrderId)).ToList();
             }
 
-            // Lọc theo phương thức thanh toán
             if (!string.IsNullOrEmpty(paymentMethod))
             {
                 orders = orders.Where(o => o.PaymentMethod == paymentMethod).ToList();
             }
 
-            // Lọc theo trạng thái đơn hàng
             if (!string.IsNullOrEmpty(status))
             {
                 orders = orders.Where(o => o.OrderStatus.StatusName == status).ToList();
@@ -191,7 +220,6 @@ namespace OnlineShoppingSystem_Main.Controllers
             return View("OrderList", orders);
         }
 
-        // Hủy đơn hàng
         [HttpPost]
         public async Task<IActionResult> CancelOrder(int orderId)
         {
@@ -205,6 +233,73 @@ namespace OnlineShoppingSystem_Main.Controllers
                 TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công.";
             }
             return RedirectToAction("OrderList");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderDetails(int orderId)
+        {
+            var order = await _orderService.GetOrderDetailsAsync(orderId);
+            if (order == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                return RedirectToAction("OrderList");
+            }
+
+            return View("OrderDetails", order);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderDetails(Order updatedOrder)
+        {
+            var existingOrder = await _orderService.GetOrderByIdAsync(updatedOrder.OrderId.ToString());
+
+            if (existingOrder == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                return RedirectToAction("OrderList");
+            }
+
+            try
+            {
+                existingOrder.FullName = updatedOrder.FullName;
+                existingOrder.PhoneNumber = updatedOrder.PhoneNumber;
+                existingOrder.Email = updatedOrder.Email;
+                existingOrder.Address = updatedOrder.Address;
+                existingOrder.OrderStatusId = updatedOrder.OrderStatusId;
+                existingOrder.Note = updatedOrder.Note;
+
+                await _orderService.UpdateOrderAsync(existingOrder);
+
+                var ghnUpdateRequest = new GhnOrderUpdateRequest
+                {
+                    OrderCode = existingOrder.OrderId.ToString(),
+                    ToName = existingOrder.FullName,
+                    ToPhone = existingOrder.PhoneNumber,
+                    ToAddress = existingOrder.Address,
+                    Note = existingOrder.Note
+                };
+
+                var ghnResponse = await _ghnService.UpdateOrderOnGHNAsync(ghnUpdateRequest);
+                var ghnResult = System.Text.Json.JsonSerializer.Deserialize<GhnApiResponse>(ghnResponse, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (ghnResult.Code != 200)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Cập nhật đơn hàng trên GHN thất bại: " + ghnResult.Message;
+                }
+                return RedirectToAction("OrderDetails", new { orderId = updatedOrder.OrderId });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Lỗi khi cập nhật đơn hàng: " + ex.Message;
+                return RedirectToAction("OrderDetails", new { orderId = updatedOrder.OrderId });
+            }
         }
     }
 }

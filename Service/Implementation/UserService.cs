@@ -8,18 +8,23 @@ using System.Security.Claims;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Data.Models;
+using System.Text;
+using CloudinaryDotNet.Actions;
 
 namespace Service.Implementation
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<AspNetUser> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserService(IUserRepository userRepository, UserManager<IdentityUser> userManager)
+        public UserService(IUserRepository userRepository, UserManager<AspNetUser> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _userManager = userManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<string> GetUserIdAsync(HttpContext httpContext)
@@ -34,7 +39,7 @@ namespace Service.Implementation
             return userId ?? "User1";
         }
 
-        public async Task<IdentityUser> GetCurrentUserAsync(string userId)
+        public async Task<AspNetUser> GetCurrentUserAsync(string userId)
         {
             return await _userRepository.GetUserByIdAsync(userId);
         }
@@ -44,7 +49,7 @@ namespace Service.Implementation
             var user = await _userManager.FindByIdAsync("User1");
             if (user == null)
             {
-                user = new IdentityUser
+                user = new AspNetUser
                 {
                     Id = "User1",
                     UserName = "User1",
@@ -71,6 +76,110 @@ namespace Service.Implementation
 
             await httpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal);
             Debug.WriteLine("[DEBUG] Fake login for User1 completed.");
+        }
+
+        public async Task<IEnumerable<AspNetUser>> GetUsersAsync(string searchQuery)
+        {
+            return await _userRepository.GetUsersAsync(searchQuery);
+        }
+
+        public async Task<AspNetUser> GetUserByIdAsync(string userId)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null) return null;
+
+            return new AspNetUser
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
+            };
+        }
+
+        public async Task<bool> AddUserAsync(AspNetUser user, string passwords, string role)
+        {
+            var createResult = await _userRepository.AddUserAsync(user, passwords);
+            if (!createResult)
+            {
+                return false;
+            }
+
+            //if (!string.IsNullOrEmpty(role))
+            //{
+            //    // Kiểm tra role có tồn tại chưa (nếu bạn muốn tạo role tự động)
+            //    // var roleExist = await _roleManager.RoleExistsAsync(role);
+            //    // if (!roleExist)
+            //    // {
+            //    //     await _roleManager.CreateAsync(new IdentityRole(role));
+            //    // }
+
+            //    var addToRoleResult = await _userManager.AddToRoleAsync(user, role);
+            //    if (!addToRoleResult.Succeeded)
+            //    {
+            //        return false;
+            //    }
+            //}
+
+            return true;
+        }
+
+        public async Task<bool> UpdateUserAsync(AspNetUser userInput)
+        {
+            var existingUser = await _userManager.FindByIdAsync(userInput.Id);
+            if (existingUser == null) return false;
+
+            existingUser.UserName = userInput.UserName;
+            existingUser.Email = userInput.Email;
+            existingUser.PhoneNumber = userInput.PhoneNumber;
+            existingUser.DateOfBirth = userInput.DateOfBirth;
+            existingUser.Address = userInput.Address;
+            existingUser.LockoutEnabled = userInput.LockoutEnabled;
+
+            // Lưu ý: Nếu bạn muốn cập nhật Roles, bạn nên dùng userManager.AddToRoleAsync /
+            // RemoveFromRoleAsync thay vì gán trực tiếp. Gán trực tiếp Roles[] vào đây 
+            // sẽ không có tác dụng, vì Identity quản lý Roles bằng bảng AspNetUserRoles.
+            // existingUser.Roles        = userInput.Roles; // Thường không update trực tiếp
+
+            return await _userRepository.UpdateUserAsync(existingUser);
+        }
+
+
+        public async Task<bool> DeleteUserAsync(string userId)
+        {
+            return await _userRepository.DeleteUserAsync(userId);
+        }
+
+        public async Task<string> AutoCreatePasswords()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+            Random random = new Random();
+
+            string password = new string(Enumerable.Repeat(chars, 12)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            return await Task.FromResult(password);
+        }
+
+
+        public async Task<AspNetUser> GetCurrentUserAsync()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                return await _userManager.GetUserAsync(user);
+            }
+            return null;
+        }
+
+        public async Task<string> GetCurrentUserIdAsync()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                return user.FindFirstValue(ClaimTypes.NameIdentifier);
+            }
+            return null; 
         }
     }
 }

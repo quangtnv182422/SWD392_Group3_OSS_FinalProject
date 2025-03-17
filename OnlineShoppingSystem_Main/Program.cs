@@ -55,7 +55,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.AllowedForNewUsers = false;
 });
 
-
 builder.Services.AddHttpContextAccessor();
 
 //Connect DB

@@ -128,7 +128,10 @@ namespace OnlineShoppingSystem_Main.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateUser(AspNetUser user)
         {
-            Console.WriteLine(user);
+            if (user == null || string.IsNullOrEmpty(user.Id))
+            {
+                return BadRequest(new { success = false, message = "User data is invalid." });
+            }
 
             bool result = await _userService.UpdateUserAsync(user);
 

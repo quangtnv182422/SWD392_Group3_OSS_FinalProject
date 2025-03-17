@@ -137,7 +137,7 @@
                     <th>Payment Method</th>
                     <th>Status</th>
                     <th>Note</th>
-                    @* <th>TotalCost</th> *@
+                    <th>Total Cost</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -151,7 +151,7 @@
                         <td>@order.PaymentMethod</td>
                         <td>@order.OrderStatus?.StatusName</td>
                         <td>@order.Note</td>
-                        @* <td>@(order.TotalCost.ToString("#,##0") + " đ")</td> *@
+                        <td>@(order.TotalCost.ToString("#,##0") + " đ")</td>
                         <td>
                             <!-- Xem đơn hàng -->
                             <a asp-controller="Order" asp-action="OrderDetails" asp-route-orderId="@order.OrderId">

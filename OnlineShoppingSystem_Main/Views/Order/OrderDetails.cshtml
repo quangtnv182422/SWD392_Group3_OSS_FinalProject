@@ -124,10 +124,10 @@
                             <td>@item.PriceEachItem.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td>
                         </tr>
                     }
-                    @* <tr class="total-row"> *@
-                    @*     <td colspan="2">Total</td> *@
-                    @*     <td>@Model.TotalCost.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td> *@
-                    @* </tr> *@
+                    <tr class="total-row">
+                        <td colspan="2">Total Cost</td>
+                        <td>@Model.TotalCost.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td> 
+                    </tr> 
                 </tbody>
             </table>
 
@@ -154,10 +154,13 @@
                 <textarea name="Note" class="form-control change-detect">@Model.Note</textarea>
             </div>
 
+            @if (Model.OrderStatusId == 1 || Model.OrderStatusId == 2 || Model.OrderStatusId == 3 || Model.OrderStatusId == 4)
+            {
             <div class="btn-container">
                 <a href="#" id="btnBack" class="btn btn-back">Back to Orders</a>
                 <button type="submit" id="btnSave" class="btn btn-save">Save Change</button>
             </div>
+            }
         </form>
     </div>
 

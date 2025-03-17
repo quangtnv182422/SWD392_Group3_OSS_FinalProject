@@ -76,6 +76,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 				case "COD":
 					var shippingOrder = new ShippingOrder
 					{
+						shop_id = _configuration["GHNSettings:ShopId"],
 						payment_type_id = 2,
 						note = deliveryNotes,
 						required_note = "KHONGCHOXEMHANG",
@@ -241,8 +242,10 @@ namespace OnlineShoppingSystem_Main.Controllers
 			return RedirectToAction("PaymentSuccess");
 		}
 
-		/// <summary>
-		/// API endpoint to create shipping order
+
+#warning
+		/*/// <summary>
+		/// Hàm này để test end point GHN Create Order
 		/// </summary>
 		[HttpPost("create-shipping-order")]
 		public async Task<IActionResult> CreateShippingOrder([FromBody] ShippingOrder order)
@@ -274,7 +277,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 			{
 				return StatusCode(500, $"Internal server error: {ex.Message}");
 			}
-		}
+		}*/
 
 	}
 }

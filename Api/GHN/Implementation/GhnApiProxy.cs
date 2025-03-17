@@ -87,10 +87,10 @@ namespace Api.GHN.Implementation
         }
 		public async Task<string> SendShippingOrderAsync(ShippingOrder order)
 		{
-			string url = $"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.CreateOrder}";
-			string shopId = _ghnSettings.ShopId;
+			//string url = $"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.CreateOrder}";
+			//string shopId = _ghnSettings.ShopId;
 
-			_httpClient.DefaultRequestHeaders.Add("ShopId", shopId);
+			//_httpClient.DefaultRequestHeaders.Add("ShopId", shopId);
 
             var options = new JsonSerializerOptions
             {
@@ -98,8 +98,14 @@ namespace Api.GHN.Implementation
             };
 
             var json = JsonSerializer.Serialize(order, options);
+			//var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            /*var json = JsonSerializer.Serialize(new
+			var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.CreateOrder}",
+				new StringContent(json, Encoding.UTF8, "application/json"));
+			return await response.Content.ReadAsStringAsync();
+
+
+			/*var json = JsonSerializer.Serialize(new
 			{
 				//shop_id = shopId,
 				payment_type_id = order.payment_type_id,
@@ -119,18 +125,16 @@ namespace Api.GHN.Implementation
 				items = order.items
 			});*/
 
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-			var response = await _httpClient.PostAsync(url, content);
 
-			if (response.IsSuccessStatusCode)
+			/*if (response.IsSuccessStatusCode)
 			{
 				return await response.Content.ReadAsStringAsync();
 			}
 			else
 			{
 				return $"Error: {response.StatusCode}";
-			}
+			}*/
 		}
 
 	}

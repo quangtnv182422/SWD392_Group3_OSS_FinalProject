@@ -8,7 +8,8 @@ namespace Data.Models.GHN
 {
 	public class ShippingOrder
 	{
-		public int payment_type_id { get; set; }
+        public string? shop_id { get; set; }
+        public int payment_type_id { get; set; }
 		public string? note { get; set; }
 		public string? required_note { get; set; }
 		public string? return_phone { get; set; }

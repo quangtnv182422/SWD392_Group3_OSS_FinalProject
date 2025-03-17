@@ -10,6 +10,7 @@ using Data.Models.PayOS;
 using Api.GHN.Implementation;
 using Data.Models.GHN;
 using Api.GHN.Interface;
+using System.Text.Json;
 namespace OnlineShoppingSystem_Main.Controllers
 {
 	//	9704198526191432198
@@ -238,6 +239,41 @@ namespace OnlineShoppingSystem_Main.Controllers
 				}
 			}
 			return RedirectToAction("PaymentSuccess");
+		}
+
+		/// <summary>
+		/// API endpoint to create shipping order
+		/// </summary>
+		[HttpPost("create-shipping-order")]
+		public async Task<IActionResult> CreateShippingOrder([FromBody] ShippingOrder order)
+		{
+			try
+			{
+				var response = await _ghnService.SendShippingOrderAsync(order);
+
+				if (response.Contains("Error"))
+				{
+					return BadRequest($"Shipping order creation failed: {response}");
+				}
+
+				return Ok($"Shipping order created successfully: {response}");
+			}
+			catch (HttpRequestException httpEx)
+			{
+				return StatusCode(502, $"Bad Gateway - Error while calling the external service: {httpEx.Message}");
+			}
+			catch (TimeoutException timeoutEx)
+			{
+				return StatusCode(408, $"Request Timeout: {timeoutEx.Message}");
+			}
+			catch (JsonException jsonEx)
+			{
+				return StatusCode(400, $"Bad Request - Invalid data format: {jsonEx.Message}");
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
 		}
 
 	}

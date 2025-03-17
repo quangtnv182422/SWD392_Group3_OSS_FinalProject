@@ -92,14 +92,14 @@ namespace Api.GHN.Implementation
 
 			_httpClient.DefaultRequestHeaders.Add("ShopId", shopId);
 
-			/*var options = new JsonSerializerOptions
-			{
-				PropertyNameCaseInsensitive = true
-			};
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
 
-			var json = JsonSerializer.Serialize(order, options);*/
+            var json = JsonSerializer.Serialize(order, options);
 
-			var json = JsonSerializer.Serialize(new
+            /*var json = JsonSerializer.Serialize(new
 			{
 				//shop_id = shopId,
 				payment_type_id = order.payment_type_id,
@@ -117,9 +117,9 @@ namespace Api.GHN.Implementation
 				height = order.height,
 				service_type_id = order.service_type_id,
 				items = order.items
-			});
+			});*/
 
-			var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
 			var response = await _httpClient.PostAsync(url, content);
 

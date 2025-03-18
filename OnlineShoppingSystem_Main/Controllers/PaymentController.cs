@@ -262,6 +262,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 					if (updateOrder != null)
 					{
 						await _orderService.ConfirmOrderAsync(updateOrder.OrderId, 2); // 2 là status đã xác nhận
+						await _productService.UpdateProductQuantityAfterOrder(updateOrder.OrderItems); // trừ sản phẩm sau khi order trong product
 
 					}
 				}

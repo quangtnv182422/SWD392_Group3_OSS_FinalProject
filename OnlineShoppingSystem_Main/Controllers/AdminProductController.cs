@@ -60,6 +60,8 @@ namespace OnlineShoppingSystem_Main.Controllers
         [HttpPost]
         public async Task<IActionResult> AddProduct(Product model, List<IFormFile> ProductImages)
         {
+
+
             if (!ModelState.IsValid)
             {
                 return Json(new { success = false });
@@ -87,15 +89,17 @@ namespace OnlineShoppingSystem_Main.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateProduct(Product product, List<IFormFile> ProductImages)
         {
-            if (!ModelState.IsValid)
-            {
-                Console.WriteLine("Model State Errors:");
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    Console.WriteLine(error.ErrorMessage);
-                }
-                return Json(new { success = false, message = "Invalid data" });
-            }
+
+            product.CreatedAt = DateTime.Now;
+            //if (!ModelState.IsValid)
+            //{
+            //    Console.WriteLine("Model State Errors:");
+            //    foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            //    {
+            //        Console.WriteLine(error.ErrorMessage);
+            //    }
+            //    return Json(new { success = false, message = "Invalid data" });
+            //}
 
             Console.WriteLine($"Product Status ID: {product.ProductStatusId}");
 

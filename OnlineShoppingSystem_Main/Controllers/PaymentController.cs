@@ -78,6 +78,11 @@ namespace OnlineShoppingSystem_Main.Controllers
 					{
 						shop_id = _configuration["GHNSettings:ShopId"],
 						payment_type_id = 2,
+						from_phone = _configuration["GHNSettings:SenderPhone"],
+						from_address = _configuration["GHNSettings:FromAddress"],
+						from_ward_name = _configuration["GHNSettings:FromWardName"],
+						from_district_name = _configuration["GHNSettings:FromDistrictName"],
+						from_provice_name = _configuration["GHNSettings:FromProvinceName"],
 						note = deliveryNotes,
 						required_note = "KHONGCHOXEMHANG",
 						to_name = fullName,
@@ -86,7 +91,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 						to_ward_code = SelectedWardId,
 						to_district_id = SelectedDistrictId,
 						cod_amount = 20000,//max tối đa COD của GHN là 300k
-						weight = 200,
+						weight = 200,// fix cứng vì ko có lưu weight, lenght, width, height
 						length = 20,
 						width = 15,
 						height = 5,
@@ -96,19 +101,20 @@ namespace OnlineShoppingSystem_Main.Controllers
 								new ShippingOrder.ItemOrderGHN
 								{
 									name = "Sách đọc",
-									quantity = 1,
+									quantity = cartItemIds.Count,
 									weight = 1200,
 									category = new ShippingOrder.ItemOrderGHN.CategoryGHN { level1 = "Sách" }
 								}
 							}
+						};
 
-					};
+					//Gửi thông tin Order cho GHN (Tạm tắt vì GHN giới hạn test cho 3 đơn)
 
-					var shippingResponse = await _ghnService.SendShippingOrderAsync(shippingOrder);
+					/*var shippingResponse = await _ghnService.SendShippingOrderAsync(shippingOrder);
 					if (shippingResponse.Contains("Error"))
 					{
 						return BadRequest("Failed to create shipping order: " + shippingResponse);
-					}
+					}*/
 					return RedirectToAction("PaymentSuccess");
 
 				case "vnPay":
@@ -244,7 +250,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 
 
 #warning
-		/*/// <summary>
+		/// <summary>
 		/// Hàm này để test end point GHN Create Order
 		/// </summary>
 		[HttpPost("create-shipping-order")]
@@ -277,7 +283,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 			{
 				return StatusCode(500, $"Internal server error: {ex.Message}");
 			}
-		}*/
+		}
 
 	}
 }

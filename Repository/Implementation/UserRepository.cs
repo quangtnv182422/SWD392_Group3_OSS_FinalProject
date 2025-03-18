@@ -1,5 +1,6 @@
 ﻿using Data.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
 using System.Diagnostics;
@@ -31,14 +32,42 @@ namespace Repository.Implementation
 
             return user;
         }
-        public async Task<IEnumerable<AspNetUser>> GetUsersAsync(string searchQuery)
+        public async Task<IEnumerable<AspNetUser>> GetUsersAsync(string searchQuery, string roleFilter, string statusFilter)
         {
-            var users = _userManager.Users.AsQueryable();
+            var query = _userManager.Users.AsQueryable();
+
+            // Lọc theo từ khoá tìm kiếm
             if (!string.IsNullOrEmpty(searchQuery))
             {
-                users = users.Where(u => u.UserName.Contains(searchQuery) || u.Email.Contains(searchQuery));
+                query = query.Where(u => u.UserName.Contains(searchQuery) || u.Email.Contains(searchQuery));
             }
-            return await Task.FromResult(users.ToList());
+
+            // Lọc theo Status (Active/Deactivated)
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                bool isDeactivated = statusFilter == "Deactivated";
+                query = query.Where(u => u.LockoutEnabled == isDeactivated);
+            }
+
+            var users = await query.ToListAsync();
+
+            // Nếu có lọc Role, phải gọi GetRolesAsync để kiểm tra user nào có role đó
+            if (!string.IsNullOrEmpty(roleFilter))
+            {
+                var filteredUsers = new List<AspNetUser>();
+
+                foreach (var user in users)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    if (roles.Contains(roleFilter))
+                    {
+                        filteredUsers.Add(user);
+                    }
+                }
+                return filteredUsers;
+            }
+
+            return users;
         }
 
         public async Task<bool> AddUserAsync(AspNetUser user, string password)

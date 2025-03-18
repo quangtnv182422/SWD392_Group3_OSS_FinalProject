@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Data.Models;
 using System.Text;
 using CloudinaryDotNet.Actions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Service.Implementation
 {
@@ -19,12 +20,14 @@ namespace Service.Implementation
         private readonly IUserRepository _userRepository;
         private readonly UserManager<AspNetUser> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly RoleManager<AspNetRole> _roleManager;
 
-        public UserService(IUserRepository userRepository, UserManager<AspNetUser> userManager, IHttpContextAccessor httpContextAccessor)
+        public UserService(IUserRepository userRepository, UserManager<AspNetUser> userManager, IHttpContextAccessor httpContextAccessor, RoleManager<AspNetRole> roleManager)
         {
             _userRepository = userRepository;
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
+            _roleManager = roleManager;
         }
 
         public async Task<string> GetUserIdAsync(HttpContext httpContext)
@@ -78,70 +81,121 @@ namespace Service.Implementation
             Debug.WriteLine("[DEBUG] Fake login for User1 completed.");
         }
 
-        public async Task<IEnumerable<AspNetUser>> GetUsersAsync(string searchQuery)
+        public async Task<IEnumerable<AspNetUser>> GetUsersAsync(string searchQuery, string roleFilter, string statusFilter)
         {
-            return await _userRepository.GetUsersAsync(searchQuery);
+            return await _userRepository.GetUsersAsync(searchQuery, roleFilter, statusFilter);
+        }
+
+        public async Task<List<string>> GetUserRolesAsync(AspNetUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            return roles.ToList();
         }
 
         public async Task<AspNetUser> GetUserByIdAsync(string userId)
         {
-            var user = await _userRepository.GetUserByIdAsync(userId);
-            if (user == null) return null;
+            Debug.WriteLine($"[DEBUG] Looking for user with ID: {userId}");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                Debug.WriteLine("[DEBUG] User not found in database");
+                return null;
+            }
+
+            Debug.WriteLine($"[DEBUG] Found user: Id={user.Id}, UserName={user.UserName}");
+
+            // Lấy danh sách role của user
+            var roles = await _userManager.GetRolesAsync(user);
+            Debug.WriteLine($"[DEBUG] User roles: {string.Join(", ", roles)}");
 
             return new AspNetUser
             {
                 Id = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber,
+                DateOfBirth = user.DateOfBirth,
+                Address = user.Address,
+                LockoutEnabled = user.LockoutEnabled,
+                Roles = roles.Select(roleName => new AspNetRole { Name = roleName }).ToList() // Gán roles vào user
             };
         }
 
-        public async Task<bool> AddUserAsync(AspNetUser user, string passwords, string role)
+        public async Task<AspNetUser> GetUserForUpdateByIdAsync(string userId)
         {
-            var createResult = await _userRepository.AddUserAsync(user, passwords);
-            if (!createResult)
+            var user = await _userManager.FindByIdAsync(userId);
+            return user;
+        }
+
+
+        public async Task<bool> AddUserAsync(AspNetUser user, string password, string role)
+        {
+            // Tạo user bằng UserManager (chuẩn Identity)
+            var createResult = await _userManager.CreateAsync(user, password);
+            if (!createResult.Succeeded)
             {
+                // Log lỗi để biết lỗi gì
+                var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+                Console.WriteLine($"[DEBUG] Create user failed: {errors}");
                 return false;
             }
+            // Kiểm tra nếu role không rỗng, thì gán role
+            if (!string.IsNullOrEmpty(role))
+            {
+                var roleExists = await _roleManager.RoleExistsAsync(role);
+                if (!roleExists)
+                {
+                    var roleCreateResult = await _roleManager.CreateAsync(new AspNetRole { Name = role, NormalizedName = role.ToUpper() });
+            if (!roleCreateResult.Succeeded)
+            {
+                var errors = string.Join(", ", roleCreateResult.Errors.Select(e => e.Description));
+                Console.WriteLine($"[DEBUG] Create role '{role}' failed: {errors}");
+                return false;
+            }
+                }
 
-            //if (!string.IsNullOrEmpty(role))
-            //{
-            //    // Kiểm tra role có tồn tại chưa (nếu bạn muốn tạo role tự động)
-            //    // var roleExist = await _roleManager.RoleExistsAsync(role);
-            //    // if (!roleExist)
-            //    // {
-            //    //     await _roleManager.CreateAsync(new IdentityRole(role));
-            //    // }
-
-            //    var addToRoleResult = await _userManager.AddToRoleAsync(user, role);
-            //    if (!addToRoleResult.Succeeded)
-            //    {
-            //        return false;
-            //    }
-            //}
+                // Gán user vào role
+                var addToRoleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!addToRoleResult.Succeeded)
+                {
+                    var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
+                    Console.WriteLine($"[DEBUG] Add user to role '{role}' failed: {errors}");
+                    return false;
+                }
+            }
 
             return true;
         }
 
+        public async Task<List<string>> GetAllRolesAsync()
+        {
+            var roles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+            return roles;
+        }
+
         public async Task<bool> UpdateUserAsync(AspNetUser userInput)
         {
-            var existingUser = await _userManager.FindByIdAsync(userInput.Id);
-            if (existingUser == null) return false;
+            var result = await _userManager.UpdateAsync(userInput);
+            return result.Succeeded;
+        }
 
-            existingUser.UserName = userInput.UserName;
-            existingUser.Email = userInput.Email;
-            existingUser.PhoneNumber = userInput.PhoneNumber;
-            existingUser.DateOfBirth = userInput.DateOfBirth;
-            existingUser.Address = userInput.Address;
-            existingUser.LockoutEnabled = userInput.LockoutEnabled;
+        public async Task<bool> UpdateUserRolesAsync(AspNetUser user, List<string> newRoles)
+        {
+            // Lấy roles hiện tại
+            var currentRoles = await _userManager.GetRolesAsync(user);
 
-            // Lưu ý: Nếu bạn muốn cập nhật Roles, bạn nên dùng userManager.AddToRoleAsync /
-            // RemoveFromRoleAsync thay vì gán trực tiếp. Gán trực tiếp Roles[] vào đây 
-            // sẽ không có tác dụng, vì Identity quản lý Roles bằng bảng AspNetUserRoles.
-            // existingUser.Roles        = userInput.Roles; // Thường không update trực tiếp
+            // Xoá roles cũ mà không có trong newRoles
+            var rolesToRemove = currentRoles.Where(r => !newRoles.Contains(r)).ToList();
+            if (rolesToRemove.Any())
+                await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
 
-            return await _userRepository.UpdateUserAsync(existingUser);
+            // Thêm roles mới
+            var rolesToAdd = newRoles.Where(r => !currentRoles.Contains(r)).ToList();
+            if (rolesToAdd.Any())
+                await _userManager.AddToRolesAsync(user, rolesToAdd);
+
+            return true;
         }
 
 

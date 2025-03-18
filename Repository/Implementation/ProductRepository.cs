@@ -77,7 +77,16 @@ namespace Repository.Implementation
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Category>> GetCategoriesAsync()
+		public async Task<Product> GetProductByIdAsync(int? productId)
+		{
+			return await _context.Products
+				.Where(p => p.ProductId == productId && p.ProductStatusId == 1)
+				.Include(p => p.ProductImages)
+				.Include(p => p.ProductStatus)
+				.FirstOrDefaultAsync();
+		}
+
+		public async Task<IEnumerable<Category>> GetCategoriesAsync()
         {
             return await _context.Categories.ToListAsync();
         }

@@ -30,13 +30,15 @@ namespace OnlineShoppingSystem_Main.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<AspNetUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<AspNetRole> _roleManager;
 
         public RegisterModel(
             UserManager<AspNetUser> userManager,
             IUserStore<AspNetUser> userStore,
             SignInManager<AspNetUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<AspNetRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +46,7 @@ namespace OnlineShoppingSystem_Main.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -98,6 +101,8 @@ namespace OnlineShoppingSystem_Main.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            public string Role { get; set; } = "customer";
         }
 
 
@@ -122,6 +127,14 @@ namespace OnlineShoppingSystem_Main.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+                    var roleExists = await _roleManager.RoleExistsAsync(Input.Role);
+                    if (!roleExists)
+                    {
+                        await _roleManager.CreateAsync(new AspNetRole { Name = Input.Role, NormalizedName = Input.Role.ToUpper() });
+                    }
+
+                    // 🛑 Gán user vào Role "customer"
+                    await _userManager.AddToRoleAsync(user, Input.Role);
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

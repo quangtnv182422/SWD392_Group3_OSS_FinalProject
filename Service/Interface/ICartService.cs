@@ -13,7 +13,10 @@ namespace Service.Interface
         Task<Order> PlaceSelectedOrderAsync(string userId, List<int> selectedCartItemIds);
 
         Task UpdateCartAsync(Cart cart); 
-        Task UpdateCartItemAsync(CartItem cartItem); 
+        Task UpdateCartItemAsync(CartItem cartItem);
+        //code cua Duc Anh
+        Task<bool> AddProductToCartAsync(string userId, int productId);
+
     }
 
 }

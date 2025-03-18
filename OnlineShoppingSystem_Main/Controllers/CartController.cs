@@ -10,12 +10,14 @@ namespace OnlineShoppingSystem_Main.Controllers
         private readonly ICartService _cartService;
         private readonly IOrderService _orderService;
         private readonly IUserService _userService;
+        private readonly IProductService _productService;
 
-        public CartController(ICartService cartService, IOrderService orderService, IUserService userService)
+        public CartController(ICartService cartService, IOrderService orderService, IUserService userService, IProductService productService)
         {
             _cartService = cartService;
             _orderService = orderService;
             _userService = userService;
+            _productService = productService;
         }
 
         public async Task<IActionResult> Index()
@@ -149,5 +151,34 @@ namespace OnlineShoppingSystem_Main.Controllers
             }
             return View(order);
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> AddToCart(int id)
+        {
+            string userId = await _userService.GetUserIdAsync(HttpContext);
+
+            var product =  _productService.GetProductById(id);
+
+            if (product == null)
+            {
+                TempData["Error"] = "Sản phẩm không tồn tại!";
+                return RedirectToAction("Index", "Home");  
+            }
+
+            bool result = await _cartService.AddProductToCartAsync(userId, id);
+
+            if (result)
+            {
+                TempData["Message"] = "Sản phẩm đã được thêm vào giỏ hàng!";
+            }
+            else
+            {
+                TempData["Error"] = "Có lỗi khi thêm sản phẩm vào giỏ hàng!";
+            }
+
+            return RedirectToAction("Index", "Cart");
+        }
+
     }
 }

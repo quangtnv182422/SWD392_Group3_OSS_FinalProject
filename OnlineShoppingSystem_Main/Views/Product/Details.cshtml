@@ -31,7 +31,7 @@
                     <p><strong>Quantity Available:</strong> @Model.Quantity</p>
 
                     <div class="single-product-form">
-                        <form action="@Url.Action("AddToCart", "Cart", new { id = Model.ProductId })" method="post">
+                        <form action="@Url.Action("AddToCart", "Cart", new { id = Model.ProductId })" >
                             <div class="form-group">
                                 <label for="quantity">Quantity</label>
                                 <input type="number" id="quantity" name="quantity" min="1" max="@Model.Quantity" value="1" class="form-control">
@@ -42,6 +42,17 @@
                             </button>
                         </form>
                     </div>
+                    <div class="single-product-form">
+                        <form action="@Url.Action("ConfirmOrder", "Order")" method="post">
+                            <input type="hidden" name="selectedItems" value="@Model.ProductId" />
+                            <input type="hidden" name="quantity" value="1" /> 
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-cart-plus"></i> Buy Now
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -72,8 +83,8 @@
         <div class="row">
             <div class="col-lg-8 offset-lg-2 text-center">
                 <div class="section-title">
-                    <h3><span class="orange-text">Related</span> Products</h3>
-                    <p>Find more products that may interest you.</p>
+                    <h3><span class="orange-text">Related</span> Books</h3>
+                    <p>Coming soon.</p>
                 </div>
             </div>
         </div>

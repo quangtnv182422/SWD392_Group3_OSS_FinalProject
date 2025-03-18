@@ -70,6 +70,48 @@ namespace Repository.Implementation
             _context.Update(cart);
             await _context.SaveChangesAsync();
         }
+
+        //code cua Duc Anh
+        public async Task<bool> AddProductToCartAsync(string userId, int productId)
+        {
+            // Get the user's current cart
+            var cart = await _context.Carts
+                                     .Include(c => c.CartItems)
+                                     .ThenInclude(ci => ci.Product)  
+                                     .FirstOrDefaultAsync(c => c.CustomerId == userId);
+
+            if (cart == null)
+            {
+                cart = new Cart { CustomerId = userId, CartItems = new List<CartItem>() };
+                _context.Carts.Add(cart);
+            }
+
+            var product = await _context.Products.FindAsync(productId);
+            if (product == null)
+            {
+                return false;             }
+
+            var existingCartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
+            if (existingCartItem != null)
+            {
+                existingCartItem.Quantity++;
+            }
+            else
+            {
+                cart.CartItems.Add(new CartItem
+                {
+                    ProductId = productId,
+                    Quantity = 1,
+                    Product = product, 
+                    PriceEachItem = product.Price 
+                });
+            }
+            cart.TotalPrice = cart.CartItems.Sum(ci => ci.Quantity * ci.PriceEachItem);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+
     }
 
 }

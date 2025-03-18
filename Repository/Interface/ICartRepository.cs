@@ -20,6 +20,10 @@ namespace Repository.Interface
         Task SaveChangesAsync();
 
         Task UpdateCartAsync(Cart cart);
+
+        //add to cart cua duc anh
+        Task<bool> AddProductToCartAsync(string userId, int productId);
+
     }
 
 }

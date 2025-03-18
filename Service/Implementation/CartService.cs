@@ -137,6 +137,11 @@ namespace Service.Implementation
         {
             await _cartRepository.UpdateCartItemAsync(cartItem);
         }
+        public async Task<bool> AddProductToCartAsync(string userId, int productId)
+        {
+            return await _cartRepository.AddProductToCartAsync(userId, productId);
+        }
+
     }
 
 }

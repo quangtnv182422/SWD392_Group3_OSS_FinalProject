@@ -230,6 +230,7 @@
                                     <th class="border-bottom p-3">Product Name</th>
                                     <th class="border-bottom p-3">Quantity</th>
                                     <th class="border-bottom p-3">Price</th>
+                                    <th class="border-bottom p-3">Sale Price</th>
                                     <th class="border-bottom p-3">Status</th>
                                     <th class="border-bottom p-3">Actions</th>
                                 </tr>
@@ -254,6 +255,7 @@
                                         <td class="p-3">@product.ProductName</td>
                                         <td class="p-3">@product.Quantity</td>
                                         <td class="p-3">@string.Format("{0:N0}", product.Price) VND</td>
+                                        <td class="p-3">@string.Format("{0:N0}", product.SalePrice) VND</td>
 
                                         <td class="p-3 status-cell">
                                             <span class="badge @(product.ProductStatusId == 1 ? "bg-success" : product.ProductStatusId == 2 ? "bg-warning" : "bg-danger")">

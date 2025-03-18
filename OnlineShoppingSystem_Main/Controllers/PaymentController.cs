@@ -10,6 +10,9 @@ using Data.Models.PayOS;
 using Api.GHN.Implementation;
 using Data.Models.GHN;
 using Api.GHN.Interface;
+using System.Text.Json;
+using Service.Implementation;
+using Data.Models;
 namespace OnlineShoppingSystem_Main.Controllers
 {
 	//	9704198526191432198
@@ -23,9 +26,11 @@ namespace OnlineShoppingSystem_Main.Controllers
 		private readonly IConfiguration _configuration;
 		private readonly IUserService _userService;
 		private readonly IGhnProxy _ghnService;
+		private readonly IProductService _productService;
 
 		public PaymentController(IVnPayProxy vnPayService,
 								IOrderService orderService,
+								IProductService productService,
 								IPayosProxy payOsService,
 								IConfiguration configuration,
 								IUserService userService,
@@ -35,6 +40,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 			_vnPayService = vnPayService;
 			_payOsService = payOsService;
 			_orderService = orderService;
+			_productService = productService;
 			_configuration = configuration;
 			_userService = userService;
 			_ghnService = ghnService;
@@ -70,43 +76,54 @@ namespace OnlineShoppingSystem_Main.Controllers
 			var order = await _orderService.CreateOrderAsync(fullName, userId, email, mobile,
 												fullAddress, paymentMethod, cartItemIds,
 												(float)totalCost, 1, deliveryNotes); // 1 là pending confirm dành cho COD
-			switch (paymentMethod)
+
+			// DTO để lưu thông tin order được gửi qua GHN
+			var shippingOrder = new ShippingOrder
 			{
-				case "COD":
-					var shippingOrder = new ShippingOrder
-					{
-						payment_type_id = 2,
-						note = deliveryNotes,
-						required_note = "KHONGCHOXEMHANG",
-						to_name = fullName,
-						to_phone = mobile,
-						to_address = fullAddress,
-						to_ward_code = SelectedWardId,
-						to_district_id = SelectedDistrictId,
-						cod_amount = 20000,//max tối đa COD của GHN là 300k
-						weight = 200,
-						length = 20,
-						width = 15,
-						height = 5,
-						service_type_id = 2,
-						items = new List<ShippingOrder.ItemOrderGHN>
+				shop_id = _configuration["GHNSettings:ShopId"],
+				payment_type_id = 2,
+				from_phone = _configuration["GHNSettings:SenderPhone"],
+				from_address = _configuration["GHNSettings:FromAddress"],
+				from_ward_name = _configuration["GHNSettings:FromWardName"],
+				from_district_name = _configuration["GHNSettings:FromDistrictName"],
+				from_provice_name = _configuration["GHNSettings:FromProvinceName"],
+				note = deliveryNotes,
+				required_note = "KHONGCHOXEMHANG",
+				to_name = fullName,
+				to_phone = mobile,
+				to_address = fullAddress,
+				to_ward_code = SelectedWardId,
+				to_district_id = SelectedDistrictId,
+				cod_amount = 20000,//max tối đa COD của GHN là 300k
+				weight = 200,// fix cứng vì ko có lưu weight, lenght, width, height
+				length = 20,
+				width = 15,
+				height = 5,
+				service_type_id = 2,
+				items = new List<ShippingOrder.ItemOrderGHN>
 							{
 								new ShippingOrder.ItemOrderGHN
 								{
 									name = "Sách đọc",
-									quantity = 1,
+									quantity = cartItemIds.Count,
 									weight = 1200,
 									category = new ShippingOrder.ItemOrderGHN.CategoryGHN { level1 = "Sách" }
 								}
 							}
+			};
+			// Lưu thông tin shippingOrder vào TempData
+			TempData["ShippingOrder"] = JsonSerializer.Serialize(shippingOrder);
 
-					};
 
-					var shippingResponse = await _ghnService.SendShippingOrderAsync(shippingOrder);
+			switch (paymentMethod)
+			{
+				case "COD":
+
+					/*var shippingResponse = await _ghnService.SendShippingOrderAsync(shippingOrder);
 					if (shippingResponse.Contains("Error"))
 					{
 						return BadRequest("Failed to create shipping order: " + shippingResponse);
-					}
+					}*/
 					return RedirectToAction("PaymentSuccess");
 
 				case "vnPay":
@@ -185,7 +202,23 @@ namespace OnlineShoppingSystem_Main.Controllers
 				var updateOrder = await _orderService.GetOrderByIdAsync(response.OrderId);
 				if (updateOrder != null)
 				{
-					await _orderService.ConfirmOrderAsync(updateOrder.OrderId, 2); // 2 là status đã xác nhận
+					await _orderService.ConfirmOrderAsync(updateOrder.OrderId, 2); // 2 là status Confirm
+					await _productService.UpdateProductQuantityAfterOrder(updateOrder.OrderItems); // trừ sản phẩm sau khi order trong product
+
+					// Lấy thông tin shippingOrder từ TempData
+					var shippingOrder = JsonSerializer.Deserialize<ShippingOrder>(TempData["ShippingOrder"] as string);
+
+					//Gửi thông tin Order cho GHN (Tạm tắt vì GHN giới hạn test cho 3 đơn)
+
+					/*if (shippingOrder != null)
+					{
+						// Gửi thông tin đơn hàng cho GHN sau khi thanh toán thành công
+						var shippingResponse = await _ghnService.SendShippingOrderAsync(shippingOrder);
+						if (shippingResponse.Contains("Error"))
+						{
+							return BadRequest("Failed to create shipping order: " + shippingResponse);
+						}
+					}*/
 
 				}
 			}
@@ -229,6 +262,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 					if (updateOrder != null)
 					{
 						await _orderService.ConfirmOrderAsync(updateOrder.OrderId, 2); // 2 là status đã xác nhận
+						await _productService.UpdateProductQuantityAfterOrder(updateOrder.OrderItems); // trừ sản phẩm sau khi order trong product
 
 					}
 				}
@@ -238,6 +272,43 @@ namespace OnlineShoppingSystem_Main.Controllers
 				}
 			}
 			return RedirectToAction("PaymentSuccess");
+		}
+
+
+#warning
+		/// <summary>
+		/// Hàm này để test end point GHN Create Order
+		/// </summary>
+		[HttpPost("create-shipping-order")]
+		public async Task<IActionResult> CreateShippingOrder([FromBody] ShippingOrder order)
+		{
+			try
+			{
+				var response = await _ghnService.SendShippingOrderAsync(order);
+
+				if (response.Contains("Error"))
+				{
+					return BadRequest($"Shipping order creation failed: {response}");
+				}
+
+				return Ok($"Shipping order created successfully: {response}");
+			}
+			catch (HttpRequestException httpEx)
+			{
+				return StatusCode(502, $"Bad Gateway - Error while calling the external service: {httpEx.Message}");
+			}
+			catch (TimeoutException timeoutEx)
+			{
+				return StatusCode(408, $"Request Timeout: {timeoutEx.Message}");
+			}
+			catch (JsonException jsonEx)
+			{
+				return StatusCode(400, $"Bad Request - Invalid data format: {jsonEx.Message}");
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
 		}
 
 	}

@@ -1,4 +1,4 @@
-﻿using Api.GHN.Implementation;
+using Api.GHN.Implementation;
 using Api.GHN.Interface;
 using Api.Implementation;
 using Api.Interface;
@@ -55,7 +55,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.AllowedForNewUsers = false;
 });
 
-
 builder.Services.AddHttpContextAccessor();
 
 //Connect DB
@@ -63,7 +62,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<Swd392OssContext>(options => options.UseSqlServer(connectionString));
 
 //Config Identity
-builder.Services.AddDefaultIdentity<AspNetUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentity<AspNetUser, AspNetRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<Swd392OssContext>()
     .AddDefaultTokenProviders();
 
@@ -89,7 +88,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.Name = "UserAuthCookie";
 });
 
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -98,12 +96,19 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader());
 });
 
-
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
 app.UseCors("AllowAll");
+
+// Tự add thêm role vào db nếu ae chưa có
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AspNetRole>>();
+
+    await SeedData.SeedRolesAsync(roleManager);
+}
 
 if (!app.Environment.IsDevelopment())
 {

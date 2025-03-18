@@ -4,9 +4,11 @@ using Service.Interface;
 using System.Threading.Tasks;
 using Data.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
+     [Authorize(Roles = "admin")]
     public class AdminAccountController : Controller
     {
         private readonly IUserService _userService;
@@ -20,24 +22,23 @@ namespace OnlineShoppingSystem_Main.Controllers
             _emailService = emailService;
         }
 
-        // Hiển thị danh sách user với tìm kiếm
         public async Task<IActionResult> AccountList(string searchQuery, string roleFilter, string statusFilter, int page = 1, int pageSize = 10)
         {
-            var users = await _userService.GetUsersAsync(searchQuery);
-
-            if (!string.IsNullOrEmpty(roleFilter))
-            {
-                users = users.Where(u => u.Roles.Any(r => r.Name == roleFilter));
-            }
-
-            if (!string.IsNullOrEmpty(statusFilter))
-            {
-                users = users.Where(u => u.LockoutEnabled == (statusFilter == "Deactivated"));
-            }
-
+            var users = await _userService.GetUsersAsync(searchQuery, roleFilter, statusFilter);
 
             int totalUsers = users.Count();
             var pagedUsers = users.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            // Lấy danh sách Roles cho từng User
+            var userRoles = new Dictionary<string, List<string>>();
+            foreach (var user in pagedUsers)
+            {
+                var roles = await _userService.GetUserRolesAsync(user);
+                userRoles[user.Id] = roles.ToList();
+            }
+
+            // Truyền roles vào ViewBag
+            ViewBag.UserRoles = userRoles;
 
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
             ViewBag.CurrentPage = page;
@@ -47,7 +48,6 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             return View(pagedUsers);
         }
-
 
         // Xem chi tiết user
         public async Task<IActionResult> ViewUser(string id)
@@ -62,6 +62,14 @@ namespace OnlineShoppingSystem_Main.Controllers
             {
                 return NotFound(new { message = "User not found." });
             }
+
+            // Lấy danh sách role của user
+            var roles = await _userService.GetUserRolesAsync(user);
+            ViewBag.UserRoles = roles; // Truyền role của user vào ViewBag
+
+            // Lấy tất cả roles có trong hệ thống
+            var allRoles = await _userService.GetAllRolesAsync();
+            ViewBag.AllRoles = allRoles; // Truyền tất cả roles vào ViewBag
 
             return View("AccountDetail", user);
         }
@@ -126,20 +134,35 @@ namespace OnlineShoppingSystem_Main.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateUser(AspNetUser user)
+        public async Task<IActionResult> UpdateUser(AspNetUser userInput, List<string> newRoles)
         {
-            Console.WriteLine(user);
-
-            bool result = await _userService.UpdateUserAsync(user);
-
-            if (result)
+            var existingUser = await _userService.GetUserForUpdateByIdAsync(userInput.Id);
+            if (existingUser == null)
             {
-                return RedirectToAction("ViewUser", new { id = user.Id });
+                return NotFound("User not found.");
             }
+
+            existingUser.UserName = userInput.UserName;
+            existingUser.Email = userInput.Email;
+            existingUser.PhoneNumber = userInput.PhoneNumber;
+            existingUser.Address = userInput.Address;
+            existingUser.DateOfBirth = userInput.DateOfBirth;
+            existingUser.LockoutEnabled = userInput.LockoutEnabled;
+
+            // Gọi hàm update user
+            var isUserUpdated = await _userService.UpdateUserAsync(existingUser);
+
+            Console.WriteLine($"[DEBUG] New roles: {string.Join(", ", newRoles)}");
+
+            // Cập nhật role dựa trên "existingUser" (cùng 1 instance)
+            var isRolesUpdated = await _userService.UpdateUserRolesAsync(existingUser, newRoles);
+            if (!isRolesUpdated)
+                return BadRequest("Failed to update user roles.");
+
+            if (isUserUpdated)
+                return RedirectToAction("ViewUser", new { id = existingUser.Id });
             else
-            {
                 return BadRequest(new { success = false, message = "Failed to update user." });
-            }
         }
 
     }

@@ -30,7 +30,8 @@ namespace Service.Interface
         Task<List<ProductStatus>> GetProductStatusesAsync();
 
         void RemoveProductImages(int id);
+        Task UpdateProductQuantityAfterOrder(ICollection<OrderItem> orderItem);
 
-    }
+	}
 
 }

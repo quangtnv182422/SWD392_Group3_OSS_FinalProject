@@ -39,12 +39,20 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">DOB:</label>
                             <p class="view-mode">@Model.DateOfBirth</p>
-                            <input type="date" class="form-control edit-mode d-none" name="DateOfBirth" value="@Model.DateOfBirth">
+                            <input type="date" class="form-control edit-mode d-none"
+                                   name="DateOfBirth"
+                                   value="@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("yyyy-MM-dd") : "")">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Role:</label>
                             <p class="view-mode">@(Model.Roles.Any() ? string.Join(", ", Model.Roles.Select(r => r.Name)) : "No Role")</p>
-                            <input type="text" class="form-control edit-mode d-none" name="Roles" value="@(Model.Roles.Any() ? string.Join(", ", Model.Roles.Select(r => r.Name)) : "No Role")" />
+                            <select class="form-select edit-mode d-none" name="newRoles" multiple>
+                                    @foreach (var role in ViewBag.AllRoles as List<string>)
+                                    {
+                                        bool isSelected = Model.Roles.Any(r => r.Name == role);
+                                        <option value="@role" selected="@(isSelected ? "selected" : null)">@role</option>
+                                    }
+                                </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Status:</label>

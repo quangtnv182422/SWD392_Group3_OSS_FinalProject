@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace OnlineShoppingSystem_Main.Migrations
 {
     [DbContext(typeof(Swd392OssContext))]
-    [Migration("20250315133837_a")]
-    partial class a
+    [Migration("20250317071345_Update_DateOfBirth")]
+    partial class Update_DateOfBirth
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,8 +34,6 @@ namespace OnlineShoppingSystem_Main.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("RoleId", "UserId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("AspNetRoleAspNetUser");
                 });
@@ -731,25 +729,11 @@ namespace OnlineShoppingSystem_Main.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("DateOfBirth")
-                        .HasMaxLength(100)
                         .HasColumnType("datetime2");
 
+                    b.ToTable("AspNetUsers", (string)null);
+
                     b.HasDiscriminator().HasValue("AspNetUser");
-                });
-
-            modelBuilder.Entity("AspNetRoleAspNetUser", b =>
-                {
-                    b.HasOne("Data.Models.AspNetRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Data.Models.AspNetUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Data.Models.AspNetRoleClaim", b =>
@@ -934,9 +918,21 @@ namespace OnlineShoppingSystem_Main.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
+                    b.HasOne("Data.Models.AspNetRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Data.Models.AspNetUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

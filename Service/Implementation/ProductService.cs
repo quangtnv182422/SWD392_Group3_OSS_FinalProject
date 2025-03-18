@@ -1,4 +1,5 @@
 ﻿using Data.Models;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
@@ -107,6 +108,25 @@ namespace Service.Implementation
         {
              _productRepository.RemoveProductImages(id);
         }
-    }
+		public async Task UpdateProductQuantityAfterOrder(ICollection<OrderItem> orderItem)
+		{
+            foreach (var item in orderItem)
+            {
+                if (item.ProductId != null)
+                {
+					var product = await _productRepository.GetProductByIdAsync(item.ProductId);
+					if (product.Quantity >= item.Quantity)
+					{
+						product.Quantity -= item.Quantity;
+						_productRepository.UpdateProduct(product);
+					}
+					else
+					{
+						throw new Exception("Not enough stock for the product.");
+					}
+				}
+			}
+		}
+	}
 
 }

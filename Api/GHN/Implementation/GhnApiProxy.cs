@@ -87,50 +87,18 @@ namespace Api.GHN.Implementation
         }
 		public async Task<string> SendShippingOrderAsync(ShippingOrder order)
 		{
-			string url = $"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.CreateOrder}";
-			string shopId = _ghnSettings.ShopId;
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+                        var json = JsonSerializer.Serialize(order, options);
 
-			_httpClient.DefaultRequestHeaders.Add("ShopId", shopId);
+			var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}{_ghnSettings.Endpoints.CreateOrder}",
+				new StringContent(json, Encoding.UTF8, "application/json"));
+			return await response.Content.ReadAsStringAsync();
 
-			/*var options = new JsonSerializerOptions
-			{
-				PropertyNameCaseInsensitive = true
-			};
 
-			var json = JsonSerializer.Serialize(order, options);*/
-
-			var json = JsonSerializer.Serialize(new
-			{
-				//shop_id = shopId,
-				payment_type_id = order.payment_type_id,
-				note = order.note,
-				required_note = order.required_note,
-				to_name = order.to_name,
-				to_phone = order.to_phone,
-				to_address = order.to_address,
-				to_ward_code = order.to_ward_code,
-				to_district_id = order.to_district_id,
-				cod_amount = order.cod_amount,//max tối đa COD của GHN là 300k
-				weight = order.weight,
-				length = order.length,
-				width = order.width,
-				height = order.height,
-				service_type_id = order.service_type_id,
-				items = order.items
-			});
-
-			var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-			var response = await _httpClient.PostAsync(url, content);
-
-			if (response.IsSuccessStatusCode)
-			{
-				return await response.Content.ReadAsStringAsync();
-			}
-			else
-			{
-				return $"Error: {response.StatusCode}";
-			}
+			
 		}
 
 	}

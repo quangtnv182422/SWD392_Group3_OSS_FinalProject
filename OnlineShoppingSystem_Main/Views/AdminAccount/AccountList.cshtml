@@ -78,8 +78,12 @@
                                 <td class="p-3">@user.PhoneNumber</td>
                                 <td class="p-3">@user.Address</td>
                                 <td class="p-3">
-                                    @(user.Roles.Any() ? string.Join(", ", user.Roles.Select(r => r.Name)) : "No Role")
+                                    @{
+                                        var userRoles = ViewBag.UserRoles[user.Id] as List<string> ?? new List<string>();
+                                    }
+                                    @(userRoles.Any() ? string.Join(", ", userRoles) : "No Role")
                                 </td>
+
                                 <td class="p-3">
                                     <span class="badge @(user.LockoutEnabled ? "bg-danger" : "bg-success")">
                                         @(user.LockoutEnabled ? "Deactivate" : "Active")

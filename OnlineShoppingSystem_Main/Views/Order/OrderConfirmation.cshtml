@@ -467,10 +467,12 @@
 			}
 
 			function getAvailableServices() {
-				var fromDistrictId = 1711;
-				var toDistrictId = $("#district").val();
-				var shopId = 5656073;
+				//var fromDistrictId = 1711;
+				var fromDistrictId = 1452;
 
+				var toDistrictId = $("#district").val();
+				//var shopId = 5656073;
+				var shopId = 5689742;
 				$.ajax({
 					url: "/Order/GetAvailableServices", 
 					type: "POST",
@@ -490,11 +492,13 @@
 			}
 
 			function calculateShipping(serviceId, serviceTypeId) {
-				var fromDistrictId = 1711;
+				//var fromDistrictId = 1711;
+				var fromDistrictId = 1452;
 				var toDistrictId = $("#district").val();
 				var weight = 500;
 				var length = 20, width = 20, height = 10;
-				var shopId = 5656073;
+				//var shopId = 5656073;
+				var shopId = 5689742;
 
 				$.ajax({
 					url: "/Order/CalculateShipping", 

@@ -15,7 +15,9 @@ namespace Repository.Interface
         Task<List<Product>> GetAllProductsAsync();
         Task<IEnumerable<Product>> GetProductsAsync(int? categoryId, int page, int pageSize);
         Task<Product> GetProductByIdAsync(int productId);
-        Task<IEnumerable<Category>> GetCategoriesAsync();
+        //Hàm này của Quang
+        Task<Product> GetProductByIdAsync(int? productId);
+		Task<IEnumerable<Category>> GetCategoriesAsync();
         List<Product> GetPagedProducts(int page, int pageSize, out int totalCount);
         Product GetProductById(int productId);
         void UpdateProduct(Product product);

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace OnlineShoppingSystem_Main.Migrations
 {
     [DbContext(typeof(Swd392OssContext))]
-    [Migration("20250315175036_xxx")]
-    partial class xxx
+    [Migration("20250318041523_AddDiscriminatorForAspNetRole")]
+    partial class AddDiscriminatorForAspNetRole
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,56 +35,7 @@ namespace OnlineShoppingSystem_Main.Migrations
 
                     b.HasKey("RoleId", "UserId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("AspNetRoleAspNetUser");
-                });
-
-            modelBuilder.Entity("Data.Models.AspNetRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AspNetRole");
-                });
-
-            modelBuilder.Entity("Data.Models.AspNetRoleClaim", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetRoleClaim");
                 });
 
             modelBuilder.Entity("Data.Models.AspNetUserClaim", b =>
@@ -520,6 +471,11 @@ namespace OnlineShoppingSystem_Main.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
+
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -536,6 +492,10 @@ namespace OnlineShoppingSystem_Main.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasDiscriminator().HasValue("IdentityRole");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -552,6 +512,11 @@ namespace OnlineShoppingSystem_Main.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(34)
+                        .HasColumnType("nvarchar(34)");
+
                     b.Property<string>("RoleId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -561,6 +526,10 @@ namespace OnlineShoppingSystem_Main.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
+
+                    b.HasDiscriminator().HasValue("IdentityRoleClaim<string>");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
@@ -665,12 +634,10 @@ namespace OnlineShoppingSystem_Main.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -707,12 +674,10 @@ namespace OnlineShoppingSystem_Main.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -720,6 +685,20 @@ namespace OnlineShoppingSystem_Main.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Data.Models.AspNetRole", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
+
+                    b.HasDiscriminator().HasValue("AspNetRole");
+                });
+
+            modelBuilder.Entity("Data.Models.AspNetRoleClaim", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>");
+
+                    b.HasDiscriminator().HasValue("AspNetRoleClaim");
                 });
 
             modelBuilder.Entity("Data.Models.AspNetUser", b =>
@@ -731,36 +710,11 @@ namespace OnlineShoppingSystem_Main.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("DateOfBirth")
-                        .HasMaxLength(100)
                         .HasColumnType("datetime2");
 
+                    b.ToTable("AspNetUsers", (string)null);
+
                     b.HasDiscriminator().HasValue("AspNetUser");
-                });
-
-            modelBuilder.Entity("AspNetRoleAspNetUser", b =>
-                {
-                    b.HasOne("Data.Models.AspNetRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Data.Models.AspNetUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Data.Models.AspNetRoleClaim", b =>
-                {
-                    b.HasOne("Data.Models.AspNetRole", "Role")
-                        .WithMany("AspNetRoleClaims")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Data.Models.AspNetUserClaim", b =>
@@ -934,9 +888,21 @@ namespace OnlineShoppingSystem_Main.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
+                    b.HasOne("Data.Models.AspNetRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Data.Models.AspNetUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -956,9 +922,15 @@ namespace OnlineShoppingSystem_Main.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Data.Models.AspNetRole", b =>
+            modelBuilder.Entity("Data.Models.AspNetRoleClaim", b =>
                 {
-                    b.Navigation("AspNetRoleClaims");
+                    b.HasOne("Data.Models.AspNetRole", "Role")
+                        .WithMany("AspNetRoleClaims")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Data.Models.Cart", b =>
@@ -1003,6 +975,11 @@ namespace OnlineShoppingSystem_Main.Migrations
             modelBuilder.Entity("Data.Models.SettingsStatus", b =>
                 {
                     b.Navigation("Settings");
+                });
+
+            modelBuilder.Entity("Data.Models.AspNetRole", b =>
+                {
+                    b.Navigation("AspNetRoleClaims");
                 });
 
             modelBuilder.Entity("Data.Models.AspNetUser", b =>

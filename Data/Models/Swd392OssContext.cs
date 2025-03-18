@@ -225,6 +225,11 @@ public partial class Swd392OssContext : IdentityDbContext
 
 			entity.Property(e => e.StatusName).HasMaxLength(255);
 		});
+
+        modelBuilder.Entity<AspNetRole>()
+        .HasDiscriminator<string>("Discriminator")
+        .HasValue<AspNetRole>("AspNetRole");
+
         modelBuilder.Entity<AspNetUser>(entity =>
         {
             entity.ToTable("AspNetUsers");

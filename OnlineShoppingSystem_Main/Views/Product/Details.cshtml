@@ -24,7 +24,7 @@
                 <div class="single-product-content">
                     <h3>@Model.ProductName</h3>
                     <p class="single-product-pricing">
-                        @string.Format("{0:N0}", Model.Price) VND
+                        @string.Format("{0:N0}", Model.SalePrice) VND
                     </p>
                     <p>@Model.Description</p>
 
@@ -64,7 +64,6 @@
             <div>
                 <div>
 
-                    <p><strong>Categories: </strong>@string.Join(", ", Model.Category?.CategoryName ?? "N/A")</p>
                     <h4>Share:</h4>
                     <ul class="product-share">
                         <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>

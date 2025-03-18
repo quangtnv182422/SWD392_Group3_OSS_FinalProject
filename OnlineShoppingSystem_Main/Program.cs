@@ -1,4 +1,4 @@
-﻿using Api.GHN.Implementation;
+using Api.GHN.Implementation;
 using Api.GHN.Interface;
 using Api.Implementation;
 using Api.Interface;

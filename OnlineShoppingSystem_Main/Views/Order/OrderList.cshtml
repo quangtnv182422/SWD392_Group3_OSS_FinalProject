@@ -1,4 +1,5 @@
-﻿@model List<Data.Models.Order>
+﻿@* ﻿@model List<Data.Models.Order> *@
+@model List<Data.Models.GHN.GhnOrderDetailResponse>
 
 @{
     ViewData["Title"] = "Order List";
@@ -95,46 +96,29 @@
         </div>
     }
 
-    <!-- Bộ lọc tìm kiếm -->
-    <form method="get" asp-action="OrderList">
-        <div class="search-container">
-            <input type="text" name="searchOrderId" value="@ViewBag.SearchOrderId" placeholder="Search OrderID">
-
-            <select name="paymentMethod">
-                <option value="">Payment Method</option>
-                <option value="COD" selected="@(ViewBag.PaymentMethod == "COD")">COD</option>
-                <option value="PayOS" selected="@(ViewBag.PaymentMethod == "PayOS")">PayOS</option>
-                <option value="Payvn" selected="@(ViewBag.PaymentMethod == "Payvn")">Payvn</option>
-            </select>
-
-            <select name="status">
-                <option value="">Status</option>
-                <option value="Pending Confirmation" selected="@(ViewBag.Status == "Pending Confirmation")">Pending Confirmation</option>
-                <option value="Confirmed" selected="@(ViewBag.Status == "Confirmed")">Confirmed</option>
-                <option value="Shipped" selected="@(ViewBag.Status == "Shipped")">Shipped</option>
-                <option value="Delivered" selected="@(ViewBag.Status == "Delivered")">Delivered</option>
-                <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Cancelled</option>
-                <option value="Returned" selected="@(ViewBag.Status == "Returned")">Returned</option>
-            </select>
-
-            <button type="submit">Search</button>
-        </div>
+    <form asp-controller="Order" asp-action="OrderList" method="get">
+        <input type="text" name="orderCode" placeholder="Nhập mã đơn hàng..." required />
+        <button type="submit">Tra cứu</button>
     </form>
-
-    @if (Model == null || !Model.Any())
-    {
-        <p>Bạn chưa đặt 1 đơn hàng nào.</p>
-    }
     
+
+    @if (Model == null)
+    {
+        <p class="text-danger">Lỗi: Dữ liệu đơn hàng không được tải lên.</p>
+    }
+    else if (!Model.Any())
+    {
+        <p class="text-warning mt-3">Bạn chưa có đơn hàng nào.</p>
+    }
     else
     {
         <table>
             <thead>
                 <tr>
-                    <th>OrderID</th>
-                    <th>Order At</th>
+                    <th>Order Code</th>
+                    <th>Receiver</th>
+                    <th>Phone</th>
                     <th>Address</th>
-                    <th>Payment Method</th>
                     <th>Status</th>
                     <th>Note</th>
                     <th>Total Cost</th>
@@ -145,35 +129,144 @@
                 @foreach (var order in Model)
                 {
                     <tr>
-                        <td>@order.OrderId</td>
-                        <td>@order.OrderedAt.ToString("yyyy-MM-dd")</td>
-                        <td>@order.Address</td>
-                        <td>@order.PaymentMethod</td>
-                        <td>@order.OrderStatus?.StatusName</td>
-                        <td>@order.Note</td>
-                        <td>@(order.TotalCost.ToString("#,##0") + " đ")</td>
+                        <td>@(order.OrderCode ?? "[Không có mã]")</td>
+                        <td>@(order.ToName ?? "[Không có tên]")</td>
+                        <td>@(order.ToPhone ?? "[Không có số điện thoại]")</td>
+                        <td>@(order.ToAddress ?? "[Không có địa chỉ]")</td>
+                        <td><span class="badge bg-info text-dark">@(order.Status ?? "Chưa xác định")</span></td>
+                        <td>@(order.Note ?? "[Không có ghi chú]")</td>
+                        <td>@(order.Items != null ? order.Items.Sum(i => i.Price * i.Quantity).ToString("N0") + " VND" : "0 VND")</td>
                         <td>
-                            <!-- Xem đơn hàng -->
-                            <a asp-controller="Order" asp-action="OrderDetails" asp-route-orderId="@order.OrderId">
-                                <i class="fas fa-eye"></i>
-                            </a>
+                            @* <a asp-controller="Order" asp-action="OrderDetails" asp-route-orderCode="@order.OrderCode"> *@
+                            @*     <i class="fas fa-eye"></i> *@
+                            @* </a> *@
 
-                            <!-- Hủy đơn hàng có xác nhận -->
-                            @if (order.OrderStatusId == 1) // Chỉ cho phép hủy đơn hàng đang chờ xác nhận
+                            @if (order.Status == "ready_to_pick")
                             {
-                                <form id="cancelForm-@order.OrderId" asp-controller="Order" asp-action="CancelOrder" method="post" style="display:inline;">
-                                    <input type="hidden" name="orderId" value="@order.OrderId" />
-                                    <button type="button" class="delete-button delete-order" data-order-id="@order.OrderId">
+                                <form id="cancelForm-@order.OrderCode" asp-controller="Order" asp-action="CancelOrder" method="post" style="display:inline;">
+                                    <input type="hidden" name="orderCode" value="@order.OrderCode" />
+                                    <button type="button" class="delete-button delete-order" data-order-code="@order.OrderCode">
                                         <i class="fas fa-trash red-icon"></i>
                                     </button>
                                 </form>
                             }
                         </td>
                     </tr>
+
+                    <!-- Bảng hiển thị danh sách sản phẩm -->
+                    @if (order.Items != null && order.Items.Any())
+                    {
+                        <tr>
+                            <td colspan="8">
+                                <table class="table table-bordered mt-2">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in order.Items)
+                                        {
+                                            <tr>
+                                                <td>@item.Name</td>
+                                                <td>@item.Quantity</td>
+                                                <td>@item.Price.ToString("N0") VND</td>
+                                                <td>@($"{item.Price * item.Quantity:N0} VND")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
+
     }
+
+    @* <!-- Bộ lọc tìm kiếm --> *@
+    @* <form method="get" asp-action="OrderList"> *@
+    @*     <div class="search-container"> *@
+    @*         <input type="text" name="searchOrderId" value="@ViewBag.SearchOrderId" placeholder="Search OrderID"> *@
+
+    @*         <select name="paymentMethod"> *@
+    @*             <option value="">Payment Method</option> *@
+    @*             <option value="COD" selected="@(ViewBag.PaymentMethod == "COD")">COD</option> *@
+    @*             <option value="PayOS" selected="@(ViewBag.PaymentMethod == "PayOS")">PayOS</option> *@
+    @*             <option value="Payvn" selected="@(ViewBag.PaymentMethod == "Payvn")">Payvn</option> *@
+    @*         </select> *@
+
+    @*         <select name="status"> *@
+    @*             <option value="">Status</option> *@
+    @*             <option value="Pending Confirmation" selected="@(ViewBag.Status == "Pending Confirmation")">Pending Confirmation</option> *@
+    @*             <option value="Confirmed" selected="@(ViewBag.Status == "Confirmed")">Confirmed</option> *@
+    @*             <option value="Shipped" selected="@(ViewBag.Status == "Shipped")">Shipped</option> *@
+    @*             <option value="Delivered" selected="@(ViewBag.Status == "Delivered")">Delivered</option> *@
+    @*             <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Cancelled</option> *@
+    @*             <option value="Returned" selected="@(ViewBag.Status == "Returned")">Returned</option> *@
+    @*         </select> *@
+
+    @*         <button type="submit">Search</button> *@
+    @*     </div> *@
+    @* </form> *@
+
+    @* @if (Model == null || !Model.Any()) *@
+    @* { *@
+    @*     <p>Bạn chưa đặt 1 đơn hàng nào.</p> *@
+    @* } *@
+    
+    @* else *@
+    @* { *@
+    @*     <table> *@
+    @*         <thead> *@
+    @*             <tr> *@
+    @*                 <th>OrderID</th> *@
+    @*                 <th>Order At</th> *@
+    @*                 <th>Address</th> *@
+    @*                 <th>Payment Method</th> *@
+    @*                 <th>Status</th> *@
+    @*                 <th>Note</th> *@
+    @*                 <th>Total Cost</th> *@
+    @*                 <th>Actions</th> *@
+    @*             </tr> *@
+    @*         </thead> *@
+    @*         <tbody> *@
+    @*             @foreach (var order in Model) *@
+    @*             { *@
+    @*                 <tr> *@
+    @*                     <td>@order.OrderId</td> *@
+    @*                     <td>@order.OrderedAt.ToString("yyyy-MM-dd")</td> *@
+    @*                     <td>@order.Address</td> *@
+    @*                     <td>@order.PaymentMethod</td> *@
+    @*                     <td>@order.OrderStatus?.StatusName</td> *@
+    @*                     <td>@order.Note</td> *@
+    @*                     <td>@(order.TotalCost.ToString("#,##0") + " đ")</td> *@
+    @*                     <td> *@
+    @*                         <!-- Xem đơn hàng --> *@
+    @*                         <a asp-controller="Order" asp-action="OrderDetails" asp-route-orderId="@order.OrderId"> *@
+    @*                             <i class="fas fa-eye"></i> *@
+    @*                         </a> *@
+
+    @*                         <!-- Hủy đơn hàng có xác nhận --> *@
+    @*                         @if (order.OrderStatusId == 1) // Chỉ cho phép hủy đơn hàng đang chờ xác nhận *@
+    @*                         { *@
+    @*                             <form id="cancelForm-@order.OrderId" asp-controller="Order" asp-action="CancelOrder" method="post" style="display:inline;"> *@
+    @*                                 <input type="hidden" name="orderId" value="@order.OrderId" /> *@
+    @*                                 <button type="button" class="delete-button delete-order" data-order-id="@order.OrderId"> *@
+    @*                                     <i class="fas fa-trash red-icon"></i> *@
+    @*                                 </button> *@
+    @*                             </form> *@
+    @*                         } *@
+    @*                     </td> *@
+    @*                 </tr> *@
+    @*             } *@
+    @*         </tbody> *@
+    @*     </table> *@
+    @* } *@
 
     <script>
         $(document).ready(function () {

@@ -1,4 +1,6 @@
-﻿using Data.Models;
+﻿using Api.GHN.Interface;
+using Data.Models;
+using Data.Models.GHN;
 using Microsoft.EntityFrameworkCore;
 using OnlineShoppingSystem_Main.Models;
 using Repository.Interface;
@@ -8,10 +10,12 @@ namespace Repository.Implementation
     public class OrderRepository : IOrderRepository
     {
         private readonly Swd392OssContext _context;
+        private readonly IGhnProxy _ghnProxy;
 
-        public OrderRepository(Swd392OssContext context)
+        public OrderRepository(Swd392OssContext context, IGhnProxy ghnProxy)
         {
             _context = context;
+            _ghnProxy = ghnProxy;
         }
 
         public async Task<Order> GetOrderByIdAsync(string orderId)
@@ -63,6 +67,11 @@ namespace Repository.Implementation
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
                 .ToListAsync();
+        }
+
+        public async Task<GhnOrderDetailResponse> GetOrderDetailsFromGhnAsync(string orderCode)
+        {
+            return await _ghnProxy.GetOrderDetailsFromGhnAsync(orderCode);
         }
 
         public async Task<bool> CancelOrderAsync(int orderId)

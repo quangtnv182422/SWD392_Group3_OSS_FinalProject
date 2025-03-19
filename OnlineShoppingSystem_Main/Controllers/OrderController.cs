@@ -183,41 +183,74 @@ namespace OnlineShoppingSystem_Main.Controllers
 
 
         // Track Order Detail
+        //[HttpGet]
+        //public async Task<IActionResult> OrderList(string searchOrderId, string paymentMethod, string status)
+        //{
+        //    var currentUser = await GetCurrentUserAsync();
+
+        //    if (currentUser == null)
+        //    {
+        //        TempData["ErrorMessage"] = "Bạn cần đăng nhập để xem danh sách đơn hàng.";
+        //        return RedirectToAction("Index", "Home");
+        //    }
+
+        //    var orders = await _orderService.GetOrdersByUserIdAsync(currentUser.Id);
+
+        //    // Filter
+        //    if (!string.IsNullOrEmpty(searchOrderId))
+        //    {
+        //        orders = orders.Where(o => o.OrderId.ToString().Contains(searchOrderId)).ToList();
+        //    }
+
+        //    if (!string.IsNullOrEmpty(paymentMethod))
+        //    {
+        //        orders = orders.Where(o => o.PaymentMethod == paymentMethod).ToList();
+        //    }
+
+        //    if (!string.IsNullOrEmpty(status))
+        //    {
+        //        orders = orders.Where(o => o.OrderStatus.StatusName == status).ToList();
+        //    }
+
+        //    ViewBag.SearchOrderId = searchOrderId;
+        //    ViewBag.PaymentMethod = paymentMethod;
+        //    ViewBag.Status = status;
+
+        //    return View("OrderList", orders);
+        //}
+
         [HttpGet]
-        public async Task<IActionResult> OrderList(string searchOrderId, string paymentMethod, string status)
+        public async Task<IActionResult> OrderList(string orderCode)
         {
             var currentUser = await GetCurrentUserAsync();
-
             if (currentUser == null)
             {
                 TempData["ErrorMessage"] = "Bạn cần đăng nhập để xem danh sách đơn hàng.";
                 return RedirectToAction("Index", "Home");
             }
 
-            var orders = await _orderService.GetOrdersByUserIdAsync(currentUser.Id);
-
-            // Filter
-            if (!string.IsNullOrEmpty(searchOrderId))
+            if (string.IsNullOrEmpty(orderCode))
             {
-                orders = orders.Where(o => o.OrderId.ToString().Contains(searchOrderId)).ToList();
+                ViewBag.ErrorMessage = "Vui lòng nhập mã đơn hàng.";
+                return View(new List<GhnOrderDetailResponse>());
             }
 
-            if (!string.IsNullOrEmpty(paymentMethod))
+            var singleOrder = await _ghnService.GetOrderDetailsFromGhnAsync(orderCode);
+
+            if (singleOrder != null)
             {
-                orders = orders.Where(o => o.PaymentMethod == paymentMethod).ToList();
+                Console.WriteLine($"DEBUG: Đơn hàng nhận được - Mã: {singleOrder.OrderCode}, Tên: {singleOrder.ToName}");
+            }
+            else
+            {
+                Console.WriteLine("DEBUG: Không có đơn hàng nào.");
             }
 
-            if (!string.IsNullOrEmpty(status))
-            {
-                orders = orders.Where(o => o.OrderStatus.StatusName == status).ToList();
-            }
+            var ghnOrders = singleOrder != null ? new List<GhnOrderDetailResponse> { singleOrder } : new List<GhnOrderDetailResponse>();
 
-            ViewBag.SearchOrderId = searchOrderId;
-            ViewBag.PaymentMethod = paymentMethod;
-            ViewBag.Status = status;
-
-            return View("OrderList", orders);
+            return View("OrderList", ghnOrders);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> CancelOrder(int orderId)

@@ -1,4 +1,5 @@
 ﻿using Data.Models;
+using Data.Models.GHN;
 using OnlineShoppingSystem_Main.Models;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,8 @@ namespace Repository.Interface
         Task<bool> CancelOrderAsync(int orderId);
         Task<Order> GetOrderDetailsAsync(int orderId);
         Task<bool> UpdateOrderAsync(Order order);
+
+        Task<GhnOrderDetailResponse> GetOrderDetailsFromGhnAsync(string orderCode);
     }
 
 }

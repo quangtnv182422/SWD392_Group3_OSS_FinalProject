@@ -1,4 +1,5 @@
 ﻿using Data.Models;
+using Data.Models.GHN;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -228,7 +229,12 @@ namespace Service.Implementation
 			return await _orderRepository.GetOrdersByUserIdAsync(userId);
 		}
 
-		public async Task<bool> CancelOrderAsync(int orderId)
+        public async Task<GhnOrderDetailResponse> GetOrderDetailsFromGhnAsync(string orderCode)
+        {
+            return await _orderRepository.GetOrderDetailsFromGhnAsync(orderCode);
+        }
+
+        public async Task<bool> CancelOrderAsync(int orderId)
 		{
 			return await _orderRepository.CancelOrderAsync(orderId);
 		}

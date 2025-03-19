@@ -210,7 +210,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 
 					//Gửi thông tin Order cho GHN (Tạm tắt vì GHN giới hạn test cho 3 đơn)
 
-					if (shippingOrder != null)
+					/*if (shippingOrder != null)
 					{
 						// Gửi thông tin đơn hàng cho GHN sau khi thanh toán thành công
 						var shippingResponse = await _ghnService.SendShippingOrderAsync(shippingOrder);
@@ -218,7 +218,15 @@ namespace OnlineShoppingSystem_Main.Controllers
 						{
 							return BadRequest("Failed to create shipping order: " + shippingResponse);
 						}
-					}
+						else
+						{
+                            var jsonResponse = JsonSerializer.Deserialize<JsonElement>(shippingResponse);
+                            string orderCode = jsonResponse.GetProperty("data").GetProperty("order_code").GetString();
+                            await _orderService.UpdateOrderCodeGHNAsync(updateOrder, orderCode);
+
+                        }
+						
+					}*/
 
 				}
 			}

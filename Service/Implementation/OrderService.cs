@@ -261,5 +261,20 @@ namespace Service.Implementation
 			await _orderRepository.SaveChangesAsync();
 			return true;
 		}
-	}
+
+        public async Task<bool> UpdateOrderCodeGHNAsync(Order order, string? orderCodeGHN)
+        {
+            var existingOrder = await _orderRepository.GetOrderByIdAsync(order.OrderId.ToString());
+
+            if (existingOrder == null)
+            {
+                return false;
+            }
+
+            existingOrder.OrderCodeGHN = orderCodeGHN;
+
+            await _orderRepository.SaveChangesAsync();
+            return true;
+        }
+    }
 }

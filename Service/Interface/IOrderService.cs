@@ -1,4 +1,5 @@
 ﻿using Data.Models;
+using Data.Models.GHN;
 using Microsoft.AspNetCore.Identity;
 using OnlineShoppingSystem_Main.Models;
 
@@ -23,6 +24,8 @@ namespace Service.Interface
         Task<bool> CancelOrderAsync(int orderId);
         Task<Order> GetOrderDetailsAsync(int orderId);
         Task<bool> UpdateOrderAsync(Order order);
+
+        Task<GhnOrderDetailResponse> GetOrderDetailsFromGhnAsync(string orderCode);
     }
 
 }

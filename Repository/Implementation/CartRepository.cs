@@ -111,6 +111,12 @@ namespace Repository.Implementation
             return true;
         }
 
+        public async Task<Product> GetProductByIdAsync(int productId)
+        {
+            return await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductId == productId);
+        }
+
 
     }
 

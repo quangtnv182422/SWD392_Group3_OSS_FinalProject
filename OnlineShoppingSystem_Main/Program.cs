@@ -56,7 +56,14 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-
+//Session
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian timeout của Session
+    options.Cookie.HttpOnly = true; // Bảo mật cookie
+    options.Cookie.IsEssential = true; // Đánh dấu cookie là cần thiết (GDPR compliance)
+});
 //Connect DB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<Swd392OssContext>(options => options.UseSqlServer(connectionString));
@@ -119,7 +126,7 @@ else
 {
     app.UseDeveloperExceptionPage();
 }
-
+app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

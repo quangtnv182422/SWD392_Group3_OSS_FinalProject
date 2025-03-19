@@ -1,4 +1,5 @@
 ﻿using Data.Models;
+using Data.Models.GHN;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -24,23 +25,23 @@ namespace Service.Implementation
 			return await _orderRepository.GetOrderByIdAsync(orderId);
 		}
 
-		public async Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, AspNetUser currentUser)
-		{
-			var selectedCartItems = await _orderRepository.GetCartItemsByIdsAsync(selectedCartItemIds);
-			double totalPrice = selectedCartItems.Sum(ci => ci.Quantity * ci.Product.Price);
+        public async Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, AspNetUser currentUser)
+        {
+            var selectedCartItems = await _orderRepository.GetCartItemsByIdsAsync(selectedCartItemIds);
+            double totalPrice = selectedCartItems.Sum(ci => ci.Quantity * ci.Product.Price);
 
-			return new OrderConfirmationViewModel
-			{
-				SelectedCartItems = selectedCartItems,
-				SubTotal = totalPrice,
-				FullName = currentUser?.UserName ?? "",
-				Email = currentUser?.Email ?? "",
-				Mobile = currentUser?.PhoneNumber ?? "",
-				Address = ""
-			};
-		}
+            return new OrderConfirmationViewModel
+            {
+                SelectedCartItems = selectedCartItems,
+                SubTotal = totalPrice,
+                FullName = currentUser?.UserName ?? "",
+                Email = currentUser?.Email ?? "",
+                Mobile = currentUser?.PhoneNumber ?? "",
+                Address = ""
+            };
+        }
 
-		public async Task<Order> CreateOrderAsync(string fullName,
+        public async Task<Order> CreateOrderAsync(string fullName,
 												  string? customerId,
 												  /*string staffId,*/
 												  string email,
@@ -228,7 +229,12 @@ namespace Service.Implementation
 			return await _orderRepository.GetOrdersByUserIdAsync(userId);
 		}
 
-		public async Task<bool> CancelOrderAsync(int orderId)
+        public async Task<GhnOrderDetailResponse> GetOrderDetailsFromGhnAsync(string orderCode)
+        {
+            return await _orderRepository.GetOrderDetailsFromGhnAsync(orderCode);
+        }
+
+        public async Task<bool> CancelOrderAsync(int orderId)
 		{
 			return await _orderRepository.CancelOrderAsync(orderId);
 		}

@@ -30,7 +30,6 @@ namespace OnlineShoppingSystem_Main.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
         {
-            Console.WriteLine($"Received cartItemId: {cartItemId}, quantity: {quantity}");
             bool result = await _cartService.UpdateCartItemQuantityAsync(cartItemId, quantity);
             if (result)
             {
@@ -40,7 +39,6 @@ namespace OnlineShoppingSystem_Main.Controllers
             }
             else
             {
-                Console.WriteLine("Cart item not found!");
                 TempData["Error"] = "Không tìm thấy sản phẩm trong giỏ hàng.";
             }
             return RedirectToAction("Index");
@@ -53,6 +51,10 @@ namespace OnlineShoppingSystem_Main.Controllers
             if (result)
             {
                 TempData["Message"] = "Xóa sản phẩm khỏi giỏ hàng thành công.";
+            }
+            else
+            {
+                TempData["Error"] = "Không thể xóa sản phẩm khỏi giỏ hàng.";
             }
             return RedirectToAction("Index");
         }
@@ -74,30 +76,36 @@ namespace OnlineShoppingSystem_Main.Controllers
                 .ToList();
 
             var cart = await _cartService.GetUserCartAsync(userId);
+            Console.WriteLine($"[DEBUG] SelectedCartItemIds: {string.Join(",", selectedCartItemIds)}");
+            Console.WriteLine($"[DEBUG] CartItems in cart: {string.Join(",", cart.CartItems.Select(ci => $"{ci.CartItemId} (ProductId: {ci.ProductId})"))}");
+
             var validCartItemIds = new List<int>();
             var outOfStockItems = new List<string>();
 
-            // Kiểm tra tồn kho
             foreach (var cartItemId in selectedCartItemIds)
             {
                 var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CartItemId == cartItemId);
                 if (cartItem != null)
                 {
-                    if (cartItem.Product.Quantity >= cartItem.Quantity) // Còn hàng
+                    if (cartItem.Product.Quantity >= cartItem.Quantity)
                     {
                         validCartItemIds.Add(cartItemId);
                     }
-                    else // Hết hàng
+                    else
                     {
                         outOfStockItems.Add(cartItem.Product.ProductName);
                     }
+                }
+                else
+                {
+                    Console.WriteLine($"[DEBUG] CartItemId {cartItemId} not found in cart");
                 }
             }
 
             if (outOfStockItems.Any())
             {
                 TempData["Error"] = $"Sản phẩm {string.Join(", ", outOfStockItems)} đã hết hàng. Vui lòng kiểm tra lại!";
-                TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds); // Giữ lại lựa chọn
+                TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds);
                 return RedirectToAction("Index");
             }
 
@@ -120,7 +128,7 @@ namespace OnlineShoppingSystem_Main.Controllers
             TempData.Remove("SelectedCartItemIds");
 
             TempData["Message"] = "Đặt hàng thành công!";
-            return RedirectToAction("OrderSuccess", new { orderId = order.OrderId });
+            return RedirectToAction("ConfirmOrder", new { orderId = order.OrderId });
         }
 
         [HttpPost]
@@ -152,18 +160,16 @@ namespace OnlineShoppingSystem_Main.Controllers
             return View(order);
         }
 
-
         [HttpGet]
         public async Task<IActionResult> AddToCart(int id)
         {
             string userId = await _userService.GetUserIdAsync(HttpContext);
-
-            var product =  _productService.GetProductById(id);
+            var product = _productService.GetProductById(id);
 
             if (product == null)
             {
                 TempData["Error"] = "Sản phẩm không tồn tại!";
-                return RedirectToAction("Index", "Home");  
+                return RedirectToAction("Index", "Home");
             }
 
             bool result = await _cartService.AddProductToCartAsync(userId, id);
@@ -179,6 +185,5 @@ namespace OnlineShoppingSystem_Main.Controllers
 
             return RedirectToAction("Index", "Cart");
         }
-
     }
 }

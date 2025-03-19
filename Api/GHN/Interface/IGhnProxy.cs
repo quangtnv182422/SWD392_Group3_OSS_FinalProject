@@ -17,5 +17,7 @@ namespace Api.GHN.Interface
         Task<string> UpdateOrderOnGHNAsync(GhnOrderUpdateRequest request);
         Task<string> SendShippingOrderAsync(ShippingOrder order);
 
-	}
+        Task<GhnOrderDetailResponse> GetOrderDetailsFromGhnAsync(string orderCode);
+
+    }
 }

@@ -24,6 +24,7 @@ namespace Repository.Interface
         //add to cart cua duc anh
         Task<bool> AddProductToCartAsync(string userId, int productId);
 
+        Task<Product> GetProductByIdAsync(int productId);
     }
 
 }

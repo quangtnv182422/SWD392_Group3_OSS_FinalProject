@@ -29,7 +29,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 
         private async Task<AspNetUser> GetCurrentUserAsync()
         {
-            string userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userId = await _userService.GetCurrentUserIdAsync();
             if (!string.IsNullOrEmpty(userId))
             {
                 var user = await _userService.GetCurrentUserAsync(userId);
@@ -98,17 +98,16 @@ namespace OnlineShoppingSystem_Main.Controllers
             var validCartItemIds = new List<int>();
             var outOfStockItems = new List<string>();
 
-            // Kiểm tra tồn kho
             foreach (var cartItemId in selectedCartItemIds)
             {
                 var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CartItemId == cartItemId);
                 if (cartItem != null)
                 {
-                    if (cartItem.Product.Quantity >= cartItem.Quantity) // Còn hàng
+                    if (cartItem.Product.Quantity >= cartItem.Quantity)
                     {
                         validCartItemIds.Add(cartItemId);
                     }
-                    else // Hết hàng
+                    else
                     {
                         outOfStockItems.Add(cartItem.Product.ProductName);
                     }
@@ -125,8 +124,8 @@ namespace OnlineShoppingSystem_Main.Controllers
                 TempData["OutOfStockError"] = "Tất cả sản phẩm đã chọn đều hết hàng!";
             }
 
-            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds); // Lưu tất cả sản phẩm đã chọn
-            var model = await _orderService.CreateOrderConfirmationViewModelAsync(validCartItemIds, currentUser); // Chỉ gửi sản phẩm còn hàng vào view model
+            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds);
+            var model = await _orderService.CreateOrderConfirmationViewModelAsync(validCartItemIds, currentUser); // Nếu chưa đăng nhập, currentUser sẽ là null
             return View("OrderConfirmation", model);
         }
 
@@ -184,41 +183,74 @@ namespace OnlineShoppingSystem_Main.Controllers
 
 
         // Track Order Detail
+        //[HttpGet]
+        //public async Task<IActionResult> OrderList(string searchOrderId, string paymentMethod, string status)
+        //{
+        //    var currentUser = await GetCurrentUserAsync();
+
+        //    if (currentUser == null)
+        //    {
+        //        TempData["ErrorMessage"] = "Bạn cần đăng nhập để xem danh sách đơn hàng.";
+        //        return RedirectToAction("Index", "Home");
+        //    }
+
+        //    var orders = await _orderService.GetOrdersByUserIdAsync(currentUser.Id);
+
+        //    // Filter
+        //    if (!string.IsNullOrEmpty(searchOrderId))
+        //    {
+        //        orders = orders.Where(o => o.OrderId.ToString().Contains(searchOrderId)).ToList();
+        //    }
+
+        //    if (!string.IsNullOrEmpty(paymentMethod))
+        //    {
+        //        orders = orders.Where(o => o.PaymentMethod == paymentMethod).ToList();
+        //    }
+
+        //    if (!string.IsNullOrEmpty(status))
+        //    {
+        //        orders = orders.Where(o => o.OrderStatus.StatusName == status).ToList();
+        //    }
+
+        //    ViewBag.SearchOrderId = searchOrderId;
+        //    ViewBag.PaymentMethod = paymentMethod;
+        //    ViewBag.Status = status;
+
+        //    return View("OrderList", orders);
+        //}
+
         [HttpGet]
-        public async Task<IActionResult> OrderList(string searchOrderId, string paymentMethod, string status)
+        public async Task<IActionResult> OrderList(string orderCode)
         {
             var currentUser = await GetCurrentUserAsync();
-
             if (currentUser == null)
             {
                 TempData["ErrorMessage"] = "Bạn cần đăng nhập để xem danh sách đơn hàng.";
                 return RedirectToAction("Index", "Home");
             }
 
-            var orders = await _orderService.GetOrdersByUserIdAsync(currentUser.Id);
-
-            // Filter
-            if (!string.IsNullOrEmpty(searchOrderId))
+            if (string.IsNullOrEmpty(orderCode))
             {
-                orders = orders.Where(o => o.OrderId.ToString().Contains(searchOrderId)).ToList();
+                ViewBag.ErrorMessage = "Vui lòng nhập mã đơn hàng.";
+                return View(new List<GhnOrderDetailResponse>());
             }
 
-            if (!string.IsNullOrEmpty(paymentMethod))
+            var singleOrder = await _ghnService.GetOrderDetailsFromGhnAsync(orderCode);
+
+            if (singleOrder != null)
             {
-                orders = orders.Where(o => o.PaymentMethod == paymentMethod).ToList();
+                Console.WriteLine($"DEBUG: Đơn hàng nhận được - Mã: {singleOrder.OrderCode}, Tên: {singleOrder.ToName}");
+            }
+            else
+            {
+                Console.WriteLine("DEBUG: Không có đơn hàng nào.");
             }
 
-            if (!string.IsNullOrEmpty(status))
-            {
-                orders = orders.Where(o => o.OrderStatus.StatusName == status).ToList();
-            }
+            var ghnOrders = singleOrder != null ? new List<GhnOrderDetailResponse> { singleOrder } : new List<GhnOrderDetailResponse>();
 
-            ViewBag.SearchOrderId = searchOrderId;
-            ViewBag.PaymentMethod = paymentMethod;
-            ViewBag.Status = status;
-
-            return View("OrderList", orders);
+            return View("OrderList", ghnOrders);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> CancelOrder(int orderId)

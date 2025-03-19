@@ -32,54 +32,27 @@ namespace Service.Implementation
 
         public async Task<string> GetUserIdAsync(HttpContext httpContext)
         {
-            if (!httpContext.User.Identity.IsAuthenticated)
+            if (httpContext.User.Identity.IsAuthenticated)
             {
-                await FakeLoginAsync(httpContext);
+                string userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Debug.WriteLine($"[DEBUG] User ID from Claims: {userId}");
+                return userId;
             }
-
-            string userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Debug.WriteLine($"[DEBUG] User ID from Claims: {userId}");
-            return userId ?? "User1";
+            Debug.WriteLine("[DEBUG] User not authenticated.");
+            return null;
         }
 
         public async Task<AspNetUser> GetCurrentUserAsync(string userId)
         {
+            if (string.IsNullOrEmpty(userId))
+            {
+                Debug.WriteLine("[DEBUG] No user ID provided, returning null.");
+                return null;
+            }
             return await _userRepository.GetUserByIdAsync(userId);
         }
 
-        private async Task FakeLoginAsync(HttpContext httpContext)
-        {
-            var user = await _userManager.FindByIdAsync("User1");
-            if (user == null)
-            {
-                user = new AspNetUser
-                {
-                    Id = "User1",
-                    UserName = "User1",
-                    Email = "user1@example.com",
-                    PhoneNumber = "1234567890"
-                };
-                var result = await _userManager.CreateAsync(user);
-                if (!result.Succeeded)
-                {
-                    throw new Exception("Failed to create fake user: " + string.Join(", ", result.Errors.Select(e => e.Description)));
-                }
-                Debug.WriteLine("[DEBUG] Created fake user 'User1' in database.");
-            }
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "User1"),
-                new Claim(ClaimTypes.Name, "User1"),
-                new Claim(ClaimTypes.Email, "user1@example.com")
-            };
-
-            var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await httpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal);
-            Debug.WriteLine("[DEBUG] Fake login for User1 completed.");
-        }
+        
 
         public async Task<IEnumerable<AspNetUser>> GetUsersAsync(string searchQuery, string roleFilter, string statusFilter)
         {

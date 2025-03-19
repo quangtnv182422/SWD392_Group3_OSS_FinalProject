@@ -19,7 +19,10 @@ namespace Repository.Interface
 
 		// Track Order Detail
 		Task<List<Order>> GetOrdersByUserIdAsync(string userId);
-        Task<bool> CancelOrderAsync(int orderId);
+
+        //Task<bool> CancelOrderAsync(int orderId);
+        Task<bool> CancelOrderAsync(string orderCode);
+
         Task<Order> GetOrderDetailsAsync(int orderId);
         Task<bool> UpdateOrderAsync(Order order);
 

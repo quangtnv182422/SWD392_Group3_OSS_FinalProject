@@ -19,5 +19,7 @@ namespace Api.GHN.Interface
 
         Task<GhnOrderDetailResponse> GetOrderDetailsFromGhnAsync(string orderCode);
 
+        Task<bool> CancelOrderOnGhnAsync(string orderCode);
+
     }
 }

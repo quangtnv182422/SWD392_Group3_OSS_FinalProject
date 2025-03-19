@@ -222,12 +222,12 @@ namespace OnlineShoppingSystem_Main.Controllers
         [HttpGet]
         public async Task<IActionResult> OrderList(string orderCode)
         {
-            var currentUser = await GetCurrentUserAsync();
-            if (currentUser == null)
-            {
-                TempData["ErrorMessage"] = "Bạn cần đăng nhập để xem danh sách đơn hàng.";
-                return RedirectToAction("Index", "Home");
-            }
+            //var currentUser = await GetCurrentUserAsync();
+            //if (currentUser == null)
+            //{
+            //    TempData["ErrorMessage"] = "Bạn cần đăng nhập để xem danh sách đơn hàng.";
+            //    return RedirectToAction("Index", "Home");
+            //}
 
             if (string.IsNullOrEmpty(orderCode))
             {
@@ -252,20 +252,38 @@ namespace OnlineShoppingSystem_Main.Controllers
         }
 
 
+        //[HttpPost]
+        //public async Task<IActionResult> CancelOrder(int orderId)
+        //{
+        //    bool isCancelled = await _orderService.CancelOrderAsync(orderId);
+        //    if (!isCancelled)
+        //    {
+        //        TempData["ErrorMessage"] = "Không thể hủy đơn hàng hoặc đơn hàng không tồn tại.";
+        //    }
+        //    else
+        //    {
+        //        TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công.";
+        //    }
+        //    return RedirectToAction("OrderList");
+        //}
+
         [HttpPost]
-        public async Task<IActionResult> CancelOrder(int orderId)
+        public async Task<IActionResult> CancelOrder(string orderCode)
         {
-            bool isCancelled = await _orderService.CancelOrderAsync(orderId);
-            if (!isCancelled)
+            var isCancelled = await _orderService.CancelOrderAsync(orderCode);
+
+            if (isCancelled)
             {
-                TempData["ErrorMessage"] = "Không thể hủy đơn hàng hoặc đơn hàng không tồn tại.";
+                TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công trên GHN.";
             }
             else
             {
-                TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công.";
+                TempData["ErrorMessage"] = "Không thể hủy đơn hàng. Vui lòng thử lại!";
             }
+
             return RedirectToAction("OrderList");
         }
+
 
         [HttpGet]
         public async Task<IActionResult> OrderDetails(int orderId)

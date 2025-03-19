@@ -26,6 +26,7 @@ namespace Repository.Implementation
         {
             return await _context.CartItems
                 .Include(ci => ci.Product)
+                .Include(a => a.Product.ProductImages)
                 .Where(ci => cartItemIds.Contains(ci.CartItemId))
                 .ToListAsync();
         }

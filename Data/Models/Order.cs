@@ -6,6 +6,7 @@ namespace Data.Models;
 public partial class Order
 {
     public int OrderId { get; set; }
+    public string? OrderCodeGHN { get; set; }
 
     public DateTime OrderedAt { get; set; }
 

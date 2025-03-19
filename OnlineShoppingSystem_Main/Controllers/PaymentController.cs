@@ -143,7 +143,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 
 					var paymentLinkRequest = new PaymentData(
 											  //orderCode: int.Parse(DateTimeOffset.Now.ToString("ffffff")),
-											  orderCode: order.OrderId,
+											  orderCode: order.OrderId,//truyền orderis này vào để sau khi thanh toán thành công sẽ lưu vào DB
 											  amount: (int)totalCost,
 											  description: "Thanh toan ma QR",
 											  items: [new("Item test", 1, 2000)],
@@ -210,7 +210,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 
 					//Gửi thông tin Order cho GHN (Tạm tắt vì GHN giới hạn test cho 3 đơn)
 
-					/*if (shippingOrder != null)
+					if (shippingOrder != null)
 					{
 						// Gửi thông tin đơn hàng cho GHN sau khi thanh toán thành công
 						var shippingResponse = await _ghnService.SendShippingOrderAsync(shippingOrder);
@@ -218,7 +218,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 						{
 							return BadRequest("Failed to create shipping order: " + shippingResponse);
 						}
-					}*/
+					}
 
 				}
 			}

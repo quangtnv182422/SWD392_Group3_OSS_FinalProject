@@ -101,5 +101,35 @@ namespace Api.GHN.Implementation
 			
 		}
 
-	}
+        public async Task<GhnOrderDetailResponse> GetOrderDetailsFromGhnAsync(string orderCode)
+        {
+            if (string.IsNullOrEmpty(orderCode))
+            {
+                Console.WriteLine("DEBUG: orderCode bị null hoặc rỗng.");
+                return null;
+            }
+
+            var jsonBody = JsonSerializer.Serialize(new { order_code = orderCode });
+            var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}/v2/shipping-order/detail",
+                new StringContent(jsonBody, Encoding.UTF8, "application/json"));
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("DEBUG: GHN API Response: " + responseBody);
+
+            using var doc = JsonDocument.Parse(responseBody);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("data", out var data))
+            {
+                Console.WriteLine("DEBUG: Đã tìm thấy dữ liệu đơn hàng.");
+                return JsonSerializer.Deserialize<GhnOrderDetailResponse>(data.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+
+            Console.WriteLine("DEBUG: Không tìm thấy dữ liệu đơn hàng.");
+            return null;
+        }
+
+
+
+    }
 }

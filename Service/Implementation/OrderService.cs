@@ -24,23 +24,23 @@ namespace Service.Implementation
 			return await _orderRepository.GetOrderByIdAsync(orderId);
 		}
 
-		public async Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, AspNetUser currentUser)
-		{
-			var selectedCartItems = await _orderRepository.GetCartItemsByIdsAsync(selectedCartItemIds);
-			double totalPrice = selectedCartItems.Sum(ci => ci.Quantity * ci.Product.Price);
+        public async Task<OrderConfirmationViewModel> CreateOrderConfirmationViewModelAsync(List<int> selectedCartItemIds, AspNetUser currentUser)
+        {
+            var selectedCartItems = await _orderRepository.GetCartItemsByIdsAsync(selectedCartItemIds);
+            double totalPrice = selectedCartItems.Sum(ci => ci.Quantity * ci.Product.Price);
 
-			return new OrderConfirmationViewModel
-			{
-				SelectedCartItems = selectedCartItems,
-				SubTotal = totalPrice,
-				FullName = currentUser?.UserName ?? "",
-				Email = currentUser?.Email ?? "",
-				Mobile = currentUser?.PhoneNumber ?? "",
-				Address = ""
-			};
-		}
+            return new OrderConfirmationViewModel
+            {
+                SelectedCartItems = selectedCartItems,
+                SubTotal = totalPrice,
+                FullName = currentUser?.UserName ?? "",
+                Email = currentUser?.Email ?? "",
+                Mobile = currentUser?.PhoneNumber ?? "",
+                Address = ""
+            };
+        }
 
-		public async Task<Order> CreateOrderAsync(string fullName,
+        public async Task<Order> CreateOrderAsync(string fullName,
 												  string? customerId,
 												  /*string staffId,*/
 												  string email,

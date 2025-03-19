@@ -29,7 +29,7 @@ namespace OnlineShoppingSystem_Main.Controllers
 
         private async Task<AspNetUser> GetCurrentUserAsync()
         {
-            string userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userId = await _userService.GetCurrentUserIdAsync();
             if (!string.IsNullOrEmpty(userId))
             {
                 var user = await _userService.GetCurrentUserAsync(userId);
@@ -98,17 +98,16 @@ namespace OnlineShoppingSystem_Main.Controllers
             var validCartItemIds = new List<int>();
             var outOfStockItems = new List<string>();
 
-            // Kiểm tra tồn kho
             foreach (var cartItemId in selectedCartItemIds)
             {
                 var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CartItemId == cartItemId);
                 if (cartItem != null)
                 {
-                    if (cartItem.Product.Quantity >= cartItem.Quantity) // Còn hàng
+                    if (cartItem.Product.Quantity >= cartItem.Quantity)
                     {
                         validCartItemIds.Add(cartItemId);
                     }
-                    else // Hết hàng
+                    else
                     {
                         outOfStockItems.Add(cartItem.Product.ProductName);
                     }
@@ -125,8 +124,8 @@ namespace OnlineShoppingSystem_Main.Controllers
                 TempData["OutOfStockError"] = "Tất cả sản phẩm đã chọn đều hết hàng!";
             }
 
-            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds); // Lưu tất cả sản phẩm đã chọn
-            var model = await _orderService.CreateOrderConfirmationViewModelAsync(validCartItemIds, currentUser); // Chỉ gửi sản phẩm còn hàng vào view model
+            TempData["SelectedCartItemIds"] = JsonConvert.SerializeObject(selectedCartItemIds);
+            var model = await _orderService.CreateOrderConfirmationViewModelAsync(validCartItemIds, currentUser); // Nếu chưa đăng nhập, currentUser sẽ là null
             return View("OrderConfirmation", model);
         }
 

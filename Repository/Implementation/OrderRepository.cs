@@ -1,4 +1,5 @@
-﻿using Api.GHN.Interface;
+﻿using Api.GHN.Implementation;
+using Api.GHN.Interface;
 using Data.Models;
 using Data.Models.GHN;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,7 @@ namespace Repository.Implementation
         {
             return await _context.CartItems
                 .Include(ci => ci.Product)
+                .Include(a => a.Product.ProductImages)
                 .Where(ci => cartItemIds.Contains(ci.CartItemId))
                 .ToListAsync();
         }
@@ -74,17 +76,22 @@ namespace Repository.Implementation
             return await _ghnProxy.GetOrderDetailsFromGhnAsync(orderCode);
         }
 
-        public async Task<bool> CancelOrderAsync(int orderId)
-        {
-            var order = await _context.Orders.FindAsync(orderId);
-            if (order == null)
-            {
-                return false;
-            }
+        //public async Task<bool> CancelOrderAsync(int orderId)
+        //{
+        //    var order = await _context.Orders.FindAsync(orderId);
+        //    if (order == null)
+        //    {
+        //        return false;
+        //    }
 
-            order.OrderStatusId = 5; // StatusId = 5 corresponds to 'Cancelled'
-            await _context.SaveChangesAsync();
-            return true;
+        //    order.OrderStatusId = 5; // StatusId = 5 corresponds to 'Cancelled'
+        //    await _context.SaveChangesAsync();
+        //    return true;
+        //}
+
+        public async Task<bool> CancelOrderAsync(string orderCode)
+        {
+            return await _ghnProxy.CancelOrderOnGhnAsync(orderCode);
         }
 
         public async Task<Order> GetOrderDetailsAsync(int orderId)

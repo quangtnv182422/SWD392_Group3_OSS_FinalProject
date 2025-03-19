@@ -129,7 +129,31 @@ namespace Api.GHN.Implementation
             return null;
         }
 
+        public async Task<bool> CancelOrderOnGhnAsync(string orderCode)
+        {
+            var jsonBody = JsonSerializer.Serialize(new { order_codes = new List<string> { orderCode } });
 
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_ghnSettings.BaseUrl}/v2/switch-status/cancel")
+            {
+                Content = new StringContent(jsonBody, Encoding.UTF8, "application/json")
+            };
+
+            request.Headers.Add("Token", _ghnSettings.Token);
+            request.Headers.Add("ShopId", _ghnSettings.ShopId);
+
+            var response = await _httpClient.SendAsync(request);
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true; // Hủy đơn hàng thành công
+            }
+            else
+            {
+                Console.WriteLine($"GHN Cancel Order Error: {responseBody}");
+                return false; // Hủy đơn hàng thất bại
+            }
+        }
 
     }
 }

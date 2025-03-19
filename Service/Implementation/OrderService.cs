@@ -234,12 +234,18 @@ namespace Service.Implementation
             return await _orderRepository.GetOrderDetailsFromGhnAsync(orderCode);
         }
 
-        public async Task<bool> CancelOrderAsync(int orderId)
-		{
-			return await _orderRepository.CancelOrderAsync(orderId);
-		}
+        //      public async Task<bool> CancelOrderAsync(int orderId)
+        //{
+        //	return await _orderRepository.CancelOrderAsync(orderId);
+        //}
 
-		public async Task<Order> GetOrderDetailsAsync(int orderId)
+        public async Task<bool> CancelOrderAsync(string orderCode)
+        {
+            return await _orderRepository.CancelOrderAsync(orderCode);
+        }
+
+
+        public async Task<Order> GetOrderDetailsAsync(int orderId)
 		{
 			return await _orderRepository.GetOrderDetailsAsync(orderId);
 		}

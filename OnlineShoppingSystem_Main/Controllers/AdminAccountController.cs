@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
-     [Authorize(Roles = "admin")]
+    //[Authorize(Roles = "admin")]
     public class AdminAccountController : Controller
     {
         private readonly IUserService _userService;

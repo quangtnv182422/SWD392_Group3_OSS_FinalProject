@@ -82,6 +82,10 @@ namespace Service.Implementation
             var roles = await _userManager.GetRolesAsync(user);
             Debug.WriteLine($"[DEBUG] User roles: {string.Join(", ", roles)}");
 
+
+            // 🔥 Kiểm tra nếu tài khoản bị khóa
+            bool isLockedOut = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow;
+
             return new AspNetUser
             {
                 Id = user.Id,

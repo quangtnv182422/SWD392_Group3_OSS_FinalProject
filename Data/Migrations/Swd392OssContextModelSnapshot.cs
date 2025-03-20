@@ -32,7 +32,7 @@ namespace OnlineShoppingSystem_Main.Migrations
 
                     b.HasKey("RoleId", "UserId");
 
-                    b.ToTable("AspNetRoleAspNetUser");
+                    b.ToTable("AspNetRoleAspNetUser", (string)null);
                 });
 
             modelBuilder.Entity("Data.Models.AspNetUserClaim", b =>
@@ -58,7 +58,7 @@ namespace OnlineShoppingSystem_Main.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaim");
+                    b.ToTable("AspNetUserClaim", (string)null);
                 });
 
             modelBuilder.Entity("Data.Models.AspNetUserLogin", b =>
@@ -83,7 +83,7 @@ namespace OnlineShoppingSystem_Main.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogin");
+                    b.ToTable("AspNetUserLogin", (string)null);
                 });
 
             modelBuilder.Entity("Data.Models.AspNetUserToken", b =>
@@ -104,7 +104,7 @@ namespace OnlineShoppingSystem_Main.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserToken");
+                    b.ToTable("AspNetUserToken", (string)null);
                 });
 
             modelBuilder.Entity("Data.Models.Cart", b =>
@@ -419,7 +419,7 @@ namespace OnlineShoppingSystem_Main.Migrations
 
                     b.HasIndex("SettingStatusId");
 
-                    b.ToTable("Settings");
+                    b.ToTable("Settings", (string)null);
                 });
 
             modelBuilder.Entity("Data.Models.SettingCategory", b =>

@@ -234,39 +234,44 @@ namespace Service.Implementation
             return await _orderRepository.GetOrderDetailsFromGhnAsync(orderCode);
         }
 
-        //      public async Task<bool> CancelOrderAsync(int orderId)
-        //{
-        //	return await _orderRepository.CancelOrderAsync(orderId);
-        //}
+		public async Task<bool> CancelOrderAsync(int orderId)
+		{
+			return await _orderRepository.CancelOrderAsync(orderId);
+		}
 
-        public async Task<bool> CancelOrderAsync(string orderCode)
-        {
-            return await _orderRepository.CancelOrderAsync(orderCode);
-        }
+		//public async Task<bool> CancelOrderAsync(string orderCode)
+		//{
+		//    return await _orderRepository.CancelOrderAsync(orderCode);
+		//}
 
 
-        public async Task<Order> GetOrderDetailsAsync(int orderId)
+		public async Task<Order> GetOrderDetailsAsync(int orderId)
 		{
 			return await _orderRepository.GetOrderDetailsAsync(orderId);
 		}
 
-		public async Task<bool> UpdateOrderAsync(Order order)
-		{
-			var existingOrder = await _orderRepository.GetOrderByIdAsync(order.OrderId.ToString());
+        //public async Task<bool> UpdateOrderAsync(Order order)
+        //{
+        //	var existingOrder = await _orderRepository.GetOrderByIdAsync(order.OrderId.ToString());
 
-			if (existingOrder == null)
-			{
-				return false;
-			}
+        //	if (existingOrder == null)
+        //	{
+        //		return false;
+        //	}
 
-			existingOrder.Address = order.Address;
-			existingOrder.PaymentMethod = order.PaymentMethod;
-			existingOrder.OrderStatusId = order.OrderStatusId;
-			existingOrder.Note = order.Note;
+        //	existingOrder.Address = order.Address;
+        //	existingOrder.PaymentMethod = order.PaymentMethod;
+        //	existingOrder.OrderStatusId = order.OrderStatusId;
+        //	existingOrder.Note = order.Note;
 
-			await _orderRepository.SaveChangesAsync();
-			return true;
-		}
+        //	await _orderRepository.SaveChangesAsync();
+        //	return true;
+        //}
+
+        public async Task<bool> UpdateOrderOnGHNAsync(GhnOrderUpdateRequest request)
+        {
+            return await _orderRepository.UpdateOrderOnGHNAsync(request);
+        }
 
         public async Task<bool> UpdateOrderCodeGHNAsync(Order order, string? orderCodeGHN)
         {

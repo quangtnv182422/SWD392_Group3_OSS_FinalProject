@@ -77,14 +77,6 @@ namespace Api.GHN.Implementation
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<string> UpdateOrderOnGHNAsync(GhnOrderUpdateRequest request)
-        {
-            var jsonBody = JsonSerializer.Serialize(request);
-            var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}/v2/shipping-order/update",
-                new StringContent(jsonBody, Encoding.UTF8, "application/json"));
-
-            return await response.Content.ReadAsStringAsync();
-        }
 		public async Task<string> SendShippingOrderAsync(ShippingOrder order)
 		{
             var options = new JsonSerializerOptions
@@ -155,5 +147,25 @@ namespace Api.GHN.Implementation
             }
         }
 
+        public async Task<bool> UpdateOrderOnGHNAsync(GhnOrderUpdateRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.OrderCode))
+            {
+                Console.WriteLine("DEBUG: Yêu cầu cập nhật đơn hàng bị null hoặc thiếu OrderCode.");
+                return false;
+            }
+
+            var jsonBody = JsonSerializer.Serialize(request);
+            var response = await _httpClient.PostAsync($"{_ghnSettings.BaseUrl}/v2/shipping-order/update",
+                new StringContent(jsonBody, Encoding.UTF8, "application/json"));
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("DEBUG: GHN API Update Response: " + responseBody);
+
+            using var doc = JsonDocument.Parse(responseBody);
+            var root = doc.RootElement;
+
+            return root.GetProperty("code").GetInt32() == 200;
+        }
     }
 }

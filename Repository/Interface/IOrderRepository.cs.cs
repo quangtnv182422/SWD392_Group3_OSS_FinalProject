@@ -20,11 +20,13 @@ namespace Repository.Interface
 		// Track Order Detail
 		Task<List<Order>> GetOrdersByUserIdAsync(string userId);
 
-        //Task<bool> CancelOrderAsync(int orderId);
-        Task<bool> CancelOrderAsync(string orderCode);
+        Task<bool> CancelOrderAsync(int orderId);
+        //Task<bool> CancelOrderAsync(string orderCode);
 
         Task<Order> GetOrderDetailsAsync(int orderId);
-        Task<bool> UpdateOrderAsync(Order order);
+        //Task<bool> UpdateOrderAsync(Order order);
+
+        Task<bool> UpdateOrderOnGHNAsync(GhnOrderUpdateRequest request);
 
         Task<GhnOrderDetailResponse> GetOrderDetailsFromGhnAsync(string orderCode);
     }

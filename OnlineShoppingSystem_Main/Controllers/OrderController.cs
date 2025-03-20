@@ -183,173 +183,183 @@ namespace OnlineShoppingSystem_Main.Controllers
 
 
         // Track Order Detail
-        //[HttpGet]
-        //public async Task<IActionResult> OrderList(string searchOrderId, string paymentMethod, string status)
-        //{
-        //    var currentUser = await GetCurrentUserAsync();
-
-        //    if (currentUser == null)
-        //    {
-        //        TempData["ErrorMessage"] = "Bạn cần đăng nhập để xem danh sách đơn hàng.";
-        //        return RedirectToAction("Index", "Home");
-        //    }
-
-        //    var orders = await _orderService.GetOrdersByUserIdAsync(currentUser.Id);
-
-        //    // Filter
-        //    if (!string.IsNullOrEmpty(searchOrderId))
-        //    {
-        //        orders = orders.Where(o => o.OrderId.ToString().Contains(searchOrderId)).ToList();
-        //    }
-
-        //    if (!string.IsNullOrEmpty(paymentMethod))
-        //    {
-        //        orders = orders.Where(o => o.PaymentMethod == paymentMethod).ToList();
-        //    }
-
-        //    if (!string.IsNullOrEmpty(status))
-        //    {
-        //        orders = orders.Where(o => o.OrderStatus.StatusName == status).ToList();
-        //    }
-
-        //    ViewBag.SearchOrderId = searchOrderId;
-        //    ViewBag.PaymentMethod = paymentMethod;
-        //    ViewBag.Status = status;
-
-        //    return View("OrderList", orders);
-        //}
-
         [HttpGet]
-        public async Task<IActionResult> OrderList(string orderCode)
+        public async Task<IActionResult> OrderList()
         {
-            //var currentUser = await GetCurrentUserAsync();
+            var currentUser = await GetCurrentUserAsync();
+
             //if (currentUser == null)
             //{
             //    TempData["ErrorMessage"] = "Bạn cần đăng nhập để xem danh sách đơn hàng.";
             //    return RedirectToAction("Index", "Home");
             //}
 
-            if (string.IsNullOrEmpty(orderCode))
+            var orders = await _orderService.GetOrdersByUserIdAsync(currentUser.Id);
+
+            return View("OrderList", orders);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            bool isCancelled = await _orderService.CancelOrderAsync(orderId);
+            if (!isCancelled)
             {
-                ViewBag.ErrorMessage = "Vui lòng nhập mã đơn hàng.";
-                return View(new List<GhnOrderDetailResponse>());
+                TempData["ErrorMessage"] = "Không thể hủy đơn hàng hoặc đơn hàng không tồn tại.";
             }
-
-            var singleOrder = await _ghnService.GetOrderDetailsFromGhnAsync(orderCode);
-
-            if (singleOrder != null)
+            else
             {
-                Console.WriteLine($"DEBUG: Đơn hàng nhận được - Mã: {singleOrder.OrderCode}, Tên: {singleOrder.ToName}");
+                TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công.";
+            }
+            return RedirectToAction("OrderList");
+        }
+
+        //[HttpPost]
+        //public async Task<IActionResult> CancelOrder(string orderCode)
+        //{
+        //    var isCancelled = await _orderService.CancelOrderAsync(orderCode);
+
+        //    if (isCancelled)
+        //    {
+        //        TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công trên GHN.";
+        //    }
+        //    else
+        //    {
+        //        TempData["ErrorMessage"] = "Không thể hủy đơn hàng. Vui lòng thử lại!";
+        //    }
+
+        //    return RedirectToAction("OrderList");
+        //}
+
+
+        //[HttpGet]
+        //public async Task<IActionResult> OrderDetails(int orderId)
+        //{
+        //    var order = await _orderService.GetOrderDetailsAsync(orderId);
+        //    if (order == null)
+        //    {
+        //        TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+        //        return RedirectToAction("OrderList");
+        //    }
+
+        //    return View("OrderDetails", order);
+        //}
+
+        [HttpGet]
+        public async Task<IActionResult> OrderDetails(string orderCode)
+        {
+            var ghnOrder = await _ghnService.GetOrderDetailsFromGhnAsync(orderCode);
+
+            if (ghnOrder != null)
+            {
+                Console.WriteLine($"DEBUG: Đơn hàng nhận được - Mã: {ghnOrder.OrderCode}, Tên: {ghnOrder.ToName}");
             }
             else
             {
                 Console.WriteLine("DEBUG: Không có đơn hàng nào.");
             }
 
-            var ghnOrders = singleOrder != null ? new List<GhnOrderDetailResponse> { singleOrder } : new List<GhnOrderDetailResponse>();
-
-            return View("OrderList", ghnOrders);
-        }
-
-
-        //[HttpPost]
-        //public async Task<IActionResult> CancelOrder(int orderId)
-        //{
-        //    bool isCancelled = await _orderService.CancelOrderAsync(orderId);
-        //    if (!isCancelled)
-        //    {
-        //        TempData["ErrorMessage"] = "Không thể hủy đơn hàng hoặc đơn hàng không tồn tại.";
-        //    }
-        //    else
-        //    {
-        //        TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công.";
-        //    }
-        //    return RedirectToAction("OrderList");
-        //}
-
-        [HttpPost]
-        public async Task<IActionResult> CancelOrder(string orderCode)
-        {
-            var isCancelled = await _orderService.CancelOrderAsync(orderCode);
-
-            if (isCancelled)
-            {
-                TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công trên GHN.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Không thể hủy đơn hàng. Vui lòng thử lại!";
-            }
-
-            return RedirectToAction("OrderList");
-        }
-
-
-        [HttpGet]
-        public async Task<IActionResult> OrderDetails(int orderId)
-        {
-            var order = await _orderService.GetOrderDetailsAsync(orderId);
-            if (order == null)
-            {
-                TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
-                return RedirectToAction("OrderList");
-            }
-
-            return View("OrderDetails", order);
+            return View("OrderDetails", ghnOrder);
         }
 
         [HttpPost]
         public async Task<IActionResult> UpdateOrderDetails(Order updatedOrder)
         {
-            var existingOrder = await _orderService.GetOrderByIdAsync(updatedOrder.OrderId.ToString());
-
-            if (existingOrder == null)
+            if (updatedOrder == null || string.IsNullOrEmpty(updatedOrder.OrderCodeGHN))
             {
-                TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                TempData["ErrorMessage"] = "Không tìm thấy đơn hàng để cập nhật.";
                 return RedirectToAction("OrderList");
             }
 
             try
             {
-                existingOrder.FullName = updatedOrder.FullName;
-                existingOrder.PhoneNumber = updatedOrder.PhoneNumber;
-                existingOrder.Email = updatedOrder.Email;
-                existingOrder.Address = updatedOrder.Address;
-                existingOrder.OrderStatusId = updatedOrder.OrderStatusId;
-                existingOrder.Note = updatedOrder.Note;
-
-                await _orderService.UpdateOrderAsync(existingOrder);
-
                 var ghnUpdateRequest = new GhnOrderUpdateRequest
                 {
-                    OrderCode = existingOrder.OrderId.ToString(),
-                    ToName = existingOrder.FullName,
-                    ToPhone = existingOrder.PhoneNumber,
-                    ToAddress = existingOrder.Address,
-                    Note = existingOrder.Note
+                    OrderCode = updatedOrder.OrderCodeGHN,
+                    ToName = updatedOrder.FullName,
+                    ToPhone = updatedOrder.PhoneNumber,
+                    ToAddress = updatedOrder.Address,
+                    Note = updatedOrder.Note,
+                    Items = updatedOrder.OrderItems.Select(item => new GhnOrderItem
+                    {
+                        Quantity = item.Quantity
+                    }).ToList()
                 };
 
-                var ghnResponse = await _ghnService.UpdateOrderOnGHNAsync(ghnUpdateRequest);
-                var ghnResult = System.Text.Json.JsonSerializer.Deserialize<GhnApiResponse>(ghnResponse, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                bool updateSuccess = await _orderService.UpdateOrderOnGHNAsync(ghnUpdateRequest);
 
-                if (ghnResult.Code != 200)
+                if (updateSuccess)
                 {
-                    TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công.";
+                    TempData["SuccessMessage"] = "Cập nhật đơn hàng trên GHN thành công.";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Cập nhật đơn hàng trên GHN thất bại: " + ghnResult.Message;
+                    TempData["ErrorMessage"] = "Cập nhật đơn hàng trên GHN thất bại.";
                 }
-                return RedirectToAction("OrderDetails", new { orderId = updatedOrder.OrderId });
+
+                return RedirectToAction("OrderDetails", new { orderCode = updatedOrder.OrderCodeGHN });
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "Lỗi khi cập nhật đơn hàng: " + ex.Message;
-                return RedirectToAction("OrderDetails", new { orderId = updatedOrder.OrderId });
+                return RedirectToAction("OrderDetails", new { orderCode = updatedOrder.OrderCodeGHN });
             }
         }
+
+
+        //[HttpPost]
+        //public async Task<IActionResult> UpdateOrderDetails(Order updatedOrder)
+        //{
+        //    var existingOrder = await _orderService.GetOrderByIdAsync(updatedOrder.OrderId.ToString());
+
+        //    if (existingOrder == null)
+        //    {
+        //        TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+        //        return RedirectToAction("OrderList");
+        //    }
+
+        //    try
+        //    {
+        //        existingOrder.FullName = updatedOrder.FullName;
+        //        existingOrder.PhoneNumber = updatedOrder.PhoneNumber;
+        //        existingOrder.Email = updatedOrder.Email;
+        //        existingOrder.Address = updatedOrder.Address;
+        //        existingOrder.OrderStatusId = updatedOrder.OrderStatusId;
+        //        existingOrder.Note = updatedOrder.Note;
+
+        //        await _orderService.UpdateOrderAsync(existingOrder);
+
+        //        var ghnUpdateRequest = new GhnOrderUpdateRequest
+        //        {
+        //            OrderCode = existingOrder.OrderId.ToString(),
+        //            ToName = existingOrder.FullName,
+        //            ToPhone = existingOrder.PhoneNumber,
+        //            ToAddress = existingOrder.Address,
+        //            Note = existingOrder.Note
+        //        };
+
+        //        var ghnResponse = await _ghnService.UpdateOrderOnGHNAsync(ghnUpdateRequest);
+        //        var ghnResult = System.Text.Json.JsonSerializer.Deserialize<GhnApiResponse>(ghnResponse, new JsonSerializerOptions
+        //        {
+        //            PropertyNameCaseInsensitive = true
+        //        });
+
+        //        if (ghnResult.Code != 200)
+        //        {
+        //            TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công.";
+        //        }
+        //        else
+        //        {
+        //            TempData["ErrorMessage"] = "Cập nhật đơn hàng trên GHN thất bại: " + ghnResult.Message;
+        //        }
+        //        return RedirectToAction("OrderDetails", new { orderId = updatedOrder.OrderId });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        TempData["ErrorMessage"] = "Lỗi khi cập nhật đơn hàng: " + ex.Message;
+        //        return RedirectToAction("OrderDetails", new { orderId = updatedOrder.OrderId });
+        //    }
+        //}
     }
 }

@@ -1,4 +1,5 @@
-﻿@model Data.Models.Order
+﻿@* @model Data.Models.Order *@
+@model Data.Models.GHN.GhnOrderDetailResponse
 
 @{
     ViewData["Title"] = "Order Details";
@@ -85,25 +86,21 @@
     <div class="containerDetail">
         <h5>User Information</h5>
         <form id="orderForm" asp-controller="Order" asp-action="UpdateOrderDetails" method="post">
-            <input type="hidden" name="OrderId" value="@Model.OrderId" />
+            <input type="hidden" name="OrderCodeGHN" value="@Model.OrderCode" />
 
             <div class="row">
                 <div class="col-md-4">
                     <label>User Name</label>
-                    <input type="text" name="FullName" class="form-control change-detect" value="@Model.FullName">
+                    <input type="text" name="FullName" class="form-control change-detect" value="@Model.ToName">
                 </div>
                 <div class="col-md-4">
                     <label>Phone Number</label>
-                    <input type="text" name="PhoneNumber" class="form-control change-detect" value="@Model.PhoneNumber">
-                </div>
-                <div class="col-md-4">
-                    <label>Email</label>
-                    <input type="text" name="Email" class="form-control change-detect" value="@Model.Email">
+                    <input type="text" name="PhoneNumber" class="form-control change-detect" value="@Model.ToPhone">
                 </div>
             </div>
             <div>
                 <label>Address</label>
-                <input type="text" name="Address" class="form-control change-detect" value="@Model.Address">
+                <input type="text" name="Address" class="form-control change-detect" value="@Model.ToAddress">
             </div>
 
             <h5>Product</h5>
@@ -116,18 +113,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.OrderItems)
+                    @for (int i = 0; i < Model.Items.Count; i++)
                     {
                         <tr>
-                            <td>@item.Product?.ProductName</td>
-                            <td>@item.Quantity</td>
-                            <td>@item.PriceEachItem.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td>
+                            <td>
+                                <input type="hidden" name="Items[@i].Name" value="@Model.Items[i].Name" />
+                                @Model.Items[i].Name
+                            </td>
+                            <td>
+                                <input type="number" name="Items[@i].Quantity" class="form-control change-detect"
+                                       value="@Model.Items[i].Quantity" min="1">
+                            </td>
+                            <td>@Model.Items[i].Price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td>
                         </tr>
                     }
-                    <tr class="total-row">
-                        <td colspan="2">Total Cost</td>
-                        <td>@Model.TotalCost.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td> 
-                    </tr> 
                 </tbody>
             </table>
 
@@ -135,46 +134,42 @@
             <div class="row">
                 <div class="col-md-6">
                     <label>Status</label>
-                    <select class="form-control change-detect" name="OrderStatusId">
-                        <option value="1" selected="@(Model.OrderStatusId == 1 ? "selected" : null)">Pending Confirmation</option>
-                        <option value="2" selected="@(Model.OrderStatusId == 2 ? "selected" : null)">Confirmed</option>
-                        <option value="3" selected="@(Model.OrderStatusId == 3 ? "selected" : null)">Shipped</option>
-                        <option value="4" selected="@(Model.OrderStatusId == 4 ? "selected" : null)">Delivered</option>
-                        <option value="5" selected="@(Model.OrderStatusId == 5 ? "selected" : null)">Cancelled</option>
-                        <option value="6" selected="@(Model.OrderStatusId == 6 ? "selected" : null)">Returned</option>
-                    </select>
+                    @* <select class="form-control change-detect" name="OrderStatusId"> *@
+                    @*     <option value="1" selected="@(Model.OrderStatusId == 1 ? "selected" : null)">Pending Confirmation</option> *@
+                    @*     <option value="2" selected="@(Model.OrderStatusId == 2 ? "selected" : null)">Confirmed</option> *@
+                    @*     <option value="3" selected="@(Model.OrderStatusId == 3 ? "selected" : null)">Shipped</option> *@
+                    @*     <option value="4" selected="@(Model.OrderStatusId == 4 ? "selected" : null)">Delivered</option> *@
+                    @*     <option value="5" selected="@(Model.OrderStatusId == 5 ? "selected" : null)">Cancelled</option> *@
+                    @*     <option value="6" selected="@(Model.OrderStatusId == 6 ? "selected" : null)">Returned</option> *@
+                    @* </select> *@
+                    <div class="form-control" readonly style="background-color: white;">@Model.Status</div>
                 </div>
-                <div class="col-md-6">
-                    <label>Payment Method</label>
-                    <div class="form-control" readonly>@Model.PaymentMethod</div>
-                </div>
+                @* <div class="col-md-6"> *@
+                @*     <label>Payment Method</label> *@
+                @*     <div class="form-control" readonly>@Model.PaymentMethod</div> *@
+                @* </div> *@
             </div>
             <div>
                 <label>Notes</label>
                 <textarea name="Note" class="form-control change-detect">@Model.Note</textarea>
             </div>
 
-            @if (Model.OrderStatusId == 1 || Model.OrderStatusId == 2 || Model.OrderStatusId == 3 || Model.OrderStatusId == 4)
-            {
             <div class="btn-container">
                 <a href="#" id="btnBack" class="btn btn-back">Back to Orders</a>
                 <button type="submit" id="btnSave" class="btn btn-save">Save Change</button>
             </div>
-            }
         </form>
     </div>
 
     <script>
         let isChanged = false;
 
-        // Catch change events on all inputs
         document.querySelectorAll(".change-detect").forEach(input => {
             input.addEventListener("input", () => {
                 isChanged = true;
             });
         });
 
-        // Confirm
         document.getElementById("btnSave").addEventListener("click", function(event) {
             if (isChanged) {
                 let confirmSave = confirm("Bạn có chắc muốn thay đổi dữ liệu?");
@@ -184,14 +179,13 @@
             }
         });
 
-        // Confirm
         document.getElementById("btnBack").addEventListener("click", function(event) {
             if (isChanged) {
                 let confirmBack = confirm("Thông tin thay đổi chưa được lưu, bạn có muốn rời khỏi?");
                 if (!confirmBack) {
                     event.preventDefault();
                 } else {
-                    window.location.href = "/Order/OrderList"; // Navigate to order list
+                    window.location.href = "/Order/OrderList";
                 }
             } else {
                 window.location.href = "/Order/OrderList";

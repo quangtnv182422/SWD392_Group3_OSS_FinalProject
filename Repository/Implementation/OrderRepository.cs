@@ -76,23 +76,23 @@ namespace Repository.Implementation
             return await _ghnProxy.GetOrderDetailsFromGhnAsync(orderCode);
         }
 
-        //public async Task<bool> CancelOrderAsync(int orderId)
-        //{
-        //    var order = await _context.Orders.FindAsync(orderId);
-        //    if (order == null)
-        //    {
-        //        return false;
-        //    }
-
-        //    order.OrderStatusId = 5; // StatusId = 5 corresponds to 'Cancelled'
-        //    await _context.SaveChangesAsync();
-        //    return true;
-        //}
-
-        public async Task<bool> CancelOrderAsync(string orderCode)
+        public async Task<bool> CancelOrderAsync(int orderId)
         {
-            return await _ghnProxy.CancelOrderOnGhnAsync(orderCode);
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+            {
+                return false;
+            }
+
+            order.OrderStatusId = 5; // StatusId = 5 corresponds to 'Cancelled'
+            await _context.SaveChangesAsync();
+            return true;
         }
+
+        //public async Task<bool> CancelOrderAsync(string orderCode)
+        //{
+        //    return await _ghnProxy.CancelOrderOnGhnAsync(orderCode);
+        //}
 
         public async Task<Order> GetOrderDetailsAsync(int orderId)
         {
@@ -103,22 +103,28 @@ namespace Repository.Implementation
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
         }
 
-        public async Task<bool> UpdateOrderAsync(Order order)
+        //public async Task<bool> UpdateOrderAsync(Order order)
+        //{
+        //    var existingOrder = await _context.Orders.FindAsync(order.OrderId);
+        //    if (existingOrder == null)
+        //    {
+        //        return false; 
+        //    }
+
+        //    existingOrder.PaymentMethod = order.PaymentMethod;
+        //    existingOrder.Note = order.Note;
+        //    existingOrder.Address = order.Address;
+        //    existingOrder.OrderStatusId = order.OrderStatusId;
+
+        //    _context.Orders.Update(existingOrder);
+        //    await _context.SaveChangesAsync();
+        //    return true;
+        //}
+
+        public async Task<bool> UpdateOrderOnGHNAsync(GhnOrderUpdateRequest request)
         {
-            var existingOrder = await _context.Orders.FindAsync(order.OrderId);
-            if (existingOrder == null)
-            {
-                return false; 
-            }
-
-            existingOrder.PaymentMethod = order.PaymentMethod;
-            existingOrder.Note = order.Note;
-            existingOrder.Address = order.Address;
-            existingOrder.OrderStatusId = order.OrderStatusId;
-
-            _context.Orders.Update(existingOrder);
-            await _context.SaveChangesAsync();
-            return true;
+            return await _ghnProxy.UpdateOrderOnGHNAsync(request);
         }
+
     }
 }

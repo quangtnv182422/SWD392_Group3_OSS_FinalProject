@@ -103,6 +103,13 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader());
 });
 
+//Dành cho các controller nếu [Authorize] không hợp lệ (chưa đăng nhập) thì sẽ bị điều hướng
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Identity/Account/Login"; // Đường dẫn đến trang đăng nhập
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied"; // Trang bị từ chối truy cập
+});
+
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

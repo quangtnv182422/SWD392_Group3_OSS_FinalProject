@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Data.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -14,6 +15,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Service.Implementation;
+using Service.Interface;
 
 namespace OnlineShoppingSystem_Main.Areas.Identity.Pages.Account
 {
@@ -25,19 +28,22 @@ namespace OnlineShoppingSystem_Main.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
         private readonly RoleManager<AspNetRole> _roleManager;
+        private readonly IUserService _userService;
 
         public ExternalLoginModel(
             SignInManager<AspNetUser> signInManager,
             UserManager<AspNetUser> userManager,
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender,
-            RoleManager<AspNetRole> roleManager)
+            RoleManager<AspNetRole> roleManager,
+            IUserService userService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
             _emailSender = emailSender;
             _roleManager = roleManager;
+            _userService = userService;
         }
 
         [BindProperty]
@@ -85,8 +91,25 @@ namespace OnlineShoppingSystem_Main.Areas.Identity.Pages.Account
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (email == null)
+            {
+                TempData["ErrorMessage"] = "Your account has been locked. Please contact support.";
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+            }
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user.LockoutEnabled)
+            {
+                TempData["ErrorMessage"] = "Your account has been locked. Please contact support.";
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+            }
+
+
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor : true);
+
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
@@ -126,8 +149,9 @@ namespace OnlineShoppingSystem_Main.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = new AspNetUser { UserName = Input.Email, Email = Input.Email };
+                var password = await _userService.AutoCreatePasswords();
 
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(user, password);
                 if (result.Succeeded)
                 {
                     result = await _userManager.AddLoginAsync(user, info);
@@ -153,8 +177,18 @@ namespace OnlineShoppingSystem_Main.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                        string subject = "Welcome to Our Platform!";
+                        string message = $@"
+                        <h3>Hello {Input.Email},</h3>
+                        <p>Your account has been successfully created.</p>
+                        <p><strong>Username:</strong> {Input.Email}</p>
+                        <p><strong>Password:</strong> {password}</p>
+                        <p>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.</p>
+                        <p>Please change your password after logging in.</p>
+                        <p>Best regards,</p>";
+
+                        await _emailSender.SendEmailAsync(Input.Email, subject, message);
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)

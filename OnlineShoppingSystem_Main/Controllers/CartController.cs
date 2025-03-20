@@ -2,9 +2,11 @@
 using Service.Interface;
 using Newtonsoft.Json;
 using Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OnlineShoppingSystem_Main.Controllers
 {
+    [Authorize]
     public class CartController : Controller
     {
         private readonly ICartService _cartService;

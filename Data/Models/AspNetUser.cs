@@ -15,6 +15,8 @@ public partial class AspNetUser : IdentityUser
 
     public DateTime? DateOfBirth { get; set; }
 
+    //public bool IsLocked { get; set; }
+
     [InverseProperty("User")]
     public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; } = new List<AspNetUserClaim>();
 

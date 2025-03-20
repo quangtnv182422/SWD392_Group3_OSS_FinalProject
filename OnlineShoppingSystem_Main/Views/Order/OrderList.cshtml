@@ -245,10 +245,10 @@
     <script>
         $(document).ready(function () {
             $(".delete-order").click(function () {
-                var orderCode = $(this).data("order-code"); // Lấy orderCode thay vì orderId
-                var confirmDelete = confirm("Bạn có muốn hủy đơn hàng (" + orderCode + ")?");
+                var orderId = $(this).data("order-id");
+                var confirmDelete = confirm("Bạn có muốn xóa đơn hàng (" + orderId + ")?");
                 if (confirmDelete) {
-                    $("#cancelForm-" + orderCode).submit();
+                    $("#cancelForm-" + orderId).submit();
                 }
             });
         });
